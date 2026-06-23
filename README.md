@@ -1,85 +1,199 @@
-# Tsuzuku 🌿 — Off-Grid Daily Habits & Streak Engine
+<p align="center">
+  <img src="assets/icons/Tsuzuku.png" width="120" alt="Tsuzuku Logo" />
+</p>
 
-Tsuzuku (続ける — "to continue" or "to keep going") is a beautiful, offline-first, private-by-default habit tracker and streak engine built with modern Android paradigms.
+<h1 align="center">Tsuzuku 🌿</h1>
 
-Designed for distraction-free habit building, Tsuzuku features an elegant design, a dynamic theme switcher, local-only data persistence, and permanent notification check-ins to keep you motivated.
+<p align="center">
+  <em>続ける — "to continue" · "to keep going"</em>
+</p>
+
+<p align="center">
+  <a href="https://github.com/agupta07505/Tsuzuku/releases/latest"><img src="https://img.shields.io/github/v/release/agupta07505/Tsuzuku?style=for-the-badge&color=2e7d32&label=Latest%20Release" alt="Latest Release" /></a>
+  <a href="https://github.com/agupta07505/Tsuzuku/actions"><img src="https://img.shields.io/github/actions/workflow/status/agupta07505/Tsuzuku/android.yml?style=for-the-badge&color=1565c0&label=Build" alt="Build Status" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/agupta07505/Tsuzuku?style=for-the-badge&color=6a1b9a" alt="License" /></a>
+  <a href="https://github.com/agupta07505/Tsuzuku/issues"><img src="https://img.shields.io/github/issues/agupta07505/Tsuzuku?style=for-the-badge&color=e65100" alt="Issues" /></a>
+</p>
+
+<p align="center">
+  A beautiful, offline-first, private-by-default habit tracker and streak engine built with Jetpack Compose & Material Design 3.
+</p>
+
+---
+
+## 📸 Preview
+
+<p align="center">
+  <img src="assets/screenshots/01_home.jpg" width="180" alt="Home Screen" />
+  <img src="assets/screenshots/02_habit_tracker.jpg" width="180" alt="Habit Tracker with Mantra" />
+  <img src="assets/screenshots/03_create_streak.jpg" width="180" alt="Create Streak" />
+  <img src="assets/screenshots/04_insights.png" width="180" alt="Insights & Heatmap" />
+  <img src="assets/screenshots/05_settings.png" width="180" alt="Settings" />
+  <img src="assets/screenshots/06_motivation.png" width="180" alt="Motivation & Mantras" />
+  <img src="assets/screenshots/07_backup.png" width="180" alt="Backup & Sync" />
+  <img src="assets/screenshots/09_about.png" width="180" alt="About" />
+  <img src="assets/screenshots/08_notification.png" width="180" alt="Notification" />
+</p>
 
 ---
 
 ## ✨ Key Features
 
-- **🎯 Streak Tracker & Habits Engine**: Plan, log, and maintain daily, weekly, or custom frequency habits with high-fidelity analytics and active visual trackers.
-- **⚡ Offline-First Sandboxed Storage**: Zero tracking tags, zero analytics SDKs, and zero cloud uploads. Your progress resides strictly on your physical device.
-- **🎨 M3 Japanese Slate & Botanical Themes**: Enjoy visually appealing, high-contrast dark themes ("Tsuzuku Green" and "Tsuzuku Blue") styled with responsive Material Design 3 layouts and spacious natural margins.
-- **🔔 Resilient Habit Alarms**: Native low-draw local reminders help you check in with your goals on time.
-- **✨ Micro-Reminders & Japanese Mantras**: Receive ambient inspiration quotes dynamically rendered directly into low-priority on-screen notifications.
-- **📦 Data Portability**: Securely import or export your tracking statistics and database backups locally in standard JSON format whenever you like.
+| Feature | Description |
+|---------|-------------|
+| 🎯 **Streak Tracker** | Plan, log, and maintain daily, weekly, or custom-frequency habits with visual trackers |
+| ⚡ **Offline-First** | Zero tracking, zero analytics SDKs, zero cloud — your data stays on your device |
+| 🎨 **M3 Themes** | High-contrast dark themes ("Tsuzuku Green" & "Tsuzuku Blue") with Material Design 3 |
+| 🔔 **Smart Reminders** | Native low-draw local alarms to check in with your goals on time |
+| ✨ **Japanese Mantras** | Ambient bilingual inspiration quotes rendered into notification check-ins |
+| 📦 **Data Portability** | Import/export your tracking data locally in standard JSON format |
 
 ---
 
-## 🛠️ The Tech Stack
+## 📥 Download
 
-- **Framework**: [Jetpack Compose](https://developer.android.com/compose) (100% Kotlin-based interactive UI)
+<a href="https://github.com/agupta07505/Tsuzuku/releases/latest">
+  <img src="https://img.shields.io/badge/Download_APK-Latest_Release-2e7d32?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+</a>
+
+> Grab the latest **signed release APK** or **debug APK** from the [Releases](https://github.com/agupta07505/Tsuzuku/releases) page.
+
+---
+
+## 🛠️ Tech Stack
+
+- **UI Framework**: [Jetpack Compose](https://developer.android.com/compose) — 100% Kotlin, no XML layouts
 - **Design Language**: [Material Design 3 (M3)](https://m3.material.io/)
-- **Local Persistence**: State-managed asynchronous Room database
-- **Theme Support**: Centralized theme palettes (including light, dark, emerald green, and deep aqua blue, customizable via settings)
-- **Background Tasks**: Resilient AlarmManager scheduling with custom BroadcastReceivers
+- **Local Persistence**: [Room](https://developer.android.com/training/data-storage/room) — async, state-managed database
+- **Themes**: Centralized palettes — Light, Dark, Emerald Green, Deep Aqua Blue
+- **Background Tasks**: AlarmManager with custom BroadcastReceivers
+- **Networking**: Retrofit + OkHttp + Moshi (for data serialization)
+- **CI/CD**: GitHub Actions — automated builds, signing, and releases
 
 ---
 
-## 📦 How to Compile & Run
+## 📦 Building from Source
 
-You can build the app directly using standard Gradle tasks.
+### Prerequisites
 
-### Local Development Setup
+- **JDK 17** (Zulu distribution recommended)
+- **Android Studio** Ladybug or later (optional, for IDE development)
 
-Ensure you have **JDK 17** set up in your local system environment.
+### Steps
 
-1. **Clone the Repository**:
+1. **Clone the repository**:
    ```bash
-   git clone <your-repo-url>
-   cd tsuzuku
+   git clone https://github.com/agupta07505/Tsuzuku.git
+   cd Tsuzuku
    ```
 
-2. **Grant Executable Permissions override**:
+2. **Set up environment**:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Gemini API key (optional for basic usage)
+   ```
+
+3. **Make Gradle wrapper executable** (macOS/Linux):
    ```bash
    chmod +x gradlew
    ```
 
-3. **Build the Debug APK**:
+4. **Build the debug APK**:
    ```bash
    ./gradlew assembleDebug
    ```
-   The compiled APK will be generated at:
-   `app/build/outputs/apk/debug/app-debug.apk`
+   Output: `app/build/outputs/apk/debug/app-debug.apk`
 
 ---
 
-## 🚀 GitHub Actions CI/CD Pipeline
+## 🚀 CI/CD Pipeline
 
-We have configured a fully automated GitHub Actions workflow inside `.github/workflows/android.yml`.
+The project uses a fully automated [GitHub Actions workflow](.github/workflows/android.yml) that triggers on pushes to `main`/`master`, tags (`v*`), and pull requests.
 
-Whenever you **push** your commits to the `main` or `master` branches, or open a **pull request**, the workflow will automatically:
-1. Verify code formatting and compile the project using **JDK 17 (Zulu distribution)**.
-2. Gracefully restore the local security configuration (decoding the `debug.keystore.base64` if available).
-3. Build and optimize a **Debug APK**.
-4. Pack and upload the final compiled `.apk` as a downloadable GitHub actions build artifact named **`tsuzuku-debug-apk`**.
+**What it does:**
+1. Compiles the project with **JDK 17 (Zulu)**
+2. Restores or generates debug and release keystores
+3. Builds both **Debug** and **Release** APKs
+4. Uploads APKs as downloadable build artifacts
+5. Creates a **GitHub Release** with signed APKs on `main` pushes and version tags
 
 ---
 
-## 💡 Architecture Insights
+## 🏗️ Project Structure
 
-### Where are the Daily Quotes (Mantras) fetched from?
-Tsuzuku prioritizes speed, privacy, and full offline autonomy. Quotes are **not fetched from any internet API**. They are securely stored locally inside the application binary under **`app/src/main/java/com/example/notification/HabitNotificationHelper.kt`** inside a static structure:
-
-```kotlin
-val mantras = listOf(
-    QuotePair("Consistency builds strength.", "続けることが、力になる。"),
-    QuotePair("Small steps every day, big change always.", "毎日の小さな一歩が、大きな変化を生む。"),
-    QuotePair("Fall seven times, stand up eight.", "七転び八起き。"),
-    QuotePair("With patience, the grass becomes milk.", "忍耐があれば、草もミルクになる。"),
-    ...
-)
+```
+Tsuzuku/
+├── app/src/main/java/com/agupta07505/tsuzuku/
+│   ├── MainActivity.kt              # App entry point
+│   ├── data/                         # Room database, DAOs, entities, Quotes
+│   ├── notification/                 # Reminder scheduling & broadcast receivers
+│   ├── security/                     # Encryption utilities
+│   ├── ui/
+│   │   ├── components/               # Reusable Compose components
+│   │   ├── screens/                  # TrackerScreen, StatsScreen, SettingsScreen
+│   │   └── theme/                    # M3 color palettes & typography
+│   └── util/                         # Utility helpers
+├── assets/
+│   ├── screenshots/                  # App preview images for README
+│   ├── banners/                      # Feature graphics & promotional banners
+│   └── icons/                        # Additional branding assets
+├── .github/
+│   ├── workflows/android.yml         # CI/CD pipeline
+│   ├── ISSUE_TEMPLATE/               # Bug report & feature request templates
+│   └── PULL_REQUEST_TEMPLATE.md      # PR template
 ```
 
-You can easily customize, append, or modify these inspirational pairs straight from this Kotlin class to suit your personal habit goals or add custom phrases!
+---
+
+## 💡 Architecture Notes
+
+### Offline-First Mantras
+
+Tsuzuku delivers bilingual inspiration quotes **without any internet API calls**. All 80+ quotes are bundled locally in [`Quotes.kt`](app/src/main/java/com/agupta07505/tsuzuku/data/Quotes.kt):
+
+```kotlin
+data class Quote(
+    val english: String,
+    val japanese: String,
+    val romaji: String = ""
+)
+
+object Quotes {
+    val all: List<Quote> = listOf(
+        Quote(
+            english = "Consistency builds strength.",
+            japanese = "続けることが、力になる。",
+            romaji = "Tsudukeru koto ga, chikara ni naru."
+        ),
+        ...
+    )
+
+    fun random(): Quote = all.random()
+    fun byIndex(index: Int): Quote = all[index % all.size]
+}
+```
+
+You can customize these pairs to match your personal goals!
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) before getting started.
+
+- 🐛 [Report a Bug](.github/ISSUE_TEMPLATE/bug_report.md)
+- 💡 [Request a Feature](.github/ISSUE_TEMPLATE/feature_request.md)
+- 🔒 [Security Policy](SECURITY.md)
+- 📜 [Code of Conduct](CODE_OF_CONDUCT.md)
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  Made with 🌱 by <a href="https://github.com/agupta07505">Animesh Gupta</a>
+</p>
