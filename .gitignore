@@ -37,4 +37,8 @@ gradle-8.7-bin.zip
 
 # Developer Environment & AI Studio metadata
 metadata.json
-assets/.aistudio/
+assets/.aistudio/
+
+
+linkedIn.txt
+share_templates.txt
