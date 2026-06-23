@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.agupta07505.tsuzuku.MainActivity
+import com.agupta07505.tsuzuku.data.Quotes
 
 class ReminderReceiver : BroadcastReceiver() {
 
@@ -59,11 +60,11 @@ class ReminderReceiver : BroadcastReceiver() {
         var contentText = "Don't break your streak! Check in for \"$habitName\" today."
         
         if (showQuotes) {
-            val mantra = HabitNotificationHelper.mantras.random()
+            val quote = Quotes.random()
             contentText = if (showJapanese) {
-                "${mantra.english}\n${mantra.japanese}"
+                "${quote.english}\n${quote.japanese}"
             } else {
-                mantra.english
+                quote.english
             }
         }
 
