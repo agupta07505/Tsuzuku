@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.res.painterResource
 import com.agupta07505.tsuzuku.R
+import com.agupta07505.tsuzuku.data.Quotes
 import com.agupta07505.tsuzuku.ui.HabitViewModel
 import com.agupta07505.tsuzuku.util.DateUtils
 import com.agupta07505.tsuzuku.util.StreakCalculator
@@ -1184,14 +1185,9 @@ fun SettingsScreen(
 
                         // Sleek Interactive Quote Showcase box
                         val mantraPairList = remember {
-                            listOf(
-                                Pair("Consistency builds strength.", Pair("続けることが、力になる。", "Tsudukeru koto ga, chikara ni naru.")),
-                                Pair("Small steps every day, big change always.", Pair("毎日の小さな一歩が、大きな変化を生む。", "Mainichi no chiisana ippo ga, tsune ni ookina henka o umu.")),
-                                Pair("Fall seven times, stand up eight.", Pair("七転び八起き。", "Nanakorobi yaoki.")),
-                                Pair("With patience, the grass becomes milk.", Pair("忍耐があれば、草もミルクになる。", "Nintai ga areba, kusa mo miruku ni naru.")),
-                                Pair("The water is clean, the mind is clear, the day is new.", Pair("水は清く、心は澄み、日は新しい。", "Mizu wa kiyoku, kokoro wa sumi, hi wa atarashii.")),
-                                Pair("Beginning is easy, continuing is hard.", Pair("始めるのは容易、続けるのは困難。", "Hajimeru no wa yōi, tsudukeru no wa konnan."))
-                            )
+                            Quotes.all.map { q ->
+                                Pair(q.english, Pair(q.japanese, q.romaji))
+                            }
                         }
 
                         var currentMantraIdx by remember { mutableStateOf(0) }

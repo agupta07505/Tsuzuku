@@ -10,20 +10,10 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.agupta07505.tsuzuku.data.Habit
+import com.agupta07505.tsuzuku.data.Quotes
 import java.util.Calendar
 
 object HabitNotificationHelper {
-
-    data class QuotePair(val english: String, val japanese: String)
-
-    val mantras = listOf(
-        QuotePair("Consistency builds strength.", "続けることが、力になる。"),
-        QuotePair("Small steps every day, big change always.", "毎日の小さな一歩が、大きな変化を生む。"),
-        QuotePair("Fall seven times, stand up eight.", "七転び八起き。"),
-        QuotePair("With patience, the grass becomes milk.", "忍耐があれば、草もミルクになる。"),
-        QuotePair("The water is clean, the mind is clear, the day is new.", "水は清く、心は澄み、日は新しい。"),
-        QuotePair("Beginning is easy, continuing is hard.", "始めるのは容易、続けるのは困難。")
-    )
 
     fun updatePermanentNotification(context: Context) {
         val sharedPrefs = context.getSharedPreferences("streak_marker_prefs", Context.MODE_PRIVATE)
@@ -55,8 +45,7 @@ object HabitNotificationHelper {
         )
 
         val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val mantraIdx = currentHour % mantras.size
-        val mantra = mantras[mantraIdx]
+        val mantra = Quotes.byIndex(currentHour)
 
         val showJapanese = sharedPrefs.getBoolean("show_japanese_quotes", true)
         val titleText = "Tsuzuku Permanent Motivation"

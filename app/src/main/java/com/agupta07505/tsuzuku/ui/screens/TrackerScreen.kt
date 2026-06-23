@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.agupta07505.tsuzuku.data.Habit
+import com.agupta07505.tsuzuku.data.Quotes
 import com.agupta07505.tsuzuku.ui.HabitViewModel
 import com.agupta07505.tsuzuku.ui.components.StreakHeatmap
 import com.agupta07505.tsuzuku.util.DateUtils
@@ -60,14 +61,8 @@ fun TrackerScreen(
     var viewingStreakHabit by remember { mutableStateOf<Habit?>(null) }
     
     val selectedMantra = remember {
-        listOf(
-            Pair("Consistency builds strength.", "続けることが、力になる。"),
-            Pair("Small steps every day, big change always.", "毎日の小さな一歩が、大きな変化を生む。"),
-            Pair("Fall seven times, stand up eight.", "七転び八起き。"),
-            Pair("With patience, the grass becomes milk.", "忍耐があれば、草もミルクになる。"),
-            Pair("The water is clean, the mind is clear, the day is new.", "水は清く、心は澄み、日は新しい。"),
-            Pair("Beginning is easy, continuing is hard.", "始めるのは容易、続けるのは困難。")
-        ).random()
+        val quote = Quotes.random()
+        Pair(quote.english, quote.japanese)
     }
     
     // Quick-select week dates
