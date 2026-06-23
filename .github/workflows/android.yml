@@ -105,10 +105,11 @@ jobs:
           path: app/build/outputs/apk/release/tsuzuku-release-${{ env.VERSION_NAME }}.apk
           if-no-files-found: error
 
-    - name: Create GitHub Release
-      if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'latest' }}
           files: |
             app/build/outputs/apk/release/tsuzuku-release-${{ env.VERSION_NAME }}.apk
             app/build/outputs/apk/debug/tsuzuku-debug-${{ env.VERSION_NAME }}.apk
