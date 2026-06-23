@@ -22,13 +22,23 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Restore Debug Keystore
+      - name: Create fallback .env file
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.example .env || echo "GEMINI_API_KEY=dummy" > .env
+          fi
+
+      - name: Restore or Generate Debug Keystore
         run: |
           if [ -f debug.keystore.base64 ]; then
-            echo "Decoding debug keystore..."
-            base64 -d debug.keystore.base64 > debug.keystore
+            echo "Decoding debug keystore from base64..."
+            base64 -d debug.keystore.base64 > debug.keystore || base64 --decode debug.keystore.base64 > debug.keystore
+          fi
+          if [ ! -f debug.keystore ]; then
+            echo "No debug keystore found! Generating a fresh debug.keystore..."
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           else
-            echo "No debug.keystore.base64 found. Built-in fallback compilation will be used."
+            echo "Debug keystore restored successfully."
           fi
 
       - name: Setup Gradle
