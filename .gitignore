@@ -18,3 +18,17 @@ local.properties
 debug.keystore
 tsuzuku.jks
 tsuzuku_base64.txt
+
+
+# Entire Android Studio folder
+.idea/
+
+# Generated APKs/AABs
+*.apk
+*.aab
+
+# Keystore configs
+keystore.properties
+
+# Logs
+*.log
