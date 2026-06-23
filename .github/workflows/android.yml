@@ -48,13 +48,20 @@ jobs:
           fi
 
       - name: Setup Release Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASS: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
-          if [ -n "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
+          if [ -n "$KEYSTORE_BASE64" ]; then
             echo "Decoding production/release keystore from secrets..."
             # Decode base64 release keystore cleanly, removing blank spaces/newlines
-            echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | tr -d '\r\n[:space:]' | base64 --decode > tsuzuku.jks
-            echo "STORE_PASSWORD=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
-            echo "KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD || secrets.RELEASE_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+            echo "$KEYSTORE_BASE64" | tr -d '\r\n[:space:]' | base64 --decode > tsuzuku.jks
+            echo "STORE_PASSWORD=$STORE_PASS" >> $GITHUB_ENV
+            
+            # Use KEY_PASS if provided, otherwise default to STORE_PASS
+            FINAL_KEY_PASS="${KEY_PASS:-$STORE_PASS}"
+            echo "KEY_PASSWORD=$FINAL_KEY_PASS" >> $GITHUB_ENV
             echo "KEYSTORE_PATH=$GITHUB_WORKSPACE/tsuzuku.jks" >> $GITHUB_ENV
           else
             echo "Using fallback production/release signing credentials..."
