@@ -103,16 +103,34 @@ jobs:
           path: app/build/outputs/apk/release/tsuzuku-release.apk
           if-no-files-found: error
 
+      - name: Delete existing release (clean slate)
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'latest' }}"
+          gh release delete "$TAG" --yes --cleanup-tag || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create GitHub Release
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'latest' }}
-          overwrite_files: true
+          make_latest: true
           files: |
             app/build/outputs/apk/release/tsuzuku-release.apk
             app/build/outputs/apk/debug/tsuzuku-debug.apk
           draft: false
           prerelease: false
+          body: |
+            ## Tsuzuku Open-Source Release 🌿
+
+            Welcome to the new release of Tsuzuku habit tracker!
+
+            ### 📦 Download Assets
+            - **Production Release APK (signed)**: tsuzuku-release.apk
+            - **Developer Debug APK**: tsuzuku-debug.apk
+
+            _Built and packaged automatically by GitHub Actions._
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
