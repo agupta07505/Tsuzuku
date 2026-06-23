@@ -1,3 +1,9 @@
+/*
+ * Tsuzuku (2026)
+ * © Animesh Gupta — github.com/agupta07505
+ * Licensed under the MIT License
+ */
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.compose)

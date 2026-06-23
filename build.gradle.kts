@@ -1,3 +1,9 @@
+/*
+ * Tsuzuku (2026)
+ * © Animesh Gupta — github.com/agupta07505
+ * Licensed under the MIT License
+ */
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
   alias(libs.plugins.android.application) apply false

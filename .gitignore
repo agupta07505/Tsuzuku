@@ -34,3 +34,7 @@ keystore.properties
 *.log
 gradle-dist/
 gradle-8.7-bin.zip
+
+# Developer Environment & AI Studio metadata
+metadata.json
+assets/.aistudio/

@@ -1,3 +1,9 @@
+/*
+ * Tsuzuku (2026)
+ * © Animesh Gupta — github.com/agupta07505
+ * Licensed under the MIT License
+ */
+
 package com.agupta07505.tsuzuku
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
