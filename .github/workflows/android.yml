@@ -84,25 +84,23 @@ jobs:
             -PRELEASE_KEY_ALIAS="upload" \
             -PRELEASE_KEY_PASSWORD="$KEY_PASSWORD"
 
-      - name: Rename Release APK with Version
+      - name: Rename APKs
         run: |
-          VERSION_NAME=$(git describe --tags --always || echo "1.0")
-          cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/tsuzuku-release-$VERSION_NAME.apk
-          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/tsuzuku-debug-$VERSION_NAME.apk
-          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/tsuzuku-release.apk
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/tsuzuku-debug.apk
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tsuzuku-debug-apk-${{ env.VERSION_NAME }}
-          path: app/build/outputs/apk/debug/tsuzuku-debug-${{ env.VERSION_NAME }}.apk
+          name: tsuzuku-debug
+          path: app/build/outputs/apk/debug/tsuzuku-debug.apk
           if-no-files-found: error
 
       - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tsuzuku-release-apk-${{ env.VERSION_NAME }}
-          path: app/build/outputs/apk/release/tsuzuku-release-${{ env.VERSION_NAME }}.apk
+          name: tsuzuku-release-apk
+          path: app/build/outputs/apk/release/tsuzuku-release.apk
           if-no-files-found: error
 
       - name: Create GitHub Release
@@ -110,20 +108,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'latest' }}
+          overwrite_files: true
           files: |
-            app/build/outputs/apk/release/tsuzuku-release-${{ env.VERSION_NAME }}.apk
-            app/build/outputs/apk/debug/tsuzuku-debug-${{ env.VERSION_NAME }}.apk
+            app/build/outputs/apk/release/tsuzuku-release.apk
+            app/build/outputs/apk/debug/tsuzuku-debug.apk
           draft: false
           prerelease: false
-          body: |
-            ## Tsuzuku Open-Source Release 🌿
-            
-            Welcome to the new release of Tsuzuku habit tracker!
-            
-            ### 📦 Download Assets
-            - **Production Release APK (signed)**: [tsuzuku-release-${{ env.VERSION_NAME }}.apk](https://github.com/${{ github.repository }}/releases/download/${{ env.VERSION_NAME }}/tsuzuku-release-${{ env.VERSION_NAME }}.apk)
-            - **Developer Debug APK**: [tsuzuku-debug-${{ env.VERSION_NAME }}.apk](https://github.com/${{ github.repository }}/releases/download/${{ env.VERSION_NAME }}/tsuzuku-debug-${{ env.VERSION_NAME }}.apk)
-            
-            _Built and packaged automatically by GitHub Actions._
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
