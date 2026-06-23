@@ -1,6 +1,0 @@
-{
-  "name": "Tsuzuku",
-  "description": "Securely track your daily habits and streak statistics with interactive heatmaps, client-side encryption, and daily local reminders.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
