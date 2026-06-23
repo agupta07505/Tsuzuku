@@ -57,6 +57,14 @@ Use the [Feature Request](https://github.com/agupta07505/Tsuzuku/issues/new?temp
 - Your proposed solution
 - Any alternatives you've considered
 
+## ⭐ Reviewing the App / Leaving Feedback
+
+Use the [App Review / Feedback](https://github.com/agupta07505/Tsuzuku/issues/new?template=app_review.md) issue template. You can share:
+- An overall rating of your experience (out of 5 stars)
+- Detailed thoughts and reviews of the app
+- What features you found most helpful
+- Suggestions for general user experience improvements
+
 ## 🧪 Testing
 
 - Run existing tests before submitting:

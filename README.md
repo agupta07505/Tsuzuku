@@ -177,6 +177,7 @@ Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md)
 
 - 🐛 [Report a Bug](.github/ISSUE_TEMPLATE/bug_report.md)
 - 💡 [Request a Feature](.github/ISSUE_TEMPLATE/feature_request.md)
+- ⭐ [Review the App](.github/ISSUE_TEMPLATE/app_review.md)
 - 🔒 [Security Policy](SECURITY.md)
 - 📜 [Code of Conduct](CODE_OF_CONDUCT.md)
 
