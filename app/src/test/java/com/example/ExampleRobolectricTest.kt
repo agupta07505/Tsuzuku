@@ -1,4 +1,4 @@
-package com.example
+package com.agupta07505.tsuzuku
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider

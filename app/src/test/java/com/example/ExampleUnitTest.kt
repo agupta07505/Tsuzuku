@@ -1,4 +1,4 @@
-package com.example
+package com.agupta07505.tsuzuku
 
 import org.junit.Assert.*
 import org.junit.Test
