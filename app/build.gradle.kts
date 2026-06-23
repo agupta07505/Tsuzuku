@@ -11,7 +11,7 @@ android {
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.tsuzuku.mktqz"
+    applicationId = "com.agupta07505.tsuzuku"
     minSdk = 24
     targetSdk = 36
     versionCode = 1
