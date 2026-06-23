@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    
+    <!-- Outer Brand Ring -->
+    <path
+        android:pathData="M50,5 A45,45 0 1,1 49.999,5"
+        android:strokeColor="#14B8A6"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+        
+    <!-- Central Stalk -->
+    <path
+        android:pathData="M50,85 L50,15"
+        android:strokeColor="#14B8A6"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+        
+    <!-- Lower Symmetrical Leaf Loops -->
+    <path
+        android:pathData="M50,65 Q20,50 50,45"
+        android:strokeColor="#2DD4BF"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M50,65 Q80,50 50,45"
+        android:strokeColor="#2DD4BF"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+        
+    <!-- Upper Symmetrical Leaf Loops -->
+    <path
+        android:pathData="M50,45 Q25,32 50,28"
+        android:strokeColor="#2DD4BF"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M50,45 Q75,32 50,28"
+        android:strokeColor="#2DD4BF"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+</vector>

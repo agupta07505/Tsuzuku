@@ -1,0 +1,37 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+        
+    <!-- Central Stalk -->
+    <path
+        android:pathData="M50,85 L50,15"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round" />
+        
+    <!-- Lower Symmetrical Leaf Loops -->
+    <path
+        android:pathData="M50,65 Q20,50 50,45"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M50,65 Q80,50 50,45"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round" />
+        
+    <!-- Upper Symmetrical Leaf Loops -->
+    <path
+        android:pathData="M50,45 Q25,32 50,28"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M50,45 Q75,32 50,28"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round" />
+</vector>
