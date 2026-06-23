@@ -1490,7 +1490,7 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Version 1.0.0 (Build 1)",
+                            text = "Version ${BuildConfig.VERSION_NAME}",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )

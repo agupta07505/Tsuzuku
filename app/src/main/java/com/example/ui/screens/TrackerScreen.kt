@@ -796,7 +796,7 @@ fun TrackerScreen(
 
                         // Creator profile attribution explicitly styled as per request
                         Text(
-                            text = "Tsuzuku Streak Engine • Developed by Animesh Gupta",
+                            text = "Tsuzuku • Developed by Animesh Gupta",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
