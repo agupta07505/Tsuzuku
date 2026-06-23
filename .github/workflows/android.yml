@@ -72,10 +72,10 @@ jobs:
       - name: Build Debug & Release APKs
         run: |
           gradle assembleDebug assembleRelease \
-            -PRELEASE_KEYSTORE_PATH="${{ env.KEYSTORE_PATH }}" \
-            -PRELEASE_STORE_PASSWORD="${{ env.STORE_PASSWORD }}" \
+            -PRELEASE_KEYSTORE_PATH="$KEYSTORE_PATH" \
+            -PRELEASE_STORE_PASSWORD="$STORE_PASSWORD" \
             -PRELEASE_KEY_ALIAS="upload" \
-            -PRELEASE_KEY_PASSWORD="${{ env.KEY_PASSWORD }}"
+            -PRELEASE_KEY_PASSWORD="$KEY_PASSWORD"
 
       - name: Rename Release APK with Version
         run: |
