@@ -51,16 +51,16 @@ jobs:
         run: |
           if [ -n "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
             echo "Decoding production/release keystore from secrets..."
-            echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > my-upload-key.jks
+            echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > tsuzuku.jks
             echo "STORE_PASSWORD=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
             echo "KEY_PASSWORD=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
-            echo "KEYSTORE_PATH=my-upload-key.jks" >> $GITHUB_ENV
+            echo "KEYSTORE_PATH=$GITHUB_WORKSPACE/tsuzuku.jks" >> $GITHUB_ENV
           else
             echo "Using fallback production/release signing credentials..."
-            keytool -genkey -v -keystore my-upload-key.jks -storepass fallbackpassword -alias upload -keypass fallbackpassword -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Tsuzuku Production Fallback,O=Tsuzuku,C=US"
+            keytool -genkey -v -keystore tsuzuku.jks -storepass fallbackpassword -alias upload -keypass fallbackpassword -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Tsuzuku Production Fallback,O=Tsuzuku,C=US"
             echo "STORE_PASSWORD=fallbackpassword" >> $GITHUB_ENV
             echo "KEY_PASSWORD=fallbackpassword" >> $GITHUB_ENV
-            echo "KEYSTORE_PATH=my-upload-key.jks" >> $GITHUB_ENV
+            echo "KEYSTORE_PATH=$GITHUB_WORKSPACE/tsuzuku.jks" >> $GITHUB_ENV
           fi
 
       - name: Setup Gradle
