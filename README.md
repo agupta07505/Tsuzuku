@@ -24,15 +24,15 @@
 ## 📸 Preview
 
 <p align="center">
-  <img src="assets/screenshots/01_home.jpg" width="180" alt="Home Screen" />
-  <img src="assets/screenshots/02_habit_tracker.jpg" width="180" alt="Habit Tracker with Mantra" />
-  <img src="assets/screenshots/03_create_streak.jpg" width="180" alt="Create Streak" />
-  <img src="assets/screenshots/04_insights.png" width="180" alt="Insights & Heatmap" />
-  <img src="assets/screenshots/05_settings.png" width="180" alt="Settings" />
-  <img src="assets/screenshots/06_motivation.png" width="180" alt="Motivation & Mantras" />
-  <img src="assets/screenshots/07_backup.png" width="180" alt="Backup & Sync" />
-  <img src="assets/screenshots/09_about.png" width="180" alt="About" />
-  <img src="assets/screenshots/08_notification.png" width="180" alt="Notification" />
+  <img src="assets/screenshots/01_home.jpg" width="240" alt="Home Screen" />
+  <img src="assets/screenshots/02_habit_tracker.jpg" width="240" alt="Habit Tracker with Mantra" />
+  <img src="assets/screenshots/03_create_streak.jpg" width="240" alt="Create Streak" />
+  <img src="assets/screenshots/04_insights.png" width="240" alt="Insights & Heatmap" />
+  <img src="assets/screenshots/05_settings.png" width="240" alt="Settings" />
+  <img src="assets/screenshots/06_motivation.png" width="240" alt="Motivation & Mantras" />
+  <img src="assets/screenshots/07_backup.png" width="240" alt="Backup & Sync" />
+  <img src="assets/screenshots/09_about.png" width="240" alt="About" />
+  <img src="assets/screenshots/08_notification.png" width="240" alt="Notification" />
 </p>
 
 ---
@@ -87,18 +87,12 @@
    cd Tsuzuku
    ```
 
-2. **Set up environment**:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your Gemini API key (optional for basic usage)
-   ```
-
-3. **Make Gradle wrapper executable** (macOS/Linux):
+2. **Make Gradle wrapper executable** (macOS/Linux):
    ```bash
    chmod +x gradlew
    ```
 
-4. **Build the debug APK**:
+3. **Build the debug APK**:
    ```bash
    ./gradlew assembleDebug
    ```

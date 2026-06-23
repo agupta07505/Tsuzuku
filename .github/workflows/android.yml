@@ -53,12 +53,6 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Create fallback .env file
-        run: |
-          if [ ! -f .env ]; then
-            cp .env.example .env || echo "GEMINI_API_KEY=dummy" > .env
-          fi
-
       - name: Restore or Generate Debug Keystore
         run: |
           if [ -f debug.keystore.base64 ]; then
