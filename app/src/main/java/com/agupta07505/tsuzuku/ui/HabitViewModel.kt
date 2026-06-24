@@ -31,6 +31,9 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
     val habits: StateFlow<List<Habit>> = repository.allActiveHabits
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val managedHabits: StateFlow<List<Habit>> = repository.allHabits
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val allLogs: StateFlow<List<HabitLog>> = repository.allLogs
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -88,6 +91,18 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
             repository.deleteHabit(habit)
             val context = getApplication<Application>().applicationContext
             HabitNotificationHelper.cancelReminder(context, habit.id)
+        }
+    }
+
+    fun setHabitArchived(habit: Habit, archived: Boolean) {
+        viewModelScope.launch {
+            val updated = habit.copy(isArchived = archived)
+            repository.updateHabit(updated)
+            val context = getApplication<Application>().applicationContext
+            HabitNotificationHelper.cancelReminder(context, habit.id)
+            if (!archived && updated.reminderHour != null && updated.reminderMinute != null) {
+                HabitNotificationHelper.scheduleDailyReminder(context, updated)
+            }
         }
     }
 

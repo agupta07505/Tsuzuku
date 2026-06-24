@@ -153,6 +153,7 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.padding(innerPadding)
                         )
                         "habits" -> com.agupta07505.tsuzuku.ui.screens.HabitsScreen(
+                            viewModel = viewModel,
                             modifier = Modifier.padding(innerPadding)
                         )
                         "study_mode" -> com.agupta07505.tsuzuku.ui.screens.StudyModeScreen(
