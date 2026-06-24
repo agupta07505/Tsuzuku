@@ -44,7 +44,7 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
             failedSessions = failed,
             successRate = if (sessions.isEmpty()) 0 else completed * 100 / sessions.size,
             currentStreakDays = calculateCurrentStreak(sessions, now),
-            recentSessions = sessions.take(10),
+            recentSessions = sessions,
             runtime = runtime
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FocusUiState())

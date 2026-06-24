@@ -98,12 +98,18 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.max
 
-private val FocusGreen = Color(0xFF65DF5B)
-private val FocusOrange = Color(0xFFFF762F)
-private val FocusPurple = Color(0xFF9B72F2)
-private val FocusRed = Color(0xFFFF554D)
-private val FocusCard = Color(0xFF07150E)
-private val FocusOutline = Color(0xFF193B27)
+private val FocusGreen: Color
+    @Composable get() = MaterialTheme.colorScheme.primary
+private val FocusOrange: Color
+    @Composable get() = MaterialTheme.colorScheme.tertiary
+private val FocusPurple: Color
+    @Composable get() = MaterialTheme.colorScheme.secondary
+private val FocusRed: Color
+    @Composable get() = MaterialTheme.colorScheme.error
+private val FocusCard: Color
+    @Composable get() = MaterialTheme.colorScheme.surface
+private val FocusOutline: Color
+    @Composable get() = MaterialTheme.colorScheme.outlineVariant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -148,7 +154,11 @@ private fun FocusBackground(modifier: Modifier, content: @Composable () -> Unit)
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(MaterialTheme.colorScheme.background, Color(0xFF031109), MaterialTheme.colorScheme.background)
+                    listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = .35f),
+                        MaterialTheme.colorScheme.background
+                    )
                 )
             )
     ) { content() }
@@ -156,6 +166,8 @@ private fun FocusBackground(modifier: Modifier, content: @Composable () -> Unit)
 
 @Composable
 private fun FocusDashboard(state: FocusUiState, onStart: () -> Unit) {
+    var showAllSessions by rememberSaveable { mutableStateOf(false) }
+    val visibleSessions = if (showAllSessions) state.recentSessions else state.recentSessions.take(3)
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(20.dp),
@@ -176,7 +188,11 @@ private fun FocusDashboard(state: FocusUiState, onStart: () -> Unit) {
         item {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text("Recent Sessions", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                Text("View all", color = FocusGreen, style = MaterialTheme.typography.labelMedium)
+                if (state.recentSessions.size > 3) {
+                    TextButton(onClick = { showAllSessions = !showAllSessions }) {
+                        Text(if (showAllSessions) "Show less" else "View all", color = FocusGreen)
+                    }
+                }
             }
         }
         if (state.recentSessions.isEmpty()) {
@@ -190,14 +206,14 @@ private fun FocusDashboard(state: FocusUiState, onStart: () -> Unit) {
                 }
             }
         } else {
-            items(state.recentSessions.take(3), key = { it.id }) { RecentSessionCard(it) }
+            items(visibleSessions, key = { it.id }) { RecentSessionCard(it) }
         }
         item {
             Button(
                 onClick = onStart,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = FocusGreen, contentColor = Color(0xFF041007))
+                colors = ButtonDefaults.buttonColors(containerColor = FocusGreen, contentColor = MaterialTheme.colorScheme.onPrimary)
             ) {
                 Icon(Icons.Default.PlayArrow, null)
                 Spacer(Modifier.size(8.dp))
@@ -234,12 +250,13 @@ private fun FocusMetricsBoard(state: FocusUiState) {
 private fun MetricRow(
     left: Triple<String, String, androidx.compose.ui.graphics.vector.ImageVector>,
     right: Triple<String, String, androidx.compose.ui.graphics.vector.ImageVector>,
-    rightColor: Color = FocusGreen
+    rightColor: Color? = null
 ) {
+    val resolvedRightColor = rightColor ?: FocusGreen
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         FocusMetric(left.first, left.second, left.third, FocusGreen, Modifier.weight(1f))
         VerticalDivider(color = FocusOutline, modifier = Modifier.height(62.dp))
-        FocusMetric(right.first, right.second, right.third, rightColor, Modifier.weight(1f).padding(start = 14.dp))
+        FocusMetric(right.first, right.second, right.third, resolvedRightColor, Modifier.weight(1f).padding(start = 14.dp))
     }
 }
 
@@ -328,9 +345,12 @@ private fun FocusSetupSheet(onDismiss: () -> Unit, onStart: (String, Int, Int) -
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF0C1715),
+        containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = {
-            Box(Modifier.padding(10.dp).size(width = 42.dp, height = 4.dp).clip(CircleShape).background(Color(0xFF67736E)))
+            Box(
+                Modifier.padding(10.dp).size(width = 42.dp, height = 4.dp).clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .55f))
+            )
         }
     ) {
         LazyColumn(
@@ -385,7 +405,7 @@ private fun FocusSetupSheet(onDismiss: () -> Unit, onStart: (String, Int, Int) -
                     onClick = start,
                     enabled = name.isNotBlank() && duration in 1..720,
                     modifier = Modifier.fillMaxWidth().height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = FocusGreen, contentColor = Color(0xFF041007)),
+                    colors = ButtonDefaults.buttonColors(containerColor = FocusGreen, contentColor = MaterialTheme.colorScheme.onPrimary),
                     shape = RoundedCornerShape(11.dp)
                 ) {
                     Icon(Icons.Default.PlayArrow, null)
@@ -436,13 +456,13 @@ private fun SessionChipRow(options: List<Int>, selected: Int, onSelected: (Int) 
                 },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = FocusGreen,
-                    selectedLabelColor = Color(0xFF061108),
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
                     containerColor = Color.Transparent
                 ),
                 border = FilterChipDefaults.filterChipBorder(
                     enabled = true,
                     selected = selected == option,
-                    borderColor = Color(0xFF405049),
+                    borderColor = MaterialTheme.colorScheme.outline,
                     selectedBorderColor = FocusGreen
                 ),
                 modifier = if (options.size > 1) Modifier.weight(1f) else Modifier
@@ -553,8 +573,11 @@ private fun SessionValueCard(label: String, value: String, color: Color, modifie
 private fun FocusWarningScreen(runtime: FocusRuntimeState) {
     KeepScreenOn()
     val seconds = runtime.warningSeconds ?: 5
-    val remaining = if (runtime.allowedMistakes == FocusSessionManager.UNLIMITED_MISTAKES) "∞"
-    else (runtime.allowedMistakes - runtime.mistakesUsed).coerceAtLeast(0).toString()
+    val mistakesRemainingLabel = if (runtime.allowedMistakes == FocusSessionManager.UNLIMITED_MISTAKES) {
+        "Unlimited"
+    } else {
+        "${(runtime.allowedMistakes - runtime.mistakesUsed).coerceAtLeast(0)} / ${runtime.allowedMistakes}"
+    }
     Column(
         Modifier.fillMaxSize().padding(28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -574,12 +597,17 @@ private fun FocusWarningScreen(runtime: FocusRuntimeState) {
         ) {
             Column(Modifier.fillMaxWidth().padding(17.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Mistakes Remaining", color = FocusOrange, fontWeight = FontWeight.SemiBold)
-                Text("$remaining / ${formatAllowed(runtime.allowedMistakes)}", color = FocusOrange, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+                Text(mistakesRemainingLabel, color = FocusOrange, fontSize = 26.sp, fontWeight = FontWeight.Bold)
             }
         }
-        CircularValue(seconds / 5f, FocusOrange, 154.dp) {
-            Text(seconds.toString(), fontSize = 44.sp, fontWeight = FontWeight.Bold)
-            Text("seconds", style = MaterialTheme.typography.bodySmall)
+        CircularValue(if (seconds > 0) seconds / 5f else 1f, FocusOrange, 154.dp) {
+            if (seconds > 0) {
+                Text(seconds.toString(), fontSize = 44.sp, fontWeight = FontWeight.Bold)
+                Text("seconds", style = MaterialTheme.typography.bodySmall)
+            } else {
+                Icon(Icons.Default.PhoneAndroid, null, tint = FocusOrange, modifier = Modifier.size(38.dp))
+                Text("Face down now", color = FocusOrange, style = MaterialTheme.typography.labelMedium)
+            }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.ExitToApp, null, tint = FocusOrange, modifier = Modifier.size(34.dp))
@@ -691,7 +719,7 @@ private fun FocusResultScreen(result: FocusSession, onDone: () -> Unit) {
             Button(
                 onClick = onDone,
                 modifier = Modifier.fillMaxWidth().height(54.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = FocusGreen, contentColor = Color(0xFF041007)),
+                colors = ButtonDefaults.buttonColors(containerColor = FocusGreen, contentColor = MaterialTheme.colorScheme.onPrimary),
                 shape = RoundedCornerShape(11.dp)
             ) { Text("Done", fontWeight = FontWeight.Bold) }
         }

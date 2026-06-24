@@ -13,4 +13,10 @@ interface FocusSessionDao {
 
     @Query("SELECT * FROM focus_sessions ORDER BY startTime DESC")
     fun observeAll(): Flow<List<FocusSession>>
+
+    @Query("SELECT * FROM focus_sessions ORDER BY startTime DESC")
+    suspend fun getAllDirect(): List<FocusSession>
+
+    @Query("DELETE FROM focus_sessions")
+    suspend fun deleteAll()
 }

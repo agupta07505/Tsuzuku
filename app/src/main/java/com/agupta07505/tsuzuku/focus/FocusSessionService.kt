@@ -129,7 +129,11 @@ class FocusSessionService : Service(), SensorEventListener {
                 if (lastPosition == PhonePosition.FACE_DOWN) return@launch
             }
             FocusSessionManager.update { current ->
-                current.copy(mistakesUsed = current.mistakesUsed + 1, warningSeconds = null)
+                current.copy(
+                    mistakesUsed = current.mistakesUsed + 1,
+                    // Keep the warning screen latched until the sensor reports FACE_DOWN.
+                    warningSeconds = 0
+                )
             }
             val state = FocusSessionManager.state.value
             if (state.mistakesUsed > state.allowedMistakes) {

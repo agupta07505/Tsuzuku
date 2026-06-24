@@ -18,6 +18,8 @@ class HabitRepository(private val habitDao: HabitDao) {
 
     val allLogs: Flow<List<HabitLog>> = habitDao.getAllLogs()
 
+    suspend fun getAllLogsDirect(): List<HabitLog> = habitDao.getAllLogsDirect()
+
     suspend fun getAllHabitsDirectDecrypted(): List<Habit> {
         return habitDao.getAllHabitsDirect().map { decryptHabit(it) }
     }

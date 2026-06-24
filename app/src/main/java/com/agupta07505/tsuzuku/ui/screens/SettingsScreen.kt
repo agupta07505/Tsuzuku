@@ -1053,7 +1053,7 @@ fun SettingsScreen(
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(
-                            text = "Preserve and restore your local backup databases securely",
+                            text = "Preserve and restore habits, check-ins, and Focus sessions securely",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             modifier = Modifier.padding(bottom = 6.dp)
@@ -1103,7 +1103,7 @@ fun SettingsScreen(
                                 }
                             }
                             Text(
-                                text = "Choose Save File to store on your device, or Share Text to copy/send.",
+                            text = "Includes habits, check-ins, and Focus history. Save locally or share as text.",
                                 fontSize = 10.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                 modifier = Modifier.padding(start = 4.dp)
@@ -1458,7 +1458,7 @@ fun SettingsScreen(
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
-                            text = "Locate and upload a previously saved streak_marker_backup.json backup file from your local storage:",
+                            text = "Select a Tsuzuku JSON backup containing habits, check-ins, and Focus sessions, or paste its contents below:",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
