@@ -134,9 +134,7 @@ fun TrackerScreen(
     }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
+        modifier = modifier.fillMaxSize()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             CenterAlignedTopAppBar(
@@ -191,7 +189,8 @@ fun TrackerScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .testTag("habits_checklist"),
+                    .testTag("habits_checklist")
+                    .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
