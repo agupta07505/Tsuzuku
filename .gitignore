@@ -16,6 +16,8 @@
 local.properties
 .env
 debug.keystore
+
+# Keystore files
 tsuzuku.jks
 tsuzuku_base64.txt
 
@@ -36,9 +38,9 @@ gradle-dist/
 gradle-8.7-bin.zip
 
 # Developer Environment & AI Studio metadata
-# metadata.json
-# assets/.aistudio/
+metadata.json
+assets/.aistudio/
 
-
+# Social Texts
 linkedIn.txt
 share_templates.txt
