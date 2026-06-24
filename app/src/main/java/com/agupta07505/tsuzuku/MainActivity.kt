@@ -121,8 +121,8 @@ class MainActivity : ComponentActivity() {
                             NavigationBarItem(
                                 selected = currentTab == "study_mode",
                                 onClick = { currentTab = "study_mode" },
-                                icon = { Icon(Icons.Default.School, contentDescription = "Study Mode") },
-                                label = { Text("Study Mode") },
+                                icon = { Icon(Icons.Default.School, contentDescription = "Focus") },
+                                label = { Text("Focus") },
                                 modifier = Modifier.testTag("tab_study_mode")
                             )
                             NavigationBarItem(

@@ -583,11 +583,11 @@ fun TrackerScreen(
                     }
                 }
                 
-                // --- STUDY MODE AND STATS CARDS ---
+                // --- Focus AND STATS CARDS ---
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Tsuzuku Study Mode Card
+                    // Tsuzuku Focus Card
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
@@ -606,14 +606,14 @@ fun TrackerScreen(
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = "Tsuzuku Study Mode", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                    Text(text = "Tsuzuku Focus", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                     Text(text = "Eliminate distractions. Stay focused.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(text = "Last session: 0 min • 0 distractions", fontSize = 11.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Button(
-                                    onClick = { /* TODO: Navigate to study mode */ },
+                                    onClick = { /* TODO: Navigate to Focus */ },
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                     shape = RoundedCornerShape(24.dp),
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)

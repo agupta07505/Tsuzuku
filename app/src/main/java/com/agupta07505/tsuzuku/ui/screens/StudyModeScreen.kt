@@ -10,6 +10,6 @@ import androidx.compose.ui.Modifier
 @Composable
 fun StudyModeScreen(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Study Mode Screen (Placeholder)")
+        Text("Focus Screen (Placeholder)")
     }
 }
