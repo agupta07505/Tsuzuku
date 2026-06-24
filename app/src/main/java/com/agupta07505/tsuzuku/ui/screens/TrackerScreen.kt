@@ -139,8 +139,6 @@ fun TrackerScreen(
             .padding(horizontal = 16.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Spacer(modifier = Modifier.height(20.dp))
-            
             CenterAlignedTopAppBar(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -199,7 +197,7 @@ fun TrackerScreen(
             ) {
                 item {
                     Column {
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
             
             // Motivational Hero Card
             Card(
@@ -241,7 +239,7 @@ fun TrackerScreen(
                     }
                     
                     Column(
-                        modifier = Modifier.padding(24.dp)
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
                     ) {
                         Text(
                             text = selectedMantra.second, // Japanese
@@ -502,9 +500,7 @@ fun TrackerScreen(
                 if (habits.isEmpty()) {
                     item {
                         Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 16.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(24.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
@@ -513,7 +509,7 @@ fun TrackerScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(32.dp)
+                                    .padding(vertical = 24.dp, horizontal = 16.dp)
                             ) {
                                 Text(
                                     text = "🌱",

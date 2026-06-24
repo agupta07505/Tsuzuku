@@ -113,10 +113,9 @@ class MainActivity : ComponentActivity() {
                                         contentAlignment = Alignment.Center
                                     ) {
                                         androidx.compose.foundation.Image(
-                                            painter = androidx.compose.ui.res.painterResource(id = com.agupta07505.tsuzuku.R.drawable.ic_tsuzuku_bg_removed),
+                                            painter = androidx.compose.ui.res.painterResource(id = com.agupta07505.tsuzuku.R.drawable.ic_tsuzuku_create_habbit_logo),
                                             contentDescription = "Add",
-                                            modifier = Modifier.size(32.dp),
-                                            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+                                            modifier = Modifier.size(32.dp)
                                         )
                                     }
                                 },
