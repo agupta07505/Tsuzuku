@@ -1,7 +1,6 @@
 package com.agupta07505.tsuzuku.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,8 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,9 +33,9 @@ import com.agupta07505.tsuzuku.util.DateUtils
 import com.agupta07505.tsuzuku.util.StreakCalculator
 import com.agupta07505.tsuzuku.util.StreakStats
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import kotlin.math.roundToInt
 
 private enum class HabitFilter(val label: String) {
     ALL("All Habits"), ACTIVE("Active"), ARCHIVED("Archived"), COMPLETED("Completed")
@@ -52,7 +49,7 @@ private enum class HabitSort(val label: String) {
 private data class HabitOverview(
     val activeCount: Int,
     val bestStreak: Int,
-    val weeklySuccess: Int,
+    val completedToday: Int,
     val totalCompletions: Int
 )
 
@@ -72,9 +69,18 @@ fun HabitsScreen(
     var editingHabit by remember { mutableStateOf<Habit?>(null) }
     var deleteCandidate by remember { mutableStateOf<Habit?>(null) }
 
-    val statsByHabit = remember(habits, logs) {
+    val currentMonthPrefix = remember { SimpleDateFormat("yyyy-MM", Locale.US).format(Date()) }
+    val monthStart = remember { Calendar.getInstance().apply {
+        set(Calendar.DAY_OF_MONTH, 1)
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.timeInMillis }
+    val statsByHabit = remember(habits, logs, currentMonthPrefix, monthStart) {
         habits.associate { habit ->
-            habit.id to StreakCalculator.calculate(logs.filter { it.habitId == habit.id }, habit.createdAt)
+            val monthLogs = logs.filter { it.habitId == habit.id && it.date.startsWith(currentMonthPrefix) }
+            habit.id to StreakCalculator.calculate(monthLogs, maxOf(habit.createdAt, monthStart))
         }
     }
     val overview = remember(habits, logs, statsByHabit) {
@@ -100,7 +106,7 @@ fun HabitsScreen(
             }
             .let { sequence ->
                 when (selectedSort) {
-                    HabitSort.CONSISTENT -> sequence.sortedByDescending { statsByHabit[it.id]?.completionRate ?: 0f }
+                    HabitSort.CONSISTENT -> sequence.sortedByDescending { statsByHabit[it.id]?.totalCompletions ?: 0 }
                     HabitSort.STREAK -> sequence.sortedByDescending { statsByHabit[it.id]?.maxStreak ?: 0 }
                     HabitSort.NEWEST -> sequence.sortedByDescending { it.createdAt }
                     HabitSort.OLDEST -> sequence.sortedBy { it.createdAt }
@@ -131,10 +137,10 @@ fun HabitsScreen(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     HabitStatsCard("Total Habits", overview.activeCount.toString(), "Active", Icons.Default.List, Modifier.weight(1f))
-                    HabitStatsCard("Best Streak", overview.bestStreak.toString(), "Days", Icons.Default.LocalFireDepartment, Modifier.weight(1f))
+                    HabitStatsCard("Best Streak", overview.bestStreak.toString(), "Days • This Month", Icons.Default.LocalFireDepartment, Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HabitStatsCard("Avg. Success", "${overview.weeklySuccess}%", "This Week", Icons.Default.TrendingUp, Modifier.weight(1f))
+                    HabitStatsCard("Done Today", overview.completedToday.toString(), "Today", Icons.Default.Today, Modifier.weight(1f))
                     HabitStatsCard("Completed", overview.totalCompletions.toString(), "All Time", Icons.Default.CheckCircle, Modifier.weight(1f))
                 }
             }
@@ -162,7 +168,16 @@ fun HabitsScreen(
                 HabitManagementCard(
                     habit = habit,
                     stats = statsByHabit[habit.id] ?: StreakStats(0, 0, 0, 0f),
+                    completedToday = logs.any {
+                        it.habitId == habit.id && it.date == DateUtils.getTodayString() && it.isCompleted
+                    },
                     onClick = { editingHabit = habit },
+                    onToggleDone = {
+                        val completed = logs.any {
+                            it.habitId == habit.id && it.date == DateUtils.getTodayString() && it.isCompleted
+                        }
+                        viewModel.toggleHabitLog(habit.id, DateUtils.getTodayString(), !completed)
+                    },
                     onEdit = { editingHabit = habit },
                     onArchive = { viewModel.setHabitArchived(habit, !habit.isArchived) },
                     onDelete = { deleteCandidate = habit }
@@ -368,7 +383,9 @@ private fun HabitSortRow(
 private fun HabitManagementCard(
     habit: Habit,
     stats: StreakStats,
+    completedToday: Boolean,
     onClick: () -> Unit,
+    onToggleDone: () -> Unit,
     onEdit: () -> Unit,
     onArchive: () -> Unit,
     onDelete: () -> Unit
@@ -379,12 +396,6 @@ private fun HabitManagementCard(
         runCatching { Color(android.graphics.Color.parseColor(habit.colorHex)) }
             .getOrDefault(defaultHabitColor)
     }
-    val success = stats.completionRate.roundToInt().coerceIn(0, 100)
-    val successColor = when {
-        success >= 75 -> MaterialTheme.colorScheme.primary
-        success >= 45 -> MaterialTheme.colorScheme.tertiary
-        else -> MaterialTheme.colorScheme.error
-    }
     val created = remember(habit.createdAt) {
         SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(habit.createdAt))
     }
@@ -392,7 +403,10 @@ private fun HabitManagementCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(
+            if (completedToday) 1.5.dp else 1.dp,
+            if (completedToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+        ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -411,10 +425,27 @@ private fun HabitManagementCard(
                         }
                     }
                 }
-                Text("🔥 ${stats.currentStreak} day streak", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                Text("🔥 ${stats.currentStreak} day streak this month", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
                 Text("Created: $created", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
             }
-            SuccessProgress(success, successColor)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(if (completedToday) MaterialTheme.colorScheme.primary else Color.Transparent)
+                    .then(
+                        if (completedToday) Modifier
+                        else Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                    )
+                    .clickable(enabled = !habit.isArchived, onClick = onToggleDone),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Check,
+                    if (completedToday) "Mark not done" else "Mark done",
+                    tint = if (completedToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             IconButton(onClick = onEdit, modifier = Modifier.size(38.dp)) { Icon(Icons.Default.Edit, "Edit ${habit.name}", modifier = Modifier.size(19.dp)) }
             Box {
                 IconButton(onClick = { menuExpanded = true }, modifier = Modifier.size(38.dp)) { Icon(Icons.Default.MoreVert, "More options") }
@@ -432,21 +463,6 @@ private fun HabitManagementCard(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun SuccessProgress(percent: Int, color: Color) {
-    Box(Modifier.size(55.dp), contentAlignment = Alignment.Center) {
-        Canvas(Modifier.fillMaxSize().padding(5.dp)) {
-            val width = 5.dp.toPx()
-            drawCircle(color.copy(alpha = .18f), style = Stroke(width))
-            drawArc(color, -90f, 360f * percent / 100f, false, style = Stroke(width, cap = StrokeCap.Round))
-        }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("$percent%", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = color)
-            Text("Success", fontSize = 7.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -484,17 +500,12 @@ private fun calculateOverview(
     statsByHabit: Map<Int, StreakStats>
 ): HabitOverview {
     val activeHabits = habits.filterNot { it.isArchived }
-    val lastWeek = (0..6).map { DateUtils.getDateWithOffset(-it) }.toSet()
-    val weeklyRates = activeHabits.map { habit ->
-        val ageDays = (((System.currentTimeMillis() - habit.createdAt).coerceAtLeast(0L)) / 86_400_000L + 1).toInt()
-        val eligibleDays = ageDays.coerceIn(1, 7)
-        val completed = logs.count { it.habitId == habit.id && it.isCompleted && it.date in lastWeek }
-        (completed.coerceAtMost(eligibleDays) * 100f / eligibleDays).roundToInt()
-    }
+    val activeHabitIds = activeHabits.map { it.id }.toSet()
+    val today = DateUtils.getTodayString()
     return HabitOverview(
         activeCount = activeHabits.size,
         bestStreak = statsByHabit.values.maxOfOrNull { it.maxStreak } ?: 0,
-        weeklySuccess = if (weeklyRates.isEmpty()) 0 else weeklyRates.average().roundToInt(),
+        completedToday = logs.count { it.isCompleted && it.date == today && it.habitId in activeHabitIds },
         totalCompletions = logs.count { it.isCompleted }
     )
 }
@@ -507,7 +518,8 @@ private fun HabitManagementCardPreview() {
             HabitManagementCard(
                 habit = Habit(name = "Codeforces", description = "Solve one problem", iconName = "💻 Code", createdAt = 1_704_844_800_000),
                 stats = StreakStats(currentStreak = 15, maxStreak = 21, totalCompletions = 42, completionRate = 85f),
-                onClick = {}, onEdit = {}, onArchive = {}, onDelete = {}
+                completedToday = true,
+                onClick = {}, onToggleDone = {}, onEdit = {}, onArchive = {}, onDelete = {}
             )
         }
     }

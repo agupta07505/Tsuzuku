@@ -16,8 +16,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +56,16 @@ fun StatsScreen(
 ) {
     val habits by viewModel.habits.collectAsState()
     val logs by viewModel.allLogs.collectAsState()
+    val currentYear = remember { Calendar.getInstance().get(Calendar.YEAR) }
+    val availableYears = remember(habits, logs, currentYear) {
+        val loggedYears = logs.mapNotNull { it.date.take(4).toIntOrNull() }
+        val createdYears = habits.map { habit ->
+            Calendar.getInstance().apply { timeInMillis = habit.createdAt }.get(Calendar.YEAR)
+        }
+        val earliestYear = (loggedYears + createdYears).minOrNull()?.coerceAtMost(currentYear) ?: currentYear
+        (currentYear downTo earliestYear).toList()
+    }
+    var selectedYear by rememberSaveable { mutableIntStateOf(currentYear) }
     
     // Expand state for each habit card
     var expandedHabitId by remember { mutableStateOf<Int?>(null) }
@@ -134,10 +148,12 @@ fun StatsScreen(
 
     // Best performing habits this month sorting
     val sortedHabits = remember(habits, logs) {
+        val monthPrefix = SimpleDateFormat("yyyy-MM", Locale.US).format(Date())
         habits.map { h ->
-            val habitLogs = logs.filter { it.habitId == h.id }
-            val st = StreakCalculator.calculate(habitLogs, h.createdAt)
-            Pair(h, st.completionRate.roundToInt())
+            val completedThisMonth = logs.count {
+                it.habitId == h.id && it.isCompleted && it.date.startsWith(monthPrefix)
+            }
+            Pair(h, completedThisMonth)
         }.sortedByDescending { it.second }
     }
 
@@ -350,12 +366,30 @@ fun StatsScreen(
             // Contribution Heatmap Section
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Contribution Heatmap",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                text = "Yearly Activity",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "A full year of habit check-ins",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        StatsYearDropdown(
+                            selectedYear = selectedYear,
+                            availableYears = availableYears,
+                            onYearSelected = { selectedYear = it }
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -368,6 +402,7 @@ fun StatsScreen(
                         Column(modifier = Modifier.padding(16.dp)) {
                             GithubCombinedHeatmap(
                                 logs = logs,
+                                selectedYear = selectedYear,
                                 onCellToggle = { dateStr, toggleState ->
                                     if (habits.isNotEmpty()) {
                                         viewModel.toggleHabitLog(habits.first().id, dateStr, toggleState)
@@ -449,7 +484,7 @@ fun StatsScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         } else {
-                            topHabitsShowList.take(3).forEach { (name, rate, medal) ->
+                            topHabitsShowList.take(3).forEach { (name, checkIns, medal) ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -464,7 +499,7 @@ fun StatsScreen(
                                         Text(medal, fontSize = 18.sp)
                                         Text(name, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                     }
-                                    Text("$rate%", fontSize = 14.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+                                    Text("$checkIns check-ins", fontSize = 14.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
                                 }
                             }
                         }
@@ -502,8 +537,15 @@ fun StatsScreen(
                 items(habits) { habit ->
                     val isExpanded = expandedHabitId == habit.id
                     val habitLogs = logs.filter { it.habitId == habit.id }
-                    val stats = remember(habitLogs) {
-                        StreakCalculator.calculate(habitLogs, habit.createdAt)
+                    val selectedYearLogs = habitLogs.filter { it.date.startsWith(selectedYear.toString()) }
+                    val selectedYearStart = remember(selectedYear) {
+                        Calendar.getInstance().apply {
+                            clear()
+                            set(selectedYear, Calendar.JANUARY, 1)
+                        }.timeInMillis
+                    }
+                    val stats = remember(selectedYearLogs, selectedYearStart) {
+                        StreakCalculator.calculate(selectedYearLogs, maxOf(habit.createdAt, selectedYearStart))
                     }
                     
                     val habitColor = remember(habit.colorHex) {
@@ -555,22 +597,22 @@ fun StatsScreen(
                                 
                                 Spacer(modifier = Modifier.width(12.dp))
                                 
-                                // Title & Success Rate Info (Explicitly formatted as requested)
+                                // Selected-year habit summary
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "${habit.name} - Success Rate: ${stats.completionRate.roundToInt()}%",
+                                        text = habit.name,
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
-                                        text = "🔥 Running: ${stats.currentStreak}d  |  🏆 High: ${stats.maxStreak}d",
+                                        text = "$selectedYear: ${stats.totalCompletions} check-ins  |  Best: ${stats.maxStreak}d",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 
-                                // Circular rate Badge
+                                // Selected year completion count
                                 Box(
                                     modifier = Modifier
                                         .size(38.dp)
@@ -579,7 +621,7 @@ fun StatsScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "${stats.completionRate.roundToInt()}%",
+                                        text = stats.totalCompletions.toString(),
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Black,
                                         color = habitColor
@@ -606,6 +648,7 @@ fun StatsScreen(
                                     StreakHeatmap(
                                         habit = habit,
                                         logs = habitLogs,
+                                        selectedYear = selectedYear,
                                         onCellToggle = { dateStr, state ->
                                             viewModel.toggleHabitLog(habit.id, dateStr, state)
                                         }
@@ -622,6 +665,40 @@ fun StatsScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatsYearDropdown(
+    selectedYear: Int,
+    availableYears: List<Int>,
+    onYearSelected: (Int) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        OutlinedButton(
+            onClick = { expanded = true },
+            shape = RoundedCornerShape(12.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 7.dp)
+        ) {
+            Text(selectedYear.toString(), fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(4.dp))
+            Icon(Icons.Default.KeyboardArrowDown, null, modifier = Modifier.size(18.dp))
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            availableYears.forEach { year ->
+                DropdownMenuItem(
+                    text = { Text(year.toString()) },
+                    onClick = {
+                        onYearSelected(year)
+                        expanded = false
+                    },
+                    leadingIcon = {
+                        if (year == selectedYear) Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                    }
+                )
             }
         }
     }

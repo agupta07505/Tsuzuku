@@ -38,23 +38,28 @@ fun StreakHeatmap(
     logs: List<HabitLog>,
     onCellToggle: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    weeksCount: Int = 18
+    weeksCount: Int = 18,
+    selectedYear: Int? = null
 ) {
     val todayStr = remember { DateUtils.getTodayString() }
+    val effectiveWeeksCount = if (selectedYear == null) weeksCount else 53
     
     // Retrieve a structured sequence of dates for the grid
-    val dates = remember(weeksCount) {
+    val dates = remember(weeksCount, selectedYear) {
          val tempDates = mutableListOf<String>()
          val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
          val cal = Calendar.getInstance()
-         
+
+         if (selectedYear != null) {
+             cal.clear()
+             cal.set(selectedYear, Calendar.JANUARY, 1)
+         }
          val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
          val daysToMonday = if (dayOfWeek == Calendar.SUNDAY) 6 else dayOfWeek - 2
-         
          cal.add(Calendar.DAY_OF_YEAR, -daysToMonday)
-         cal.add(Calendar.WEEK_OF_YEAR, -(weeksCount - 1))
+         if (selectedYear == null) cal.add(Calendar.WEEK_OF_YEAR, -(weeksCount - 1))
          
-         for (i in 0 until (weeksCount * 7)) {
+         for (i in 0 until (effectiveWeeksCount * 7)) {
              tempDates.add(sdf.format(cal.time))
              cal.add(Calendar.DAY_OF_YEAR, 1)
          }
@@ -74,7 +79,7 @@ fun StreakHeatmap(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Last $weeksCount Weeks Activity",
+                text = selectedYear?.let { "$it Activity" } ?: "Last $weeksCount Weeks Activity",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -123,7 +128,7 @@ fun StreakHeatmap(
 
             // GitHub 7-rows × 18-weeks block columns
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                for (c in 0 until weeksCount) {
+                for (c in 0 until effectiveWeeksCount) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         for (r in 0 until 7) {
                             val idx = c * 7 + r
@@ -131,9 +136,10 @@ fun StreakHeatmap(
                             val isToday = dateStr == todayStr
                             val isCompleted = logs.any { it.date == dateStr && it.isCompleted }
                             val isFuture = dateStr > todayStr
+                            val isOutsideYear = selectedYear != null && !dateStr.startsWith(selectedYear.toString())
                             
                             val cellColor = when {
-                                isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                                isOutsideYear || isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
                                 isCompleted -> habitColor
                                 isToday -> habitColor.copy(alpha = 0.35f)
                                 else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
@@ -178,23 +184,29 @@ fun GithubCombinedHeatmap(
     logs: List<HabitLog>,
     onCellToggle: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    weeksCount: Int = 18
+    weeksCount: Int = 18,
+    selectedYear: Int? = null
 ) {
     val todayStr = remember { DateUtils.getTodayString() }
+    val effectiveWeeksCount = if (selectedYear == null) weeksCount else 53
     
     // Retrieve grid dates
-    val dates = remember(weeksCount) {
+    val dates = remember(weeksCount, selectedYear) {
          val tempDates = mutableListOf<String>()
          val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
          val cal = Calendar.getInstance()
-         
+
+         if (selectedYear != null) {
+             cal.clear()
+             cal.set(selectedYear, Calendar.JANUARY, 1)
+         }
          val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
          val daysToMonday = if (dayOfWeek == Calendar.SUNDAY) 6 else dayOfWeek - 2
          
          cal.add(Calendar.DAY_OF_YEAR, -daysToMonday)
-         cal.add(Calendar.WEEK_OF_YEAR, -(weeksCount - 1))
+         if (selectedYear == null) cal.add(Calendar.WEEK_OF_YEAR, -(weeksCount - 1))
          
-         for (i in 0 until (weeksCount * 7)) {
+         for (i in 0 until (effectiveWeeksCount * 7)) {
              tempDates.add(sdf.format(cal.time))
              cal.add(Calendar.DAY_OF_YEAR, 1)
          }
@@ -208,7 +220,7 @@ fun GithubCombinedHeatmap(
 
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 12.dp)) {
         Text(
-            text = "Total Combined Contributions",
+            text = selectedYear?.let { "$it Combined Contributions" } ?: "Total Combined Contributions",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -250,7 +262,7 @@ fun GithubCombinedHeatmap(
 
             // GitHub Combined Color Shading (Green theme!)
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                for (c in 0 until weeksCount) {
+                for (c in 0 until effectiveWeeksCount) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         for (r in 0 until 7) {
                             val idx = c * 7 + r
@@ -258,6 +270,7 @@ fun GithubCombinedHeatmap(
                             val isToday = dateStr == todayStr
                             val count = dateCompletionCounts[dateStr] ?: 0
                             val isFuture = dateStr > todayStr
+                            val isOutsideYear = selectedYear != null && !dateStr.startsWith(selectedYear.toString())
                             
                             // GitHub's standard green shades:
                             // 0: Light gray
@@ -266,7 +279,7 @@ fun GithubCombinedHeatmap(
                             // 3: Dark Green (#239A3B)    -> Color(0xFF37B24D)
                             // 4+: Deep Forest Green (#196127) -> Color(0xFF2B8A3E)
                             val cellColor = when {
-                                isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                                isOutsideYear || isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
                                 count >= 4 -> Color(0xFF2B8A3E)
                                 count == 3 -> Color(0xFF37B24D)
                                 count == 2 -> Color(0xFF8CE99A)
