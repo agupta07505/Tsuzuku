@@ -518,7 +518,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .testTag("settings_scroll"),
-            contentPadding = PaddingValues(top = 22.dp, bottom = 80.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Screen Header Info
@@ -526,7 +526,7 @@ fun SettingsScreen(
                 Column {
                     Text(
                         text = "Settings",
-                        fontSize = 28.sp,
+                        style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.onSurface
                     )

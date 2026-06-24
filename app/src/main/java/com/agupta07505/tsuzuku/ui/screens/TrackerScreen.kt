@@ -134,68 +134,65 @@ fun TrackerScreen(
     }
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Tsuzuku",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("habits_checklist"),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Column {
                             Text(
-                                text = "続く ",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                text = "Tsuzuku",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
-                            Text(
-                                text = "Keep going, every day.",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "続く ",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Keep going, every day.",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        Row {
+                            IconButton(onClick = { /* TODO: Notifications */ }) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Notifications",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            IconButton(onClick = onNavigateToSettings) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Settings",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /* TODO: Notifications */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Notifications,
-                            contentDescription = "Notifications",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-            
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .testTag("habits_checklist")
-                    .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                item {
-                    Column {
+
+                    Spacer(modifier = Modifier.height(16.dp))
             
             // Motivational Hero Card
             Card(
@@ -523,7 +520,7 @@ fun TrackerScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "Click the '+' button to declare your first habit\nand lock in your daily streaks securely.",
+                                    text = "Click the '+ Add Habit' button to declare your first habit\nand lock in your daily streaks securely.",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
@@ -892,7 +889,6 @@ fun TrackerScreen(
             }
         }
     }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
