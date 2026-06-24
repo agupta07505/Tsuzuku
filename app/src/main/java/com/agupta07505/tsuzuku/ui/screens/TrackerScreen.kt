@@ -28,6 +28,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
@@ -185,7 +189,17 @@ fun TrackerScreen(
                 )
             )
             
-            Spacer(modifier = Modifier.height(16.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .testTag("habits_checklist"),
+                contentPadding = PaddingValues(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    Column {
+                        Spacer(modifier = Modifier.height(16.dp))
             
             // Motivational Hero Card
             Card(
@@ -197,24 +211,53 @@ fun TrackerScreen(
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column {
+                    androidx.compose.foundation.Canvas(modifier = Modifier.matchParentSize()) {
+                        val canvasWidth = size.width
+                        val canvasHeight = size.height
+                        
+                        drawCircle(
+                            color = Color(0xFF81C784).copy(alpha = 0.5f),
+                            radius = 40.dp.toPx(),
+                            center = androidx.compose.ui.geometry.Offset(x = canvasWidth - 60.dp.toPx(), y = 50.dp.toPx())
+                        )
+                        
+                        val path1 = androidx.compose.ui.graphics.Path().apply {
+                            moveTo(canvasWidth * 0.3f, canvasHeight)
+                            lineTo(canvasWidth * 0.7f, canvasHeight * 0.3f)
+                            lineTo(canvasWidth * 1.1f, canvasHeight)
+                            close()
+                        }
+                        drawPath(path = path1, color = Color(0xFF1E3A23).copy(alpha = 0.6f))
+                        
+                        val path2 = androidx.compose.ui.graphics.Path().apply {
+                            moveTo(canvasWidth * 0.1f, canvasHeight)
+                            lineTo(canvasWidth * 0.5f, canvasHeight * 0.5f)
+                            lineTo(canvasWidth * 0.9f, canvasHeight)
+                            close()
+                        }
+                        drawPath(path = path2, color = Color(0xFF162B1A).copy(alpha = 0.8f))
+                    }
+                    
+                    Column(
+                        modifier = Modifier.padding(24.dp)
+                    ) {
                         Text(
                             text = selectedMantra.second, // Japanese
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
-                            lineHeight = 28.sp
+                            lineHeight = 28.sp,
+                            modifier = Modifier.fillMaxWidth(0.75f)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = selectedMantra.first, // English
                             fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.primary,
-                            lineHeight = 20.sp
+                            lineHeight = 20.sp,
+                            modifier = Modifier.fillMaxWidth(0.75f)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
@@ -453,14 +496,9 @@ fun TrackerScreen(
             
             Spacer(modifier = Modifier.height(8.dp))
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .testTag("habits_checklist"),
-                contentPadding = PaddingValues(bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+                    }
+                }
+
                 if (habits.isEmpty()) {
                     item {
                         Card(
@@ -566,7 +604,7 @@ fun TrackerScreen(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
-                                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Study", tint = MaterialTheme.colorScheme.primary)
+                                    Icon(imageVector = Icons.Default.School, contentDescription = "Study", tint = MaterialTheme.colorScheme.primary)
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
@@ -595,7 +633,7 @@ fun TrackerScreen(
                         Card(modifier = Modifier.weight(1f).height(100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
                             Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Focus", tint = Color(0xFFA78BFA), modifier = Modifier.size(16.dp))
+                                    Icon(imageVector = Icons.Default.Schedule, contentDescription = "Focus", tint = Color(0xFFA78BFA), modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Focus Time", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
@@ -607,7 +645,7 @@ fun TrackerScreen(
                         Card(modifier = Modifier.weight(1f).height(100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
                             Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(imageVector = Icons.Default.Check, contentDescription = "Completed", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                                    Icon(imageVector = Icons.Default.RadioButtonChecked, contentDescription = "Completed", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Completed", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
@@ -635,7 +673,7 @@ fun TrackerScreen(
                         Card(modifier = Modifier.weight(1f).height(100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
                             Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(imageVector = Icons.Default.Star, contentDescription = "Success", tint = Color(0xFF60A5FA), modifier = Modifier.size(16.dp))
+                                    Icon(imageVector = Icons.Default.TrendingUp, contentDescription = "Success", tint = Color(0xFF60A5FA), modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Success Rate", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }

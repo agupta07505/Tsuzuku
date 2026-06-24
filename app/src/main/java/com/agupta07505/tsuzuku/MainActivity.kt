@@ -23,7 +23,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -107,13 +109,14 @@ class MainActivity : ComponentActivity() {
                                         modifier = Modifier
                                             .size(56.dp)
                                             .clip(CircleShape)
-                                            .background(Color(0xFF2CB5C3)),
+                                            .background(MaterialTheme.colorScheme.primary),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Image(
-                                            painter = painterResource(id = com.agupta07505.tsuzuku.R.drawable.ic_tsuzuku_logo),
+                                        Icon(
+                                            imageVector = Icons.Default.Eco,
                                             contentDescription = "Add",
-                                            modifier = Modifier.size(32.dp).clip(CircleShape)
+                                            tint = MaterialTheme.colorScheme.onPrimary,
+                                            modifier = Modifier.size(32.dp)
                                         )
                                     }
                                 },
@@ -124,14 +127,14 @@ class MainActivity : ComponentActivity() {
                             NavigationBarItem(
                                 selected = currentTab == "study_mode",
                                 onClick = { currentTab = "study_mode" },
-                                icon = { Icon(Icons.Default.PlayArrow, contentDescription = "Study Mode") },
+                                icon = { Icon(Icons.Default.School, contentDescription = "Study Mode") },
                                 label = { Text("Study Mode") },
                                 modifier = Modifier.testTag("tab_study_mode")
                             )
                             NavigationBarItem(
                                 selected = currentTab == "stats",
                                 onClick = { currentTab = "stats" },
-                                icon = { Icon(Icons.Default.Star, contentDescription = "Stats") },
+                                icon = { Icon(Icons.Default.BarChart, contentDescription = "Stats") },
                                 label = { Text("Stats") },
                                 modifier = Modifier.testTag("tab_stats")
                             )
