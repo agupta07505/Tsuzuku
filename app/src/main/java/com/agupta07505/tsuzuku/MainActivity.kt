@@ -21,9 +21,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agupta07505.tsuzuku.ui.HabitViewModel
@@ -71,32 +84,70 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.testTag("bottom_nav_bar")
                         ) {
                             NavigationBarItem(
-                                selected = currentTab == "tracker",
-                                onClick = { currentTab = "tracker" },
-                                icon = { Icon(Icons.Default.Check, contentDescription = "Tracker") },
-                                label = { Text("Tracker") },
-                                modifier = Modifier.testTag("tab_tracker")
+                                selected = currentTab == "home",
+                                onClick = { currentTab = "home" },
+                                icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                                label = { Text("Home") },
+                                modifier = Modifier.testTag("tab_home")
+                            )
+                            NavigationBarItem(
+                                selected = currentTab == "habits",
+                                onClick = { currentTab = "habits" },
+                                icon = { Icon(Icons.Default.List, contentDescription = "Habits") },
+                                label = { Text("Habits") },
+                                modifier = Modifier.testTag("tab_habits")
+                            )
+                            
+                            // Center Leaf Logo Item
+                            NavigationBarItem(
+                                selected = false,
+                                onClick = { /* TODO: Open Add Habit Dialog or central action */ },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(56.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFF2CB5C3)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = com.agupta07505.tsuzuku.R.drawable.ic_tsuzuku_logo),
+                                            contentDescription = "Add",
+                                            modifier = Modifier.size(32.dp).clip(CircleShape)
+                                        )
+                                    }
+                                },
+                                label = { }, // No label for center item
+                                modifier = Modifier.testTag("tab_center")
+                            )
+
+                            NavigationBarItem(
+                                selected = currentTab == "study_mode",
+                                onClick = { currentTab = "study_mode" },
+                                icon = { Icon(Icons.Default.PlayArrow, contentDescription = "Study Mode") },
+                                label = { Text("Study Mode") },
+                                modifier = Modifier.testTag("tab_study_mode")
                             )
                             NavigationBarItem(
                                 selected = currentTab == "stats",
                                 onClick = { currentTab = "stats" },
-                                icon = { Icon(Icons.Default.Star, contentDescription = "Insights") },
-                                label = { Text("Insights") },
+                                icon = { Icon(Icons.Default.Star, contentDescription = "Stats") },
+                                label = { Text("Stats") },
                                 modifier = Modifier.testTag("tab_stats")
-                            )
-                            NavigationBarItem(
-                                selected = currentTab == "settings",
-                                onClick = { currentTab = "settings" },
-                                icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                                label = { Text("Settings") },
-                                modifier = Modifier.testTag("tab_settings")
                             )
                         }
                     }
                 ) { innerPadding ->
                     when (currentTab) {
-                        "tracker" -> TrackerScreen(
+                        "home", "tracker" -> TrackerScreen(
                             viewModel = viewModel,
+                            onNavigateToSettings = { currentTab = "settings" },
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                        "habits" -> com.agupta07505.tsuzuku.ui.screens.HabitsScreen(
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                        "study_mode" -> com.agupta07505.tsuzuku.ui.screens.StudyModeScreen(
                             modifier = Modifier.padding(innerPadding)
                         )
                         "stats" -> StatsScreen(
