@@ -1093,10 +1093,10 @@ fun HabitDialog(
                             text = {
                                 Column(
                                     modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     Text(
-                                        "Choose from our vibrant selection or enter any custom Hex code below:",
+                                        "Choose a preset, use the RGB sliders, or enter a Hex code:",
                                         fontSize = 13.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -1146,53 +1146,144 @@ fun HabitDialog(
                                     
                                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                                     
-                                    // Hex Input and Preview block
-                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Text("Enter Hex Color Code", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    // RGB Color Picker
+                                    val currentR = if (hexInputState.length == 6) {
+                                        try { Integer.parseInt(hexInputState.substring(0, 2), 16) } catch (_: Exception) { 128 }
+                                    } else 128
+                                    val currentG = if (hexInputState.length == 6) {
+                                        try { Integer.parseInt(hexInputState.substring(2, 4), 16) } catch (_: Exception) { 128 }
+                                    } else 128
+                                    val currentB = if (hexInputState.length == 6) {
+                                        try { Integer.parseInt(hexInputState.substring(4, 6), 16) } catch (_: Exception) { 128 }
+                                    } else 128
+                                    
+                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Text("RGB Color Picker", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                         
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                            verticalAlignment = Alignment.CenterVertically
+                                        // Live preview strip
+                                        val previewColor = Color(currentR / 255f, currentG / 255f, currentB / 255f)
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(40.dp)
+                                                .clip(RoundedCornerShape(10.dp))
+                                                .background(previewColor)
+                                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp)),
+                                            contentAlignment = Alignment.Center
                                         ) {
-                                            OutlinedTextField(
-                                                value = hexInputState,
-                                                onValueChange = { newVal ->
-                                                    val filtered = newVal.filter { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }
-                                                    if (filtered.length <= 6) {
-                                                        hexInputState = filtered
-                                                    }
-                                                },
-                                                placeholder = { Text("E.g., FF5722") },
-                                                leadingIcon = { Text("#", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                                                singleLine = true,
-                                                modifier = Modifier.weight(1f),
-                                                shape = RoundedCornerShape(10.dp),
-                                                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 15.sp)
+                                            Text(
+                                                text = "#${hexInputState.uppercase().padEnd(6, '0')}",
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (previewColor.luminance() > 0.5f) Color.Black.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.9f)
                                             )
-                                            
-                                            val isValidHex = hexInputState.length == 6
-                                            val parsedColorPreview = if (isValidHex) {
-                                                try {
-                                                    Color(android.graphics.Color.parseColor("#$hexInputState"))
-                                                } catch (e: Exception) {
-                                                    Color.Transparent
-                                                }
-                                            } else Color.Transparent
-                                            
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(48.dp)
-                                                    .clip(RoundedCornerShape(10.dp))
-                                                    .background(if (isValidHex) parsedColorPreview else Color.DarkGray)
-                                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp)),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                if (!isValidHex) {
-                                                    Text("?", color = Color.White)
-                                                }
-                                            }
                                         }
+                                        
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        
+                                        // Red slider
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("R", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEF4444), modifier = Modifier.width(16.dp))
+                                            Slider(
+                                                value = currentR.toFloat(),
+                                                onValueChange = { newR ->
+                                                    hexInputState = String.format("%02X%02X%02X", newR.toInt(), currentG, currentB)
+                                                },
+                                                valueRange = 0f..255f,
+                                                colors = SliderDefaults.colors(
+                                                    thumbColor = Color(0xFFEF4444),
+                                                    activeTrackColor = Color(0xFFEF4444)
+                                                ),
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Text(
+                                                text = "$currentR",
+                                                fontSize = 11.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.width(28.dp),
+                                                textAlign = TextAlign.End
+                                            )
+                                        }
+                                        
+                                        // Green slider
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("G", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF22C55E), modifier = Modifier.width(16.dp))
+                                            Slider(
+                                                value = currentG.toFloat(),
+                                                onValueChange = { newG ->
+                                                    hexInputState = String.format("%02X%02X%02X", currentR, newG.toInt(), currentB)
+                                                },
+                                                valueRange = 0f..255f,
+                                                colors = SliderDefaults.colors(
+                                                    thumbColor = Color(0xFF22C55E),
+                                                    activeTrackColor = Color(0xFF22C55E)
+                                                ),
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Text(
+                                                text = "$currentG",
+                                                fontSize = 11.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.width(28.dp),
+                                                textAlign = TextAlign.End
+                                            )
+                                        }
+                                        
+                                        // Blue slider
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("B", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF3B82F6), modifier = Modifier.width(16.dp))
+                                            Slider(
+                                                value = currentB.toFloat(),
+                                                onValueChange = { newB ->
+                                                    hexInputState = String.format("%02X%02X%02X", currentR, currentG, newB.toInt())
+                                                },
+                                                valueRange = 0f..255f,
+                                                colors = SliderDefaults.colors(
+                                                    thumbColor = Color(0xFF3B82F6),
+                                                    activeTrackColor = Color(0xFF3B82F6)
+                                                ),
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Text(
+                                                text = "$currentB",
+                                                fontSize = 11.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.width(28.dp),
+                                                textAlign = TextAlign.End
+                                            )
+                                        }
+                                    }
+                                    
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                    
+                                    // Hex Input
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text("Hex Color Code", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        
+                                        OutlinedTextField(
+                                            value = hexInputState,
+                                            onValueChange = { newVal ->
+                                                val filtered = newVal.filter { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }
+                                                if (filtered.length <= 6) {
+                                                    hexInputState = filtered
+                                                }
+                                            },
+                                            placeholder = { Text("E.g., FF5722") },
+                                            leadingIcon = { Text("#", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                            singleLine = true,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(10.dp),
+                                            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 15.sp)
+                                        )
                                     }
                                 }
                             },
