@@ -112,11 +112,11 @@ class MainActivity : ComponentActivity() {
                                             .background(MaterialTheme.colorScheme.primary),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Eco,
+                                        androidx.compose.foundation.Image(
+                                            painter = androidx.compose.ui.res.painterResource(id = com.agupta07505.tsuzuku.R.drawable.ic_tsuzuku_bg_removed),
                                             contentDescription = "Add",
-                                            tint = MaterialTheme.colorScheme.onPrimary,
-                                            modifier = Modifier.size(32.dp)
+                                            modifier = Modifier.size(32.dp),
+                                            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
                                         )
                                     }
                                 },

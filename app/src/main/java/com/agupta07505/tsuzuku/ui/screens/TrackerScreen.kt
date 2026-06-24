@@ -602,25 +602,28 @@ fun TrackerScreen(
                         Column(
                             modifier = Modifier.fillMaxWidth().padding(20.dp)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
                                 Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
                                     Icon(imageVector = Icons.Default.School, contentDescription = "Study", tint = MaterialTheme.colorScheme.primary)
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(text = "Tsuzuku Study Mode", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                                    Text(text = "Eliminate distractions. Stay focused.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(text = "Tsuzuku Study Mode", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                    Text(text = "Eliminate distractions. Stay focused.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(text = "Last session: 0 min • 0 distractions", fontSize = 11.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
                                 }
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                Text(text = "Last session: 0 min • 0 distractions", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Button(
                                     onClick = { /* TODO: Navigate to study mode */ },
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                    shape = RoundedCornerShape(24.dp)
+                                    shape = RoundedCornerShape(24.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                                 ) {
-                                    Text("Start Session", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+                                    Text("Start Session", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                 }
                             }
                         }
@@ -630,7 +633,7 @@ fun TrackerScreen(
                     
                     // Statistics Dashboard Grid
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Card(modifier = Modifier.weight(1f).height(100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
+                        Card(modifier = Modifier.weight(1f).heightIn(min = 100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
                             Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(imageVector = Icons.Default.Schedule, contentDescription = "Focus", tint = Color(0xFFA78BFA), modifier = Modifier.size(16.dp))
@@ -642,7 +645,7 @@ fun TrackerScreen(
                                 Text("Today", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
                             }
                         }
-                        Card(modifier = Modifier.weight(1f).height(100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
+                        Card(modifier = Modifier.weight(1f).heightIn(min = 100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
                             Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(imageVector = Icons.Default.RadioButtonChecked, contentDescription = "Completed", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
@@ -658,7 +661,7 @@ fun TrackerScreen(
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Card(modifier = Modifier.weight(1f).height(100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
+                        Card(modifier = Modifier.weight(1f).heightIn(min = 100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
                             Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text("🔥", fontSize = 12.sp)
@@ -670,7 +673,7 @@ fun TrackerScreen(
                                 Text("Best: $globalStreak days", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
                             }
                         }
-                        Card(modifier = Modifier.weight(1f).height(100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
+                        Card(modifier = Modifier.weight(1f).heightIn(min = 100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
                             Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(imageVector = Icons.Default.TrendingUp, contentDescription = "Success", tint = Color(0xFF60A5FA), modifier = Modifier.size(16.dp))
