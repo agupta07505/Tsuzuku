@@ -23,6 +23,7 @@ data class FocusUiState(
     val completedSessions: Int = 0,
     val failedSessions: Int = 0,
     val successRate: Int = 0,
+    val currentStreakDays: Int = 0,
     val recentSessions: List<FocusSession> = emptyList(),
     val runtime: FocusRuntimeState = FocusRuntimeState()
 )
@@ -42,6 +43,7 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
             completedSessions = completed,
             failedSessions = failed,
             successRate = if (sessions.isEmpty()) 0 else completed * 100 / sessions.size,
+            currentStreakDays = calculateCurrentStreak(sessions, now),
             recentSessions = sessions.take(10),
             runtime = runtime
         )
@@ -71,5 +73,25 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
         return first.get(Calendar.ERA) == second.get(Calendar.ERA) &&
             first.get(Calendar.YEAR) == second.get(Calendar.YEAR) &&
             first.get(Calendar.DAY_OF_YEAR) == second.get(Calendar.DAY_OF_YEAR)
+    }
+
+    private fun calculateCurrentStreak(sessions: List<FocusSession>, now: Long): Int {
+        val completedDays = sessions.asSequence()
+            .filter { it.completed }
+            .map { dayKey(it.endTime) }
+            .toSet()
+        val cursor = Calendar.getInstance().apply { timeInMillis = now }
+        if (dayKey(cursor.timeInMillis) !in completedDays) cursor.add(Calendar.DAY_OF_YEAR, -1)
+        var streak = 0
+        while (dayKey(cursor.timeInMillis) in completedDays) {
+            streak++
+            cursor.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        return streak
+    }
+
+    private fun dayKey(timeMillis: Long): String {
+        val calendar = Calendar.getInstance().apply { this.timeInMillis = timeMillis }
+        return "${calendar.get(Calendar.ERA)}-${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.DAY_OF_YEAR)}"
     }
 }

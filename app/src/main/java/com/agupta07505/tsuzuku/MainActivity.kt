@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        if (!focusRuntime.active) {
+                        if (!focusRuntime.active && focusRuntime.lastResult == null) {
                             NavigationBar(
                                 modifier = Modifier.testTag("bottom_nav_bar")
                             ) {
