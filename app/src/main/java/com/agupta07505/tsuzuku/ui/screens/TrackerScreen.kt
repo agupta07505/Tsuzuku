@@ -6,6 +6,7 @@
 
 package com.agupta07505.tsuzuku.ui.screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -857,9 +859,11 @@ fun HabitDialog(
         "#EF4444", // Coral Red
         "#06B6D4", // Ocean Blue
         "#6366F1", // Indigo
-        "#F97316", // Sunset Orange
-        "#8B5CF6"  // Purple Twilight
+        "#F97316"  // Sunset Orange
     )
+    
+    var showCustomColorDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     
     val icons = listOf(
         "🏋️ Workout",
@@ -974,10 +978,15 @@ fun HabitDialog(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
+                    val isCustomActive = selectedColor.isNotEmpty() && !colors.any { it.uppercase() == selectedColor.uppercase() }
+                    val customColorToShow = if (isCustomActive) {
+                        try { Color(android.graphics.Color.parseColor(selectedColor)) } catch (_: Exception) { Color.Transparent }
+                    } else Color.Transparent
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        // 5 preset color circles
                         colors.forEach { colString ->
                             val isSelected = selectedColor == colString
                             val uiColor = Color(android.graphics.Color.parseColor(colString))
@@ -1005,6 +1014,306 @@ fun HabitDialog(
                                 }
                             }
                         }
+                        
+                        // 6th circle: custom color picker
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(if (isCustomActive) customColorToShow else Color.Transparent)
+                                .border(
+                                    width = if (isCustomActive) 3.dp else 1.dp,
+                                    color = if (isCustomActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    shape = CircleShape
+                                )
+                                .background(
+                                    brush = androidx.compose.ui.graphics.Brush.sweepGradient(
+                                        colors = listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
+                                    ),
+                                    alpha = if (isCustomActive) 0.15f else 1.0f
+                                )
+                                .clickable { showCustomColorDialog = true }
+                                .testTag("color_select_custom"),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isCustomActive) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .clip(CircleShape)
+                                        .background(customColorToShow)
+                                        .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Selected Custom",
+                                        tint = if (customColorToShow.luminance() > 0.5f) Color.Black else Color.White,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                }
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Choose custom color",
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Custom color picker dialog
+                    if (showCustomColorDialog) {
+                        var hexInputState by remember {
+                            mutableStateOf(
+                                if (isCustomActive) selectedColor.replace("#", "") else ""
+                            )
+                        }
+                        
+                        val presetPalette = listOf(
+                            "#EF4444", // Red
+                            "#F97316", // Orange
+                            "#F59E0B", // Amber
+                            "#10B981", // Emerald
+                            "#06B6D4", // Cyan
+                            "#3B82F6", // Blue
+                            "#6366F1", // Indigo
+                            "#8B5CF6", // Violet
+                            "#EC4899", // Pink
+                            "#14B8A6"  // Teal
+                        )
+                        
+                        AlertDialog(
+                            onDismissRequest = { showCustomColorDialog = false },
+                            title = {
+                                Text("Accent Color Palette", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                            },
+                            text = {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Text(
+                                        "Choose a preset, use the RGB sliders, or enter a Hex code:",
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    
+                                    // Grid of 10 popular colors
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text("Palette Presets", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            presetPalette.take(5).forEach { hex ->
+                                                val c = Color(android.graphics.Color.parseColor(hex))
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(36.dp)
+                                                        .clip(CircleShape)
+                                                        .background(c)
+                                                        .border(1.dp, Color.White.copy(alpha = 0.3f), CircleShape)
+                                                        .clickable {
+                                                            hexInputState = hex.replace("#", "")
+                                                        }
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            presetPalette.drop(5).take(5).forEach { hex ->
+                                                val c = Color(android.graphics.Color.parseColor(hex))
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(36.dp)
+                                                        .clip(CircleShape)
+                                                        .background(c)
+                                                        .border(1.dp, Color.White.copy(alpha = 0.3f), CircleShape)
+                                                        .clickable {
+                                                            hexInputState = hex.replace("#", "")
+                                                        }
+                                                )
+                                            }
+                                        }
+                                    }
+                                    
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                    
+                                    // RGB Color Picker
+                                    val currentR = if (hexInputState.length == 6) {
+                                        try { Integer.parseInt(hexInputState.substring(0, 2), 16) } catch (_: Exception) { 128 }
+                                    } else 128
+                                    val currentG = if (hexInputState.length == 6) {
+                                        try { Integer.parseInt(hexInputState.substring(2, 4), 16) } catch (_: Exception) { 128 }
+                                    } else 128
+                                    val currentB = if (hexInputState.length == 6) {
+                                        try { Integer.parseInt(hexInputState.substring(4, 6), 16) } catch (_: Exception) { 128 }
+                                    } else 128
+                                    
+                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Text("RGB Color Picker", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        
+                                        // Live preview strip
+                                        val previewColor = Color(currentR / 255f, currentG / 255f, currentB / 255f)
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(40.dp)
+                                                .clip(RoundedCornerShape(10.dp))
+                                                .background(previewColor)
+                                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "#${hexInputState.uppercase().padEnd(6, '0')}",
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (previewColor.luminance() > 0.5f) Color.Black.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.9f)
+                                            )
+                                        }
+                                        
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        
+                                        // Red slider
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("R", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEF4444), modifier = Modifier.width(16.dp))
+                                            Slider(
+                                                value = currentR.toFloat(),
+                                                onValueChange = { newR ->
+                                                    hexInputState = String.format("%02X%02X%02X", newR.toInt(), currentG, currentB)
+                                                },
+                                                valueRange = 0f..255f,
+                                                colors = SliderDefaults.colors(
+                                                    thumbColor = Color(0xFFEF4444),
+                                                    activeTrackColor = Color(0xFFEF4444)
+                                                ),
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Text(
+                                                text = "$currentR",
+                                                fontSize = 11.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.width(28.dp),
+                                                textAlign = TextAlign.End
+                                            )
+                                        }
+                                        
+                                        // Green slider
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("G", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF22C55E), modifier = Modifier.width(16.dp))
+                                            Slider(
+                                                value = currentG.toFloat(),
+                                                onValueChange = { newG ->
+                                                    hexInputState = String.format("%02X%02X%02X", currentR, newG.toInt(), currentB)
+                                                },
+                                                valueRange = 0f..255f,
+                                                colors = SliderDefaults.colors(
+                                                    thumbColor = Color(0xFF22C55E),
+                                                    activeTrackColor = Color(0xFF22C55E)
+                                                ),
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Text(
+                                                text = "$currentG",
+                                                fontSize = 11.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.width(28.dp),
+                                                textAlign = TextAlign.End
+                                            )
+                                        }
+                                        
+                                        // Blue slider
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("B", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF3B82F6), modifier = Modifier.width(16.dp))
+                                            Slider(
+                                                value = currentB.toFloat(),
+                                                onValueChange = { newB ->
+                                                    hexInputState = String.format("%02X%02X%02X", currentR, currentG, newB.toInt())
+                                                },
+                                                valueRange = 0f..255f,
+                                                colors = SliderDefaults.colors(
+                                                    thumbColor = Color(0xFF3B82F6),
+                                                    activeTrackColor = Color(0xFF3B82F6)
+                                                ),
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            Text(
+                                                text = "$currentB",
+                                                fontSize = 11.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.width(28.dp),
+                                                textAlign = TextAlign.End
+                                            )
+                                        }
+                                    }
+                                    
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                    
+                                    // Hex Input
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text("Hex Color Code", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        
+                                        OutlinedTextField(
+                                            value = hexInputState,
+                                            onValueChange = { newVal ->
+                                                val filtered = newVal.filter { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }
+                                                if (filtered.length <= 6) {
+                                                    hexInputState = filtered
+                                                }
+                                            },
+                                            placeholder = { Text("E.g., FF5722") },
+                                            leadingIcon = { Text("#", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                            singleLine = true,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(10.dp),
+                                            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 15.sp)
+                                        )
+                                    }
+                                }
+                            },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        val fullHex = "#${hexInputState.trim()}"
+                                        try {
+                                            android.graphics.Color.parseColor(fullHex)
+                                            selectedColor = fullHex
+                                            showCustomColorDialog = false
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "Invalid Hex Color code!", Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
+                                    enabled = hexInputState.trim().length == 6,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Text("Apply Color", fontWeight = FontWeight.Bold)
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showCustomColorDialog = false }) {
+                                    Text("Cancel")
+                                }
+                            }
+                        )
                     }
                 }
                 
