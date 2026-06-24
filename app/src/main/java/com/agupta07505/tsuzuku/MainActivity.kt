@@ -105,19 +105,14 @@ class MainActivity : ComponentActivity() {
                                 selected = false,
                                 onClick = { /* TODO: Open Add Habit Dialog or central action */ },
                                 icon = {
-                                    Box(
+                                    androidx.compose.foundation.Image(
+                                        painter = androidx.compose.ui.res.painterResource(id = com.agupta07505.tsuzuku.R.drawable.ic_tsuzuku_create_habbit_logo),
+                                        contentDescription = "Add",
                                         modifier = Modifier
                                             .size(56.dp)
-                                            .clip(CircleShape)
-                                            .background(MaterialTheme.colorScheme.primary),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        androidx.compose.foundation.Image(
-                                            painter = androidx.compose.ui.res.painterResource(id = com.agupta07505.tsuzuku.R.drawable.ic_tsuzuku_create_habbit_logo),
-                                            contentDescription = "Add",
-                                            modifier = Modifier.size(32.dp)
-                                        )
-                                    }
+                                            .clip(CircleShape),
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                    )
                                 },
                                 label = { }, // No label for center item
                                 modifier = Modifier.testTag("tab_center")

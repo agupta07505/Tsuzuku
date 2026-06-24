@@ -192,12 +192,11 @@ fun TrackerScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .testTag("habits_checklist"),
-                contentPadding = PaddingValues(bottom = 24.dp),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
                     Column {
-                        Spacer(modifier = Modifier.height(8.dp))
             
             // Motivational Hero Card
             Card(
