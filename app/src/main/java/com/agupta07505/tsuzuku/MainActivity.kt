@@ -46,6 +46,8 @@ import com.agupta07505.tsuzuku.ui.screens.SettingsScreen
 import com.agupta07505.tsuzuku.ui.screens.StatsScreen
 import com.agupta07505.tsuzuku.ui.screens.TrackerScreen
 import com.agupta07505.tsuzuku.ui.theme.MyApplicationTheme
+import com.agupta07505.tsuzuku.focus.FocusSessionManager
+import com.agupta07505.tsuzuku.focus.FocusSessionService
 
 class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher = registerForActivityResult(
@@ -78,13 +80,20 @@ class MainActivity : ComponentActivity() {
             ) {
                 val viewModel: HabitViewModel = viewModel()
                 var currentTab by remember { mutableStateOf("tracker") }
+                var openFocusSetup by remember { mutableStateOf(false) }
+                val focusRuntime by FocusSessionManager.state.collectAsState()
+
+                LaunchedEffect(focusRuntime.active) {
+                    if (focusRuntime.active) currentTab = "study_mode"
+                }
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        NavigationBar(
-                            modifier = Modifier.testTag("bottom_nav_bar")
-                        ) {
+                        if (!focusRuntime.active) {
+                            NavigationBar(
+                                modifier = Modifier.testTag("bottom_nav_bar")
+                            ) {
                             NavigationBarItem(
                                 selected = currentTab == "home",
                                 onClick = { currentTab = "home" },
@@ -103,7 +112,7 @@ class MainActivity : ComponentActivity() {
                             // Center Leaf Logo Item
                             NavigationBarItem(
                                 selected = false,
-                                onClick = { /* TODO: Open Add Habit Dialog or central action */ },
+                                onClick = { currentTab = "habits" },
                                 icon = {
                                     androidx.compose.foundation.Image(
                                         painter = androidx.compose.ui.res.painterResource(id = com.agupta07505.tsuzuku.R.drawable.ic_tsuzuku_create_habbit_logo),
@@ -120,7 +129,7 @@ class MainActivity : ComponentActivity() {
 
                             NavigationBarItem(
                                 selected = currentTab == "study_mode",
-                                onClick = { currentTab = "study_mode" },
+                                onClick = { openFocusSetup = false; currentTab = "study_mode" },
                                 icon = { Icon(Icons.Default.School, contentDescription = "Focus") },
                                 label = { Text("Focus") },
                                 modifier = Modifier.testTag("tab_study_mode")
@@ -132,6 +141,7 @@ class MainActivity : ComponentActivity() {
                                 label = { Text("Stats") },
                                 modifier = Modifier.testTag("tab_stats")
                             )
+                            }
                         }
                     }
                 ) { innerPadding ->
@@ -139,12 +149,14 @@ class MainActivity : ComponentActivity() {
                         "home", "tracker" -> TrackerScreen(
                             viewModel = viewModel,
                             onNavigateToSettings = { currentTab = "settings" },
+                            onNavigateToFocus = { openFocusSetup = true; currentTab = "study_mode" },
                             modifier = Modifier.padding(innerPadding)
                         )
                         "habits" -> com.agupta07505.tsuzuku.ui.screens.HabitsScreen(
                             modifier = Modifier.padding(innerPadding)
                         )
                         "study_mode" -> com.agupta07505.tsuzuku.ui.screens.StudyModeScreen(
+                            openSetupOnLaunch = openFocusSetup,
                             modifier = Modifier.padding(innerPadding)
                         )
                         "stats" -> StatsScreen(
@@ -169,5 +181,19 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (FocusSessionManager.state.value.active) {
+            FocusSessionService.send(this, FocusSessionService.ACTION_APP_FOREGROUND)
+        }
+    }
+
+    override fun onStop() {
+        if (FocusSessionManager.state.value.active && !isChangingConfigurations) {
+            FocusSessionService.send(this, FocusSessionService.ACTION_APP_BACKGROUND)
+        }
+        super.onStop()
     }
 }

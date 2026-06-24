@@ -66,6 +66,7 @@ import kotlin.math.roundToInt
 fun TrackerScreen(
     viewModel: HabitViewModel,
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToFocus: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val habits by viewModel.habits.collectAsState()
@@ -175,7 +176,7 @@ fun TrackerScreen(
                             }
                         }
                         Row {
-                            IconButton(onClick = { /* TODO: Notifications */ }) {
+                            IconButton(onClick = {}) {
                                 Icon(
                                     imageVector = Icons.Default.Notifications,
                                     contentDescription = "Notifications",
@@ -609,7 +610,7 @@ fun TrackerScreen(
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Button(
-                                    onClick = { /* TODO: Navigate to Focus */ },
+                                    onClick = onNavigateToFocus,
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                     shape = RoundedCornerShape(24.dp),
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
