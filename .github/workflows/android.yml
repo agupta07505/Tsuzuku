@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "dev" ]
     tags: [ "v*" ]
     paths-ignore:
       - '**.md'
@@ -15,7 +15,7 @@ on:
       - 'CONTRIBUTING.md'
       - 'SECURITY.md'
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "dev" ]
     paths-ignore:
       - '**.md'
       - 'assets/**'
@@ -67,6 +67,7 @@ jobs:
           fi
 
       - name: Setup Release Keystore
+        if: github.ref != 'refs/heads/dev' && github.base_ref != 'dev'
         env:
           KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
           STORE_PASS: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
@@ -95,20 +96,32 @@ jobs:
         with:
           validate-wrappers: false
 
-      - name: Build Debug & Release APKs
+      - name: Build Debug APK
+        if: github.ref == 'refs/heads/dev' || github.base_ref == 'dev'
         run: |
-          ./gradlew assembleDebug assembleRelease \
+          ./gradlew assembleDebug
+
+      - name: Build Release APK
+        if: github.ref != 'refs/heads/dev' && github.base_ref != 'dev'
+        run: |
+          ./gradlew assembleRelease \
             -PRELEASE_KEYSTORE_PATH="$KEYSTORE_PATH" \
             -PRELEASE_STORE_PASSWORD="$STORE_PASSWORD" \
             -PRELEASE_KEY_ALIAS="upload" \
             -PRELEASE_KEY_PASSWORD="$KEY_PASSWORD"
 
-      - name: Rename APKs
+      - name: Rename Debug APK
+        if: github.ref == 'refs/heads/dev' || github.base_ref == 'dev'
         run: |
-          cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/tsuzuku-release.apk
           cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/tsuzuku-debug.apk
 
+      - name: Rename Release APK
+        if: github.ref != 'refs/heads/dev' && github.base_ref != 'dev'
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/tsuzuku-release.apk
+
       - name: Upload Debug APK Artifact
+        if: github.ref == 'refs/heads/dev' || github.base_ref == 'dev'
         uses: actions/upload-artifact@v4
         with:
           name: tsuzuku-debug
@@ -116,6 +129,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload Release APK Artifact
+        if: github.ref != 'refs/heads/dev' && github.base_ref != 'dev'
         uses: actions/upload-artifact@v4
         with:
           name: tsuzuku-release-apk
@@ -138,7 +152,6 @@ jobs:
           make_latest: true
           files: |
             app/build/outputs/apk/release/tsuzuku-release.apk
-            app/build/outputs/apk/debug/tsuzuku-debug.apk
           draft: false
           prerelease: false
           body: |
@@ -148,7 +161,6 @@ jobs:
 
             ### 📦 Download Assets
             - **Production Release APK (signed)**: tsuzuku-release.apk
-            - **Developer Debug APK**: tsuzuku-debug.apk
 
             _Built and packaged automatically by GitHub Actions._
         env:
