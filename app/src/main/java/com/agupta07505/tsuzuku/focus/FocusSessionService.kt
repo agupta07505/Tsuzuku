@@ -123,21 +123,31 @@ class FocusSessionService : Service(), SensorEventListener {
         if (positionGraceJob?.isActive == true) return
         warnUser()
         positionGraceJob = scope.launch {
-            for (second in 5 downTo 1) {
-                FocusSessionManager.update { it.copy(warningSeconds = second) }
-                delay(1_000)
-                if (lastPosition == PhonePosition.FACE_DOWN) return@launch
-            }
-            FocusSessionManager.update { current ->
-                current.copy(
-                    mistakesUsed = current.mistakesUsed + 1,
-                    // Keep the warning screen latched until the sensor reports FACE_DOWN.
-                    warningSeconds = 0
-                )
-            }
-            val state = FocusSessionManager.state.value
-            if (state.mistakesUsed > state.allowedMistakes) {
-                finishSession(completed = false, failedReason = "Mistake limit exceeded")
+            while (FocusSessionManager.state.value.active && lastPosition != PhonePosition.FACE_DOWN) {
+                for (second in 5 downTo 1) {
+                    FocusSessionManager.update { it.copy(warningSeconds = second) }
+                    delay(1_000)
+                    if (lastPosition == PhonePosition.FACE_DOWN) return@launch
+                }
+                FocusSessionManager.update { current ->
+                    current.copy(
+                        mistakesUsed = current.mistakesUsed + 1,
+                        consecutiveMistakes = current.consecutiveMistakes + 1,
+                        warningSeconds = 5
+                    )
+                }
+                val state = FocusSessionManager.state.value
+                when {
+                    state.mistakesUsed > state.allowedMistakes -> {
+                        finishSession(completed = false, failedReason = "Mistake limit exceeded")
+                        return@launch
+                    }
+                    state.consecutiveMistakes >= MAX_CONSECUTIVE_MISTAKES -> {
+                        finishSession(completed = false, failedReason = "Phone stayed picked up after 3 warnings")
+                        return@launch
+                    }
+                    else -> warnUser()
+                }
             }
         }
     }
@@ -145,7 +155,7 @@ class FocusSessionService : Service(), SensorEventListener {
     private fun cancelPositionGracePeriod() {
         positionGraceJob?.cancel()
         positionGraceJob = null
-        FocusSessionManager.update { it.copy(warningSeconds = null) }
+        FocusSessionManager.update { it.copy(warningSeconds = null, consecutiveMistakes = 0) }
     }
 
     private fun startAppGracePeriod() {
@@ -313,6 +323,7 @@ class FocusSessionService : Service(), SensorEventListener {
         private const val KEY_RINGER = "ringer"
         private const val KEY_FILTER = "filter"
         private const val KEY_SESSION_START = "session_start"
+        private const val MAX_CONSECUTIVE_MISTAKES = 3
         const val ACTION_START = "com.agupta07505.tsuzuku.focus.START"
         const val ACTION_END = "com.agupta07505.tsuzuku.focus.END"
         const val ACTION_APP_BACKGROUND = "com.agupta07505.tsuzuku.focus.BACKGROUND"

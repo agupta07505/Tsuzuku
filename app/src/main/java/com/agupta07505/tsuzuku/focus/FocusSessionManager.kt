@@ -12,6 +12,7 @@ data class FocusRuntimeState(
     val plannedDurationMinutes: Int = 0,
     val allowedMistakes: Int = 0,
     val mistakesUsed: Int = 0,
+    val consecutiveMistakes: Int = 0,
     val remainingMillis: Long = 0,
     val phonePosition: PhonePosition = PhonePosition.UNKNOWN,
     val warningSeconds: Int? = null,

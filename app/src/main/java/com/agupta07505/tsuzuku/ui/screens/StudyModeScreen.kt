@@ -87,6 +87,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agupta07505.tsuzuku.data.FocusSession
+import com.agupta07505.tsuzuku.data.Quotes
 import com.agupta07505.tsuzuku.focus.FocusRuntimeState
 import com.agupta07505.tsuzuku.focus.FocusSessionManager
 import com.agupta07505.tsuzuku.focus.PhonePosition
@@ -97,6 +98,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.max
+import kotlin.math.absoluteValue
 
 private val FocusGreen: Color
     @Composable get() = MaterialTheme.colorScheme.primary
@@ -129,7 +131,7 @@ fun StudyModeScreen(
     FocusBackground(modifier) {
         when {
             runtime.active && runtime.appReturnSeconds != null -> ReturnToFocusScreen(runtime)
-            runtime.active && runtime.warningSeconds != null -> FocusWarningScreen(runtime)
+            runtime.active && runtime.warningSeconds != null -> FocusWarningScreen(runtime, focusViewModel::endSession)
             runtime.active -> ActiveFocusScreen(runtime, focusViewModel::endSession)
             runtime.lastResult != null -> FocusResultScreen(runtime.lastResult, focusViewModel::dismissResult)
             else -> FocusDashboard(state, onStart = { showSetup = true })
@@ -570,49 +572,87 @@ private fun SessionValueCard(label: String, value: String, color: Color, modifie
 }
 
 @Composable
-private fun FocusWarningScreen(runtime: FocusRuntimeState) {
+private fun FocusWarningScreen(runtime: FocusRuntimeState, onEndSession: () -> Unit) {
     KeepScreenOn()
     val seconds = runtime.warningSeconds ?: 5
+    val quoteIndex = remember(runtime.sessionName, runtime.consecutiveMistakes) {
+        ((runtime.sessionName.hashCode().toLong().absoluteValue + runtime.consecutiveMistakes) % Quotes.all.size).toInt()
+    }
+    val quote = Quotes.byIndex(quoteIndex).english
     val mistakesRemainingLabel = if (runtime.allowedMistakes == FocusSessionManager.UNLIMITED_MISTAKES) {
         "Unlimited"
     } else {
         "${(runtime.allowedMistakes - runtime.mistakesUsed).coerceAtLeast(0)} / ${runtime.allowedMistakes}"
     }
-    Column(
-        Modifier.fillMaxSize().padding(28.dp),
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
+        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.WarningAmber, null, tint = FocusOrange, modifier = Modifier.size(92.dp))
-            Text("Focus Warning", color = FocusOrange, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-            Text("Keep your phone face down.", modifier = Modifier.padding(top = 13.dp))
-            Text("You have picked up your phone.", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 9.dp))
-        }
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-            border = BorderStroke(1.dp, FocusOrange),
-            shape = RoundedCornerShape(14.dp)
-        ) {
-            Column(Modifier.fillMaxWidth().padding(17.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Mistakes Remaining", color = FocusOrange, fontWeight = FontWeight.SemiBold)
-                Text(mistakesRemainingLabel, color = FocusOrange, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+        item {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Default.WarningAmber, null, tint = FocusOrange, modifier = Modifier.size(84.dp))
+                Text("Focus Warning", color = FocusOrange, fontSize = 25.sp, fontWeight = FontWeight.Bold)
+                Text("Keep your phone face down.", modifier = Modifier.padding(top = 10.dp))
+                Text("You have picked up your phone.", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 7.dp))
             }
         }
-        CircularValue(if (seconds > 0) seconds / 5f else 1f, FocusOrange, 154.dp) {
-            if (seconds > 0) {
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                border = BorderStroke(1.dp, FocusOrange),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Column(Modifier.fillMaxWidth().padding(15.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Mistakes Remaining", color = FocusOrange, fontWeight = FontWeight.SemiBold)
+                    Text(mistakesRemainingLabel, color = FocusOrange, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Consecutive warnings: ${runtime.consecutiveMistakes} / 3",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+        }
+        item {
+            CircularValue(seconds / 5f, FocusOrange, 150.dp) {
                 Text(seconds.toString(), fontSize = 44.sp, fontWeight = FontWeight.Bold)
                 Text("seconds", style = MaterialTheme.typography.bodySmall)
-            } else {
-                Icon(Icons.Default.PhoneAndroid, null, tint = FocusOrange, modifier = Modifier.size(38.dp))
-                Text("Face down now", color = FocusOrange, style = MaterialTheme.typography.labelMedium)
             }
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.ExitToApp, null, tint = FocusOrange, modifier = Modifier.size(34.dp))
-            Spacer(Modifier.size(12.dp))
-            Text("Put your phone down", color = FocusOrange, fontWeight = FontWeight.SemiBold)
+        item {
+            OutlinedFocusCard {
+                Text(
+                    "“$quote”",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(17.dp)
+                )
+            }
+        }
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.ExitToApp, null, tint = FocusOrange, modifier = Modifier.size(32.dp))
+                Spacer(Modifier.size(11.dp))
+                Text("Put your phone down and keep going", color = FocusOrange, fontWeight = FontWeight.SemiBold)
+            }
+        }
+        item {
+            OutlinedButton(
+                onClick = onEndSession,
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                border = BorderStroke(1.dp, FocusRed),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = FocusRed),
+                shape = RoundedCornerShape(11.dp)
+            ) {
+                Icon(Icons.Default.Close, null)
+                Spacer(Modifier.size(8.dp))
+                Text("End Session")
+            }
         }
     }
 }
