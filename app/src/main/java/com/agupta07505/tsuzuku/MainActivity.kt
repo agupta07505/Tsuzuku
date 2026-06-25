@@ -42,9 +42,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agupta07505.tsuzuku.ui.HabitViewModel
+import com.agupta07505.tsuzuku.launcher.LauncherViewModel
+import com.agupta07505.tsuzuku.ui.screens.LauncherActivationInstructionsScreen
+import com.agupta07505.tsuzuku.ui.screens.LauncherFocusSettingsScreen
+import com.agupta07505.tsuzuku.ui.screens.LauncherPreviewScreen
+import com.agupta07505.tsuzuku.ui.screens.LauncherRoute
+import com.agupta07505.tsuzuku.ui.screens.ManageLauncherWidgetsScreen
 import com.agupta07505.tsuzuku.ui.screens.SettingsScreen
 import com.agupta07505.tsuzuku.ui.screens.StatsScreen
 import com.agupta07505.tsuzuku.ui.screens.TrackerScreen
+import com.agupta07505.tsuzuku.ui.screens.TsuzukuLauncherSettingsScreen
 import com.agupta07505.tsuzuku.ui.theme.MyApplicationTheme
 import com.agupta07505.tsuzuku.focus.FocusSessionManager
 import com.agupta07505.tsuzuku.focus.FocusSessionService
@@ -79,12 +86,22 @@ class MainActivity : ComponentActivity() {
                 customAccentColorHex = customAccentColorHex
             ) {
                 val viewModel: HabitViewModel = viewModel()
-                var currentTab by remember { mutableStateOf("tracker") }
+                val launcherViewModel: LauncherViewModel = viewModel()
+                var currentTab by remember { mutableStateOf(if (intent?.getStringExtra("open_tab") == "launcher") "launcher" else "tracker") }
+                var launcherRoute by remember { mutableStateOf<LauncherRoute>(LauncherRoute.Settings) }
                 var openFocusSetup by remember { mutableStateOf(false) }
                 val focusRuntime by FocusSessionManager.state.collectAsState()
+                val launcherUiState by launcherViewModel.uiState.collectAsState()
+                val habits by viewModel.managedHabits.collectAsState()
+                val logs by viewModel.allLogs.collectAsState()
+                val focusSessions by viewModel.focusSessions.collectAsState()
 
                 LaunchedEffect(focusRuntime.active) {
                     if (focusRuntime.active) currentTab = "study_mode"
+                }
+
+                LaunchedEffect(currentTab) {
+                    if (currentTab == "launcher") launcherViewModel.refreshLauncherStatus()
                 }
 
                 Scaffold(
@@ -111,12 +128,12 @@ class MainActivity : ComponentActivity() {
                             
                             // Center Leaf Logo Item
                             NavigationBarItem(
-                                selected = false,
-                                onClick = { currentTab = "habits" },
+                                selected = currentTab == "launcher",
+                                onClick = { launcherRoute = LauncherRoute.Settings; currentTab = "launcher" },
                                 icon = {
                                     androidx.compose.foundation.Image(
                                         painter = androidx.compose.ui.res.painterResource(id = com.agupta07505.tsuzuku.R.drawable.ic_tsuzuku_create_habbit_logo),
-                                        contentDescription = "Add",
+                                        contentDescription = "Tsuzuku Launcher",
                                         modifier = Modifier
                                             .size(56.dp)
                                             .clip(CircleShape),
@@ -156,6 +173,51 @@ class MainActivity : ComponentActivity() {
                             viewModel = viewModel,
                             modifier = Modifier.padding(innerPadding)
                         )
+                        "launcher" -> when (launcherRoute) {
+                            LauncherRoute.Settings -> TsuzukuLauncherSettingsScreen(
+                                uiState = launcherUiState,
+                                onNavigate = { launcherRoute = it },
+                                onToggleAllowedApp = launcherViewModel::toggleAllowedApp,
+                                onOpenLauncherSettings = launcherViewModel::openDefaultLauncherSettings,
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                            LauncherRoute.Activation -> LauncherActivationInstructionsScreen(
+                                isActive = launcherUiState.isDefaultLauncher,
+                                onBack = { launcherRoute = LauncherRoute.Settings },
+                                onOpenSettings = launcherViewModel::openDefaultLauncherSettings,
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                            LauncherRoute.Preview -> LauncherPreviewScreen(
+                                uiState = launcherUiState,
+                                habits = habits,
+                                logs = logs,
+                                focusSessions = focusSessions,
+                                onBack = { launcherRoute = LauncherRoute.Settings },
+                                onOpenApp = launcherViewModel::openApp,
+                                onOpenPhone = launcherViewModel::openPhone,
+                                onOpenSettings = { launcherRoute = LauncherRoute.Settings },
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                            LauncherRoute.Widgets -> ManageLauncherWidgetsScreen(
+                                widgets = launcherUiState.widgets,
+                                onBack = { launcherRoute = LauncherRoute.Settings },
+                                onToggleWidget = launcherViewModel::setWidgetEnabled,
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                            LauncherRoute.Focus -> LauncherFocusSettingsScreen(
+                                focusSettings = launcherUiState.focusSettings,
+                                canUseDnd = launcherViewModel.canUseDnd(),
+                                onBack = { launcherRoute = LauncherRoute.Settings },
+                                onOpenDndSettings = launcherViewModel::openDndPolicySettings,
+                                onDndChange = launcherViewModel::setFocusDnd,
+                                onSilentChange = launcherViewModel::setFocusSilent,
+                                onTrackExitsChange = launcherViewModel::setFocusTrackExits,
+                                onQuoteChange = launcherViewModel::setFocusQuote,
+                                onHideUiChange = launcherViewModel::setFocusHideUi,
+                                onLockRotationChange = launcherViewModel::setFocusLockRotation,
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
                         "study_mode" -> com.agupta07505.tsuzuku.ui.screens.StudyModeScreen(
                             openSetupOnLaunch = openFocusSetup,
                             modifier = Modifier.padding(innerPadding)

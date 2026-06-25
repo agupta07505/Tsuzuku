@@ -37,6 +37,9 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
     val allLogs: StateFlow<List<HabitLog>> = repository.allLogs
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val focusSessions: StateFlow<List<FocusSession>> = focusRepository.sessions
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     // State of selected date for checklist checking (Default is today)
     private val _selectedDate = MutableStateFlow(DateUtils.getTodayString())
     val selectedDate: StateFlow<String> = _selectedDate.asStateFlow()
