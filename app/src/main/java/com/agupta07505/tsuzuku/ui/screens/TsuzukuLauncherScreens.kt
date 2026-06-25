@@ -759,115 +759,117 @@ fun TsuzukuLauncherHomeScreen(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    var quote by remember { mutableStateOf(Quotes.random()) }
+    MyApplicationTheme(themePreference = "green") {
+        val context = LocalContext.current
+        val snackbarHostState = remember { SnackbarHostState() }
+        val scope = rememberCoroutineScope()
+        var quote by remember { mutableStateOf(Quotes.random()) }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets(0.dp),
-        modifier = modifier
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(launcherHomeGradient())
-        ) {
-            LauncherScenicBackground(modifier = Modifier.fillMaxSize())
-
-            Column(
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            containerColor = MaterialTheme.colorScheme.background,
+            contentWindowInsets = WindowInsets(0.dp),
+            modifier = modifier
+        ) { padding ->
+            Box(
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(horizontal = LauncherHorizontalPadding),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(LauncherHomeTopSpacing)
+                    .fillMaxSize()
+                    .background(launcherHomeGradient())
             ) {
-                Row(
+                LauncherScenicBackground(modifier = Modifier.fillMaxSize())
+
+                Column(
                     modifier = Modifier
+                        .align(Alignment.TopCenter)
                         .fillMaxWidth()
-                        .height(48.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .statusBarsPadding()
+                        .padding(horizontal = LauncherHorizontalPadding),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(LauncherHomeTopSpacing)
                 ) {
-                    if (previewMode && onBack != null) {
-                        IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
-                    }
-                    TsuzukuMiniLogo()
-                    Spacer(Modifier.weight(1f))
-                    AssistChip(
-                        onClick = {},
-                        label = { Text(if (uiState.isDefaultLauncher) "Active" else "Preview") },
-                        leadingIcon = { Icon(Icons.Default.Security, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.45f),
-                            labelColor = MaterialTheme.colorScheme.onSurface,
-                            leadingIconContentColor = MaterialTheme.colorScheme.primary
-                        ),
-                        border = AssistChipDefaults.assistChipBorder(
-                            enabled = true,
-                            borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (previewMode && onBack != null) {
+                            IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
+                        }
+                        TsuzukuMiniLogo()
+                        Spacer(Modifier.weight(1f))
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(if (uiState.isDefaultLauncher) "Active" else "Preview") },
+                            leadingIcon = { Icon(Icons.Default.Security, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.45f),
+                                labelColor = MaterialTheme.colorScheme.onSurface,
+                                leadingIconContentColor = MaterialTheme.colorScheme.primary
+                            ),
+                            border = AssistChipDefaults.assistChipBorder(
+                                enabled = true,
+                                borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
+                            )
                         )
-                    )
+                    }
+
+                    LauncherClockWidget()
+
+                    if (uiState.widgets.firstOrNull { it.key == "motivational_quote" }?.enabled == true && uiState.focusSettings.showMotivationalQuote) {
+                        LauncherQuoteWidget(japanese = quote.japanese, english = quote.english, onClick = { quote = Quotes.random() })
+                    }
                 }
 
-                LauncherClockWidget()
-
-                if (uiState.widgets.firstOrNull { it.key == "motivational_quote" }?.enabled == true && uiState.focusSettings.showMotivationalQuote) {
-                    LauncherQuoteWidget(japanese = quote.japanese, english = quote.english, onClick = { quote = Quotes.random() })
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = LauncherHorizontalPadding)
-                    .padding(bottom = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(LauncherHomeBottomSpacing)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = LauncherHorizontalPadding)
+                        .padding(bottom = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(LauncherHomeBottomSpacing)
                 ) {
-                    LauncherAppButton(label = "Phone", icon = null, fallback = Icons.Default.Phone) {
-                        if (!onOpenPhone(context)) scope.launch { snackbarHostState.showSnackbar("Phone app is unavailable.") }
-                    }
-                    uiState.selectedAllowedApps.take(3).forEach { app ->
-                        LauncherAppButton(label = app.label, icon = app.icon, fallback = Icons.Default.Apps) {
-                            if (!onOpenApp(context, app.packageName)) scope.launch { snackbarHostState.showSnackbar("${app.label} is unavailable.") }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        LauncherAppButton(label = "Phone", icon = null, fallback = Icons.Default.Phone) {
+                            if (!onOpenPhone(context)) scope.launch { snackbarHostState.showSnackbar("Phone app is unavailable.") }
                         }
-                    }
-                    repeat((3 - uiState.selectedAllowedApps.size).coerceAtLeast(0)) {
-                        LauncherAppButton(label = "Select App", icon = null, fallback = Icons.Default.Apps) {
-                            scope.launch { snackbarHostState.showSnackbar("Choose apps from Tsuzuku Launcher settings.") }
-                        }
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
-                    }
-                    IconButton(onClick = {
-                        runCatching {
-                            val cameraIntent = Intent(android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        uiState.selectedAllowedApps.take(3).forEach { app ->
+                            LauncherAppButton(label = app.label, icon = app.icon, fallback = Icons.Default.Apps) {
+                                if (!onOpenApp(context, app.packageName)) scope.launch { snackbarHostState.showSnackbar("${app.label} is unavailable.") }
                             }
-                            context.startActivity(cameraIntent)
-                        }.onFailure {
-                            scope.launch { snackbarHostState.showSnackbar("Camera app is unavailable.") }
                         }
-                    }) {
-                        Icon(Icons.Outlined.PhotoCamera, contentDescription = "Camera", tint = MaterialTheme.colorScheme.primary)
+                        repeat((3 - uiState.selectedAllowedApps.size).coerceAtLeast(0)) {
+                            LauncherAppButton(label = "Select App", icon = null, fallback = Icons.Default.Apps) {
+                                scope.launch { snackbarHostState.showSnackbar("Choose apps from Tsuzuku Launcher settings.") }
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = onOpenSettings) {
+                            Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
+                        }
+                        IconButton(onClick = {
+                            runCatching {
+                                val cameraIntent = Intent(android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(cameraIntent)
+                            }.onFailure {
+                                scope.launch { snackbarHostState.showSnackbar("Camera app is unavailable.") }
+                            }
+                        }) {
+                            Icon(Icons.Outlined.PhotoCamera, contentDescription = "Camera", tint = MaterialTheme.colorScheme.primary)
+                        }
                     }
                 }
             }
