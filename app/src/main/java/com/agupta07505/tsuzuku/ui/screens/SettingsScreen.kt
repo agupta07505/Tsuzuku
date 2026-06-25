@@ -11,6 +11,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -623,6 +625,76 @@ private fun SettingsBrandFooter() {
 }
 
 @Composable
+private fun MissionMountainIllustration(modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val mountain = Path().apply {
+            moveTo(w * 0.12f, h * 0.86f)
+            lineTo(w * 0.48f, h * 0.18f)
+            lineTo(w * 0.82f, h * 0.86f)
+            close()
+        }
+        val side = Path().apply {
+            moveTo(w * 0.48f, h * 0.18f)
+            lineTo(w * 0.82f, h * 0.86f)
+            lineTo(w * 0.55f, h * 0.86f)
+            close()
+        }
+        val path = Path().apply {
+            moveTo(w * 0.42f, h * 0.86f)
+            cubicTo(w * 0.60f, h * 0.72f, w * 0.34f, h * 0.66f, w * 0.52f, h * 0.54f)
+            cubicTo(w * 0.68f, h * 0.44f, w * 0.56f, h * 0.36f, w * 0.64f, h * 0.28f)
+        }
+        drawPath(mountain, Color(0xFF1C7C39).copy(alpha = 0.82f))
+        drawPath(side, Color(0xFF0E4F28).copy(alpha = 0.88f))
+        drawPath(path, Color(0xFF63E66E).copy(alpha = 0.38f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 5.dp.toPx()))
+        drawCircle(Color(0xFF34D399).copy(alpha = 0.62f), radius = 8.dp.toPx(), center = androidx.compose.ui.geometry.Offset(w * 0.82f, h * 0.22f))
+        drawCircle(Color(0xFF34D399).copy(alpha = 0.36f), radius = 6.dp.toPx(), center = androidx.compose.ui.geometry.Offset(w * 0.18f, h * 0.36f))
+        drawRect(Color(0xFF86EFAC), topLeft = androidx.compose.ui.geometry.Offset(w * 0.50f, h * 0.06f), size = androidx.compose.ui.geometry.Size(3.dp.toPx(), 26.dp.toPx()))
+        val flag = Path().apply {
+            moveTo(w * 0.52f, h * 0.07f)
+            lineTo(w * 0.68f, h * 0.12f)
+            lineTo(w * 0.52f, h * 0.18f)
+            close()
+        }
+        drawPath(flag, Color(0xFF86EFAC))
+    }
+}
+
+@Composable
+private fun AboutContactButton(
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .heightIn(min = 78.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.22f))
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(title, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                subtitle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
 private fun AboutTsuzukuScreen(
     versionName: String,
     onBack: () -> Unit,
@@ -650,26 +722,35 @@ private fun AboutTsuzukuScreen(
                 )
             )
             .statusBarsPadding()
-            .padding(horizontal = 18.dp),
-        contentPadding = PaddingValues(top = 18.dp, bottom = 116.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
+            .padding(horizontal = 12.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 116.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 58.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
-                        .size(54.dp)
+                        .size(46.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.70f))
                         .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.20f), CircleShape)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
-                Spacer(Modifier.width(16.dp))
+                Spacer(Modifier.width(12.dp))
                 Column {
-                    Text("About Tsuzuku", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
-                    Text("Learn more about the app and its mission.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("About Tsuzuku", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+                    Text(
+                        "Learn more about the app and its mission.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }
@@ -755,30 +836,60 @@ private fun AboutTsuzukuScreen(
         item {
             SettingsGroupedCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.width(12.dp))
-                    Text("Our Mission", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(12.dp))
+                            Text("Our Mission", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                        }
+                        Spacer(Modifier.height(14.dp))
+                        Text(
+                            "To help you build better habits, stay focused, and live intentionally.\nNo ads. No tracking. Just you and your journey.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyLarge,
+                            lineHeight = 25.sp
+                        )
+                    }
+                    MissionMountainIllustration(
+                        modifier = Modifier
+                            .size(width = 132.dp, height = 108.dp)
+                            .padding(start = 12.dp)
+                    )
                 }
-                Spacer(Modifier.height(14.dp))
-                Text(
-                    "To help you build better habits, stay focused, and live intentionally.\nNo ads. No tracking. Just you and your journey.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyLarge,
-                    lineHeight = 25.sp
-                )
             }
         }
 
         item {
             SettingsGroupedCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFFB7185))
-                    Spacer(Modifier.width(12.dp))
-                    Text("Made with love by", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFFB7185).copy(alpha = 0.13f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFFB7185))
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            Text("Made with love by", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                        }
+                        Spacer(Modifier.height(14.dp))
+                        Text("Animesh Gupta", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+                        Text("Developer • Designer • Lifelong Learner", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.developer),
+                        contentDescription = "Animesh Gupta",
+                        modifier = Modifier
+                            .size(92.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
                 }
-                Spacer(Modifier.height(12.dp))
-                Text("Animesh Gupta", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
-                Text("Developer • Designer • Lifelong Learner", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
 
@@ -788,20 +899,12 @@ private fun AboutTsuzukuScreen(
                 Spacer(Modifier.height(12.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                        OutlinedButton(onClick = onGitHub, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
-                            Text("GitHub")
-                        }
-                        OutlinedButton(onClick = onInstagram, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
-                            Text("Instagram")
-                        }
+                        AboutContactButton("GitHub", "@agupta07505", onGitHub, Modifier.weight(1f))
+                        AboutContactButton("Instagram", "@agupta07505", onInstagram, Modifier.weight(1f))
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                        OutlinedButton(onClick = onLinkedIn, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
-                            Text("LinkedIn")
-                        }
-                        OutlinedButton(onClick = onEmail, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
-                            Text("Email")
-                        }
+                        AboutContactButton("LinkedIn", "/in/agupta07505", onLinkedIn, Modifier.weight(1f))
+                        AboutContactButton("Email", "agupta07505@gmail.com", onEmail, Modifier.weight(1f))
                     }
                 }
             }
