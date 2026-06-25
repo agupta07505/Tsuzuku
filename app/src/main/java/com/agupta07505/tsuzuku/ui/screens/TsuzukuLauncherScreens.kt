@@ -86,9 +86,6 @@ sealed interface LauncherRoute {
 
 private val LauncherBackground = Color(0xFF041008)
 private val LauncherCard = Color(0xFF0B1A12)
-private val LauncherGreen = Color(0xFF7EE35F)
-private val LauncherMuted = Color(0xFFB8C8BC)
-
 @Composable
 fun TsuzukuLauncherSettingsScreen(
     uiState: LauncherUiState,
@@ -100,10 +97,11 @@ fun TsuzukuLauncherSettingsScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    var allowedAppsExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = LauncherBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier
     ) { padding ->
         LazyColumn(
@@ -111,8 +109,9 @@ fun TsuzukuLauncherSettingsScreen(
                 .fillMaxSize()
                 .background(launcherGradient())
                 .padding(padding)
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(top = 10.dp, bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
                 Row(
@@ -125,7 +124,7 @@ fun TsuzukuLauncherSettingsScreen(
                         Spacer(Modifier.height(8.dp))
                         Text(
                             "Turn your phone into a minimal focus launcher.",
-                            color = LauncherMuted,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -148,20 +147,17 @@ fun TsuzukuLauncherSettingsScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     LauncherActionCard(
                         icon = Icons.Default.RocketLaunch,
-                        iconTint = LauncherGreen,
+                        iconTint = MaterialTheme.colorScheme.primary,
                         title = "Activate Tsuzuku Launcher",
                         subtitle = "Set as default launcher",
                         onClick = { onNavigate(LauncherRoute.Activation) }
                     )
-                    LauncherActionCard(
-                        icon = Icons.Default.Apps,
-                        iconTint = Color(0xFF38BDF8),
-                        title = "Allowed Apps",
-                        subtitle = "Choose only 2 apps",
-                        onClick = {}
-                    )
                     AllowedAppsSelector(
                         uiState = uiState,
+                        icon = Icons.Default.Apps,
+                        iconTint = Color(0xFF38BDF8),
+                        expanded = allowedAppsExpanded,
+                        onExpandedChange = { allowedAppsExpanded = it },
                         onToggleAllowedApp = { packageName ->
                             if (!onToggleAllowedApp(packageName)) {
                                 scope.launch { snackbarHostState.showSnackbar("Only 2 apps can be selected.") }
@@ -184,7 +180,7 @@ fun TsuzukuLauncherSettingsScreen(
                     )
                     LauncherActionCard(
                         icon = Icons.Default.Security,
-                        iconTint = LauncherGreen,
+                        iconTint = MaterialTheme.colorScheme.primary,
                         title = "Focus Mode",
                         subtitle = "Configure focus environment",
                         onClick = { onNavigate(LauncherRoute.Focus) }
@@ -197,7 +193,10 @@ fun TsuzukuLauncherSettingsScreen(
                     onClick = { onOpenLauncherSettings(context) },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = LauncherGreen, contentColor = Color(0xFF061007))
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Icon(Icons.Default.RocketLaunch, contentDescription = null)
                     Spacer(Modifier.width(10.dp))
@@ -226,7 +225,7 @@ fun LauncherStatusCard(
                     Spacer(Modifier.weight(1f))
                     Text(
                         if (isActive) "Active" else "Inactive",
-                        color = if (isActive) LauncherGreen else Color(0xFFFF6B5F),
+                        color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -238,11 +237,11 @@ fun LauncherStatusCard(
                 Spacer(Modifier.height(6.dp))
                 Text(
                     if (isActive) "Pressing Home opens your focus launcher." else "Your current default launcher is your system launcher.",
-                    color = LauncherMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = LauncherMuted)
+            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -275,9 +274,9 @@ fun LauncherActionCard(
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(title, fontWeight = FontWeight.Bold)
-                Text(subtitle, color = LauncherMuted, style = MaterialTheme.typography.bodySmall)
+                Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = LauncherMuted)
+            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -285,42 +284,69 @@ fun LauncherActionCard(
 @Composable
 fun AllowedAppsSelector(
     uiState: LauncherUiState,
+    icon: ImageVector,
+    iconTint: Color,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
     onToggleAllowedApp: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    PremiumCard(modifier = modifier.fillMaxWidth()) {
+    PremiumCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onExpandedChange(!expanded) },
+        contentPadding = PaddingValues(14.dp)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(iconTint.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = iconTint)
+            }
+            Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text("Allowed Apps", fontWeight = FontWeight.Bold)
-                Text("${uiState.selectedCount}/2 Selected besides Phone", color = LauncherMuted, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    if (expanded) "${uiState.selectedCount}/2 selected besides Phone" else "Choose only 2 apps",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
-            TextButton(onClick = { expanded = !expanded }) {
+            TextButton(onClick = { onExpandedChange(!expanded) }) {
                 Text(if (expanded) "Hide" else "Select")
             }
         }
-        Spacer(Modifier.height(12.dp))
-        LauncherAllowedAppRow(app = LauncherAppInfo("phone", "Phone (Caller)", locked = true), selected = true, locked = true)
-        uiState.selectedAllowedApps.forEach { app ->
-            LauncherAllowedAppRow(app = app, selected = true, onClick = { onToggleAllowedApp(app.packageName) })
-        }
         AnimatedVisibility(expanded) {
             Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
+                LauncherAllowedAppRow(app = LauncherAppInfo("phone", "Phone (Caller)", locked = true), selected = true, locked = true)
+                uiState.selectedAllowedApps.forEach { app ->
+                    LauncherAllowedAppRow(app = app, selected = true, onClick = { onToggleAllowedApp(app.packageName) })
+                }
                 if (uiState.loadingApps) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
-                uiState.installedApps.take(60).forEach { app ->
+                uiState.installedApps
+                    .filterNot { it.packageName in uiState.selectedAllowedPackages }
+                    .take(50)
+                    .forEach { app ->
                     LauncherAllowedAppRow(
                         app = app,
-                        selected = app.packageName in uiState.selectedAllowedPackages,
+                        selected = false,
                         onClick = { onToggleAllowedApp(app.packageName) }
                     )
                 }
+                Text(
+                    "Only Phone and these 2 selected apps will appear in launcher mode.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
-        Spacer(Modifier.height(10.dp))
-        Text("Only selected apps will be accessible when launcher is active.", color = LauncherMuted, style = MaterialTheme.typography.bodySmall)
     }
 }
 
@@ -343,10 +369,14 @@ private fun LauncherAllowedAppRow(
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(app.label, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(if (locked) "Always allowed" else if (selected) "Selected" else "Tap to allow", color = LauncherMuted, style = MaterialTheme.typography.bodySmall)
+            Text(
+                if (locked) "Always allowed" else if (selected) "Selected" else "Tap to allow",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
         if (locked) {
-            Icon(Icons.Default.Lock, contentDescription = null, tint = LauncherGreen)
+            Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         } else {
             FilterChip(
                 selected = selected,
@@ -372,11 +402,11 @@ fun LauncherActivationInstructionsScreen(
                     modifier = Modifier
                         .size(110.dp)
                         .clip(CircleShape)
-                        .background(LauncherGreen.copy(alpha = 0.13f))
-                        .border(1.dp, LauncherGreen.copy(alpha = 0.5f), CircleShape),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.13f))
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Home, contentDescription = null, tint = LauncherGreen, modifier = Modifier.size(62.dp))
+                    Icon(Icons.Default.Home, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(62.dp))
                 }
                 Spacer(Modifier.height(26.dp))
                 Text(
@@ -388,7 +418,7 @@ fun LauncherActivationInstructionsScreen(
                 Spacer(Modifier.height(12.dp))
                 Text(
                     "To activate Tsuzuku Launcher, you need to set it as your default Home app.",
-                    color = LauncherMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
             }
@@ -407,7 +437,10 @@ fun LauncherActivationInstructionsScreen(
             Button(
                 onClick = { onOpenSettings(context) },
                 modifier = Modifier.fillMaxWidth().height(58.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = LauncherGreen, contentColor = Color(0xFF061007)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Icon(Icons.Default.Settings, contentDescription = null)
@@ -428,15 +461,15 @@ private fun ActivationStep(number: Int, title: String, subtitle: String) {
             modifier = Modifier
                 .size(30.dp)
                 .clip(CircleShape)
-                .border(1.dp, LauncherGreen, CircleShape),
+                .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Text(number.toString(), color = LauncherGreen, fontWeight = FontWeight.Bold)
+            Text(number.toString(), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
         }
         Spacer(Modifier.width(14.dp))
         Column {
             Text(title, fontWeight = FontWeight.Bold)
-            Text(subtitle, color = LauncherMuted, style = MaterialTheme.typography.bodyMedium)
+            Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -455,7 +488,7 @@ fun ManageLauncherWidgetsScreen(
         modifier = modifier
     ) {
         item {
-            Text("Choose and arrange widgets to show on launcher home.", color = LauncherMuted)
+            Text("Choose which Tsuzuku app widgets should appear on launcher home.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         item {
             PremiumCard(contentPadding = PaddingValues(0.dp)) {
@@ -478,11 +511,11 @@ fun LauncherWidgetToggleRow(
         modifier = modifier.fillMaxWidth().padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Default.GridView, contentDescription = null, tint = LauncherGreen)
+        Icon(Icons.Default.GridView, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(widget.title, fontWeight = FontWeight.Bold)
-            Text(widget.subtitle, color = LauncherMuted, style = MaterialTheme.typography.bodySmall)
+            Text(widget.subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
         }
         Switch(checked = widget.enabled, onCheckedChange = onToggle)
     }
@@ -511,10 +544,10 @@ fun LauncherFocusSettingsScreen(
     ) {
         item {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Default.Shield, contentDescription = null, tint = LauncherGreen, modifier = Modifier.size(96.dp))
+                Icon(Icons.Default.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(96.dp))
                 Spacer(Modifier.height(12.dp))
-                Text("Focus Mode", color = LauncherGreen, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Text("Lock distractions. Stay in flow.", color = LauncherMuted)
+                Text("Focus Mode", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text("Lock distractions. Stay in flow.", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         item {
@@ -532,7 +565,7 @@ fun LauncherFocusSettingsScreen(
                 PremiumCard {
                     Text("DND permission is not granted", color = Color(0xFFFFC857), fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(6.dp))
-                    Text("Tsuzuku can continue without DND, or you can allow Notification Policy Access in settings.", color = LauncherMuted)
+                    Text("Tsuzuku can continue without DND, or you can allow Notification Policy Access in settings.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(12.dp))
                     OutlinedButton(onClick = { onOpenDndSettings(context) }) {
                         Text("Open DND Permission Settings")
@@ -542,7 +575,7 @@ fun LauncherFocusSettingsScreen(
         }
         item {
             PremiumCard {
-                Text("Focus Mode will be automatically enabled when launcher is active.", color = LauncherMuted)
+                Text("Focus Mode will be automatically enabled when launcher is active.", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -560,11 +593,11 @@ private fun FocusSettingRow(
         modifier = Modifier.fillMaxWidth().padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = LauncherGreen)
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(title, fontWeight = FontWeight.Bold)
-            Text(subtitle, color = LauncherMuted, style = MaterialTheme.typography.bodySmall)
+            Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
         }
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
@@ -622,7 +655,7 @@ fun TsuzukuLauncherHomeScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = LauncherBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier
     ) { padding ->
         LazyColumn(
@@ -630,9 +663,10 @@ fun TsuzukuLauncherHomeScreen(
                 .fillMaxSize()
                 .background(launcherHomeGradient())
                 .padding(padding)
-                .padding(horizontal = 18.dp, vertical = 18.dp),
+                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(top = 10.dp, bottom = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item {
                 Row(
@@ -642,13 +676,27 @@ fun TsuzukuLauncherHomeScreen(
                     if (previewMode && onBack != null) {
                         IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
                     }
-                    Icon(Icons.Default.Spa, contentDescription = null, tint = LauncherGreen)
+                    Icon(Icons.Default.Spa, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(8.dp))
-                    Text("Tsuzuku Launcher", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text(
+                        "Tsuzuku Launcher",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.weight(1f)
+                    )
                     AssistChip(
                         onClick = {},
                         label = { Text(if (uiState.isDefaultLauncher) "Active" else "Preview") },
-                        leadingIcon = { Icon(Icons.Default.Security, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        leadingIcon = { Icon(Icons.Default.Security, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.45f),
+                            labelColor = MaterialTheme.colorScheme.onSurface,
+                            leadingIconContentColor = MaterialTheme.colorScheme.primary
+                        ),
+                        border = AssistChipDefaults.assistChipBorder(
+                            enabled = true,
+                            borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
+                        )
                     )
                 }
             }
@@ -666,7 +714,7 @@ fun TsuzukuLauncherHomeScreen(
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     LauncherAppButton(label = "Phone", icon = null, fallback = Icons.Default.Phone) {
                         if (!onOpenPhone(context)) scope.launch { snackbarHostState.showSnackbar("Phone app is unavailable.") }
@@ -684,49 +732,38 @@ fun TsuzukuLauncherHomeScreen(
                 }
             }
 
-            item {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    if (uiState.widgets.firstOrNull { it.key == "today_habits" }?.enabled == true) {
-                        TodayHabitsLauncherWidget(
-                            completed = completedToday,
-                            total = activeHabits.size,
-                            habits = activeHabits,
-                            logs = logs,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    if (uiState.widgets.firstOrNull { it.key == "focus_timer" }?.enabled == true) {
-                        LauncherFocusTimerWidget(todayFocusMinutes = todayFocusMinutes, modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-
-            if (uiState.widgets.firstOrNull { it.key == "streak_card" }?.enabled == true || uiState.widgets.firstOrNull { it.key == "focus_stats" }?.enabled == true) {
+            if (uiState.widgets.any { it.enabled }) {
                 item {
-                    PremiumCard(modifier = Modifier.fillMaxWidth()) {
-                        Text("Consistency dashboard", color = LauncherGreen, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(6.dp))
-                        Text("${activeHabits.size} active habits • ${todayFocusMinutes}m focused today", color = LauncherMuted)
-                    }
+                    LauncherWidgetTray(
+                        widgets = uiState.widgets,
+                        completedToday = completedToday,
+                        totalHabits = activeHabits.size,
+                        todayFocusMinutes = todayFocusMinutes
+                    )
                 }
             }
 
             item {
-                Text("Swipe up for all widgets", color = LauncherMuted, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    "Only your selected apps and Tsuzuku widgets live here",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center
+                )
             }
 
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { scope.launch { snackbarHostState.showSnackbar("Only selected apps are available in Tsuzuku Launcher.") } }) {
-                        Icon(Icons.Default.GridView, contentDescription = "Apps", tint = LauncherGreen)
+                        Icon(Icons.Default.GridView, contentDescription = "Apps", tint = MaterialTheme.colorScheme.primary)
                     }
-                    TsuzukuGlowLogo(size = 66.dp)
+                    TsuzukuGlowLogo(size = 64.dp)
                     IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = LauncherGreen)
+                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -749,6 +786,7 @@ fun LauncherClockWidget(modifier: Modifier = Modifier) {
         fontSize = 72.sp,
         lineHeight = 78.sp,
         fontWeight = FontWeight.Light,
+        color = MaterialTheme.colorScheme.onBackground,
         modifier = modifier.padding(top = 22.dp)
     )
 }
@@ -756,26 +794,103 @@ fun LauncherClockWidget(modifier: Modifier = Modifier) {
 @Composable
 fun LauncherQuoteWidget(japanese: String, english: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(japanese, color = LauncherGreen, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+        Text(japanese, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
         Spacer(Modifier.height(6.dp))
-        Text(english, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
+        Text(english, color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
+    }
+}
+
+@Composable
+private fun LauncherWidgetTray(
+    widgets: List<LauncherWidgetPreference>,
+    completedToday: Int,
+    totalHabits: Int,
+    todayFocusMinutes: Int,
+    modifier: Modifier = Modifier
+) {
+    val enabledWidgets = widgets.filter { it.enabled }
+    PremiumCard(modifier = modifier.fillMaxWidth(), contentPadding = PaddingValues(14.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Tsuzuku Widgets", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Text(
+                    "Your enabled Tsuzuku app widgets appear here.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            AssistChip(
+                onClick = {},
+                label = { Text("${enabledWidgets.size} enabled") },
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        }
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+            MiniLauncherWidgetStat(
+                icon = Icons.Default.Check,
+                title = "Habits",
+                value = "$completedToday/$totalHabits",
+                modifier = Modifier.weight(1f)
+            )
+            MiniLauncherWidgetStat(
+                icon = Icons.Default.Timer,
+                title = "Focus",
+                value = "${todayFocusMinutes}m",
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            enabledWidgets.joinToString(" • ") { it.title },
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun MiniLauncherWidgetStat(
+    icon: ImageVector,
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.width(10.dp))
+        Column {
+            Text(title, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+            Text(value, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+        }
     }
 }
 
 @Composable
 fun LauncherFocusTimerWidget(todayFocusMinutes: Int, modifier: Modifier = Modifier) {
     PremiumCard(modifier = modifier.height(186.dp)) {
-        Text("Focus Timer", color = LauncherGreen, fontWeight = FontWeight.Bold)
+        Text("Focus Timer", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
         Spacer(Modifier.weight(1f))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(progress = { 0.72f }, strokeWidth = 8.dp, color = LauncherGreen, modifier = Modifier.size(92.dp))
+            CircularProgressIndicator(progress = { 0.72f }, strokeWidth = 8.dp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(92.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("25:00", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Text("${todayFocusMinutes}m today", color = LauncherMuted, style = MaterialTheme.typography.bodySmall)
+                Text("${todayFocusMinutes}m today", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
             }
         }
         Spacer(Modifier.weight(1f))
-        Text("Tap Focus tab to start", color = LauncherMuted, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        Text("Tap Focus tab to start", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -789,13 +904,13 @@ private fun TodayHabitsLauncherWidget(
 ) {
     val today = DateUtils.getTodayString()
     PremiumCard(modifier = modifier.height(186.dp)) {
-        Text("Today's Habits", color = LauncherGreen, fontWeight = FontWeight.Bold)
+        Text("Today's Habits", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(10.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
                     progress = { if (total == 0) 0f else completed.toFloat() / total.toFloat() },
-                    color = LauncherGreen,
+                    color = MaterialTheme.colorScheme.primary,
                     strokeWidth = 7.dp,
                     modifier = Modifier.size(74.dp)
                 )
@@ -808,7 +923,7 @@ private fun TodayHabitsLauncherWidget(
                     val done = logs.any { it.habitId == habit.id && it.date == today && it.isCompleted }
                     Text(
                         "${if (done) "●" else "○"} ${habit.name}",
-                        color = if (done) LauncherGreen else LauncherMuted,
+                        color = if (done) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -834,13 +949,20 @@ private fun LauncherAppButton(
             modifier = Modifier
                 .size(64.dp)
                 .clip(RoundedCornerShape(18.dp))
-                .background(LauncherGreen.copy(alpha = 0.20f)),
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)),
             contentAlignment = Alignment.Center
         ) {
             LauncherAppIcon(icon = icon, fallback = fallback, size = 64.dp, fallbackSize = 34.dp)
         }
         Spacer(Modifier.height(8.dp))
-        Text(label, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+        Text(
+            label,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -864,10 +986,10 @@ fun LauncherAppIcon(
             modifier = Modifier
                 .size(size)
                 .clip(RoundedCornerShape(12.dp))
-                .background(LauncherGreen.copy(alpha = 0.16f)),
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(fallback, contentDescription = null, tint = LauncherGreen, modifier = Modifier.size(fallbackSize))
+            Icon(fallback, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(fallbackSize))
         }
     }
 }
@@ -911,7 +1033,7 @@ private fun PremiumCard(
         modifier = modifier
             .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.28f), RoundedCornerShape(18.dp)),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = LauncherCard.copy(alpha = 0.88f))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f))
     ) {
         Column(modifier = Modifier.padding(contentPadding), content = content)
     }
@@ -922,22 +1044,32 @@ private fun TsuzukuGlowLogo(modifier: Modifier = Modifier, size: androidx.compos
     Box(
         modifier = modifier
             .size(size)
-            .shadow(18.dp, CircleShape, ambientColor = LauncherGreen, spotColor = LauncherGreen)
+            .shadow(18.dp, CircleShape, ambientColor = MaterialTheme.colorScheme.primary, spotColor = MaterialTheme.colorScheme.primary)
             .clip(CircleShape)
-            .background(LauncherGreen.copy(alpha = 0.10f))
-            .border(1.dp, LauncherGreen.copy(alpha = 0.55f), CircleShape),
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        Icon(Icons.Default.Spa, contentDescription = "Tsuzuku", tint = LauncherGreen, modifier = Modifier.size(size * 0.58f))
+        Icon(Icons.Default.Spa, contentDescription = "Tsuzuku", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(size * 0.58f))
     }
 }
 
+@Composable
 private fun launcherGradient(): Brush = Brush.verticalGradient(
-    colors = listOf(LauncherBackground, Color(0xFF06170D), LauncherBackground)
+    colors = listOf(
+        MaterialTheme.colorScheme.background,
+        MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+        MaterialTheme.colorScheme.background
+    )
 )
 
+@Composable
 private fun launcherHomeGradient(): Brush = Brush.verticalGradient(
-    colors = listOf(Color(0xFF031008), Color(0xFF0E2E18), Color(0xFF041008))
+    colors = listOf(
+        MaterialTheme.colorScheme.background,
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.36f),
+        MaterialTheme.colorScheme.background
+    )
 )
 
 @Preview(showBackground = true)
