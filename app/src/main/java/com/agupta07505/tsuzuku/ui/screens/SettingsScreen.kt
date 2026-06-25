@@ -525,6 +525,7 @@ private fun SettingsMenuRow(
     value: String? = null,
     badge: String? = null,
     chevronColor: Color = iconColor,
+    showChevron: Boolean = true,
     onClick: () -> Unit = {}
 ) {
     Row(
@@ -580,49 +581,32 @@ private fun SettingsMenuRow(
             }
             Spacer(Modifier.width(8.dp))
         }
-        Icon(
-            Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = chevronColor,
-            modifier = Modifier.size(30.dp)
-        )
+        if (showChevron) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = chevronColor,
+                modifier = Modifier.size(30.dp)
+            )
+        }
     }
 }
 
 @Composable
 private fun SettingsBrandFooter() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.76f)),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.24f))
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_tsuzuku_create_habbit_logo),
-                contentDescription = "Tsuzuku",
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(Modifier.width(16.dp))
-            Box(
-                Modifier
-                    .width(1.dp)
-                    .height(52.dp)
-                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
-            )
-            Spacer(Modifier.width(16.dp))
-            Column {
-                Text("Tsuzuku", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Text("続く — Keep going, every day.", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-                Text("Made with ❤ by Animesh Gupta", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-            }
-        }
+        Text(
+            "Made with ❤️ by Animesh Gupta",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -698,8 +682,6 @@ fun SettingsScreen(
     var showAppearanceDialog by remember { mutableStateOf(false) }
     var showNotificationDialog by remember { mutableStateOf(false) }
     var showPersonalizationDialog by remember { mutableStateOf(false) }
-    var showMotivationDialog by remember { mutableStateOf(false) }
-    var showAppStatsDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
 
     // Local notification parameters loaded/saved dynamically
@@ -960,18 +942,9 @@ fun SettingsScreen(
                         SettingsMenuRow(
                             icon = Icons.Default.Settings,
                             title = "Personalization",
-                            subtitle = "Home cards, habit order and more",
+                            subtitle = "Home cards, quotes, celebrations and more",
                             iconColor = Color(0xFF22C55E),
                             onClick = { showPersonalizationDialog = true }
-                        )
-                        SettingsMenuDivider()
-                        SettingsMenuRow(
-                            icon = Icons.Default.Star,
-                            title = "Motivation",
-                            subtitle = "Quotes, streak celebrations and sounds",
-                            iconColor = Color(0xFF38BDF8),
-                            chevronColor = Color(0xFF22D3EE),
-                            onClick = { showMotivationDialog = true }
                         )
                     }
                 }
@@ -987,6 +960,7 @@ fun SettingsScreen(
                             subtitle = "Export all habits, focus sessions and settings to a JSON file",
                             iconColor = Color(0xFFC084FC),
                             chevronColor = Color(0xFFC084FC),
+                            showChevron = false,
                             onClick = { exportJsonLauncher.launch("Tsuzuku.json") }
                         )
                         SettingsMenuDivider()
@@ -997,62 +971,6 @@ fun SettingsScreen(
                             iconColor = Color(0xFF38BDF8),
                             chevronColor = Color(0xFF38BDF8),
                             onClick = { showImportDialog = true }
-                        )
-                        SettingsMenuDivider()
-                        SettingsMenuRow(
-                            icon = Icons.AutoMirrored.Filled.List,
-                            title = "Database Size",
-                            subtitle = "Total size of your local database",
-                            iconColor = Color(0xFF22D3EE),
-                            value = databaseSizeText,
-                            onClick = {
-                                Toast.makeText(context, "Database size: $databaseSizeText", Toast.LENGTH_SHORT).show()
-                            }
-                        )
-                        SettingsMenuDivider()
-                        SettingsMenuRow(
-                            icon = Icons.Default.Settings,
-                            title = "Storage Usage",
-                            subtitle = "View app storage breakdown",
-                            iconColor = Color(0xFFF59E0B),
-                            chevronColor = Color(0xFFF59E0B),
-                            value = storageUsageText,
-                            onClick = {
-                                runCatching {
-                                    context.startActivity(
-                                        Intent(
-                                            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                            Uri.parse("package:${context.packageName}")
-                                        )
-                                    )
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-            item {
-                Column {
-                    SettingsSectionLabel("App")
-                    SettingsGroupedCard {
-                        SettingsMenuRow(
-                            icon = Icons.AutoMirrored.Filled.List,
-                            title = "App Statistics",
-                            subtitle = "Explore your app usage and activity",
-                            iconColor = Color(0xFFC084FC),
-                            chevronColor = Color(0xFFC084FC),
-                            onClick = { showAppStatsDialog = true }
-                        )
-                        SettingsMenuDivider()
-                        SettingsMenuRow(
-                            icon = Icons.Default.Info,
-                            title = "About Tsuzuku",
-                            subtitle = "Version, developer and app information",
-                            iconColor = Color(0xFF38BDF8),
-                            chevronColor = Color(0xFF38BDF8),
-                            value = "v${BuildConfig.VERSION_NAME}",
-                            onClick = { showAboutDialog = true }
                         )
                     }
                 }
@@ -1068,7 +986,18 @@ fun SettingsScreen(
                             subtitle = "Support the project by starring on GitHub",
                             iconColor = Color(0xFFE5E7EB),
                             chevronColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            showChevron = false,
                             onClick = { openUrl("https://github.com/agupta07505/Tsuzuku", "Cannot open GitHub.") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Info,
+                            title = "About Tsuzuku",
+                            subtitle = "Version, developer and app information",
+                            iconColor = Color(0xFF38BDF8),
+                            chevronColor = Color(0xFF38BDF8),
+                            value = "v${BuildConfig.VERSION_NAME}",
+                            onClick = { showAboutDialog = true }
                         )
                         SettingsMenuDivider()
                         SettingsMenuRow(
@@ -1077,7 +1006,8 @@ fun SettingsScreen(
                             subtitle = "Found an issue? Let us know",
                             iconColor = Color(0xFFEF4444),
                             chevronColor = Color(0xFFEF4444),
-                            onClick = { sendMail("Tsuzuku Bug Report", "Describe the issue:\n\nSteps to reproduce:\n") }
+                            showChevron = false,
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/issues/new?template=bug_report.md", "Cannot open bug report page.") }
                         )
                         SettingsMenuDivider()
                         SettingsMenuRow(
@@ -1086,7 +1016,18 @@ fun SettingsScreen(
                             subtitle = "Suggest a new feature or improvement",
                             iconColor = Color(0xFFFACC15),
                             chevronColor = Color(0xFFFACC15),
-                            onClick = { sendMail("Tsuzuku Feature Request", "Feature idea:\n\nWhy it helps:\n") }
+                            showChevron = false,
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/issues/new?template=feature_request.md", "Cannot open feature request page.") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Check,
+                            title = "App Review",
+                            subtitle = "Share feedback and review Tsuzuku",
+                            iconColor = Color(0xFF4ADE80),
+                            chevronColor = Color(0xFF4ADE80),
+                            showChevron = false,
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/issues/new?template=app_review.md", "Cannot open app review page.") }
                         )
                         SettingsMenuDivider()
                         SettingsMenuRow(
@@ -1096,6 +1037,7 @@ fun SettingsScreen(
                             iconColor = Color(0xFFC084FC),
                             chevronColor = Color(0xFFC084FC),
                             badge = "Coming Soon",
+                            showChevron = false,
                             onClick = { Toast.makeText(context, "Community is coming soon.", Toast.LENGTH_SHORT).show() }
                         )
                         SettingsMenuDivider()
@@ -1105,6 +1047,7 @@ fun SettingsScreen(
                             subtitle = "Open source and free to use",
                             iconColor = Color(0xFF2DD4BF),
                             chevronColor = Color(0xFF2DD4BF),
+                            showChevron = false,
                             onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/blob/main/LICENSE", "Cannot open license.") }
                         )
                     }
@@ -1128,15 +1071,6 @@ fun SettingsScreen(
                             icon = Icons.Default.Delete,
                             title = "Delete All Habits",
                             subtitle = "Permanently delete all habits and progress",
-                            iconColor = Color(0xFFEF4444),
-                            chevronColor = Color(0xFFEF4444),
-                            onClick = { showResetDialog = true }
-                        )
-                        SettingsMenuDivider()
-                        SettingsMenuRow(
-                            icon = Icons.Default.Share,
-                            title = "Clear Database",
-                            subtitle = "Remove all data from the local database",
                             iconColor = Color(0xFFEF4444),
                             chevronColor = Color(0xFFEF4444),
                             onClick = { showResetDialog = true }
@@ -2340,11 +2274,19 @@ fun SettingsScreen(
 
         if (showPersonalizationDialog) {
             var confettiEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("confetti_active", true)) }
+            var quoteBannersEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("quotes_active", true)) }
+            var morningEncouragementEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("morning_active", true)) }
             AlertDialog(
                 onDismissRequest = { showPersonalizationDialog = false },
                 title = { Text("Personalization", fontWeight = FontWeight.Bold) },
                 text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 420.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         SettingsSwitchRow(
                             title = "Confetti Celebrations",
                             subtitle = "Celebrate when completing today's habits.",
@@ -2363,22 +2305,6 @@ fun SettingsScreen(
                                 sharedPrefs.edit().putBoolean("show_japanese_quotes", enabled).apply()
                             }
                         )
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showPersonalizationDialog = false }) { Text("Done") }
-                }
-            )
-        }
-
-        if (showMotivationDialog) {
-            var quoteBannersEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("quotes_active", true)) }
-            var morningEncouragementEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("morning_active", true)) }
-            AlertDialog(
-                onDismissRequest = { showMotivationDialog = false },
-                title = { Text("Motivation", fontWeight = FontWeight.Bold) },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         SettingsSwitchRow(
                             title = "Daily Quote Banners",
                             subtitle = "Show motivational quotes around habit surfaces.",
@@ -2400,26 +2326,7 @@ fun SettingsScreen(
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { showMotivationDialog = false }) { Text("Done") }
-                }
-            )
-        }
-
-        if (showAppStatsDialog) {
-            AlertDialog(
-                onDismissRequest = { showAppStatsDialog = false },
-                title = { Text("App Statistics", fontWeight = FontWeight.Bold) },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        SettingsInfoPill("Total Habits", totalHabitsCount.toString(), Modifier.fillMaxWidth())
-                        SettingsInfoPill("Completed Check-ins", totalCheckInsCount.toString(), Modifier.fillMaxWidth())
-                        SettingsInfoPill("Focus Sessions", focusSessionsList.size.toString(), Modifier.fillMaxWidth())
-                        SettingsInfoPill("Best Streak", "$bestStreakCount days", Modifier.fillMaxWidth())
-                        SettingsInfoPill("Days Using Tsuzuku", daysUsingCount.toString(), Modifier.fillMaxWidth())
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showAppStatsDialog = false }) { Text("Done") }
+                    TextButton(onClick = { showPersonalizationDialog = false }) { Text("Done") }
                 }
             )
         }
