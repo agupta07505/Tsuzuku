@@ -81,22 +81,19 @@ import java.util.Locale
 sealed interface LauncherRoute {
     data object Settings : LauncherRoute
     data object Activation : LauncherRoute
+    data object AllowedApps : LauncherRoute
     data object Preview : LauncherRoute
     data object Widgets : LauncherRoute
     data object Focus : LauncherRoute
 }
 
-private val LauncherBackground = Color(0xFF041008)
 @Composable
 fun TsuzukuLauncherSettingsScreen(
     uiState: LauncherUiState,
     onNavigate: (LauncherRoute) -> Unit,
-    onToggleAllowedApp: (String) -> Boolean,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    var allowedAppsExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -144,17 +141,12 @@ fun TsuzukuLauncherSettingsScreen(
 
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    AllowedAppsSelector(
-                        uiState = uiState,
+                    LauncherActionCard(
                         icon = Icons.Default.Apps,
                         iconTint = Color(0xFF38BDF8),
-                        expanded = allowedAppsExpanded,
-                        onExpandedChange = { allowedAppsExpanded = it },
-                        onToggleAllowedApp = { packageName ->
-                            if (!onToggleAllowedApp(packageName)) {
-                                scope.launch { snackbarHostState.showSnackbar("Only 2 apps can be selected.") }
-                            }
-                        }
+                        title = "Allowed Apps",
+                        subtitle = "${uiState.selectedCount}/2 selected besides Phone",
+                        onClick = { onNavigate(LauncherRoute.AllowedApps) }
                     )
                     LauncherActionCard(
                         icon = Icons.Default.Widgets,
@@ -327,6 +319,118 @@ fun AllowedAppsSelector(
 }
 
 @Composable
+fun AllowedLauncherAppsScreen(
+    uiState: LauncherUiState,
+    onBack: () -> Unit,
+    onToggleAllowedApp: (String) -> Boolean,
+    modifier: Modifier = Modifier
+) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp),
+        modifier = modifier
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(launcherGradient())
+                .padding(padding)
+                .statusBarsPadding()
+                .padding(horizontal = 18.dp),
+            contentPadding = PaddingValues(top = 6.dp, bottom = 112.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
+                    Text(
+                        "Allowed Apps",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    AssistChip(
+                        onClick = {},
+                        label = { Text("${uiState.selectedCount}/2") },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    )
+                }
+            }
+
+            item {
+                PremiumCard(modifier = Modifier.fillMaxWidth()) {
+                    Text("Choose apps for launcher mode", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "Phone is always available. Select up to 2 more apps that can be opened from Tsuzuku Launcher.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            item {
+                PremiumCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(14.dp)) {
+                    LauncherAllowedAppRow(
+                        app = LauncherAppInfo("phone", "Phone (Caller)", locked = true),
+                        selected = true,
+                        locked = true
+                    )
+                }
+            }
+
+            if (uiState.loadingApps) {
+                item {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+            }
+
+            item {
+                Text("Installed Apps", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            }
+
+            if (!uiState.loadingApps && uiState.installedApps.isEmpty()) {
+                item {
+                    PremiumCard(modifier = Modifier.fillMaxWidth()) {
+                        Text("No launchable apps found", fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Only apps that Android exposes as launchable can be selected.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+
+            items(
+                items = uiState.installedApps,
+                key = { it.packageName }
+            ) { app ->
+                PremiumCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(14.dp)) {
+                    LauncherAllowedAppRow(
+                        app = app,
+                        selected = app.packageName in uiState.selectedAllowedPackages,
+                        onClick = {
+                            if (!onToggleAllowedApp(app.packageName)) {
+                                scope.launch { snackbarHostState.showSnackbar("Only 2 apps can be selected.") }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun LauncherAllowedAppRow(
     app: LauncherAppInfo,
     selected: Boolean,
@@ -371,6 +475,28 @@ fun LauncherActivationInstructionsScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    var showHowItWorks by remember { mutableStateOf(false) }
+
+    if (showHowItWorks) {
+        AlertDialog(
+            onDismissRequest = { showHowItWorks = false },
+            title = { Text("How Tsuzuku Launcher works") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Android does not allow apps to silently become your Home launcher.")
+                    Text("Tsuzuku opens the system Default Home app settings, where you choose Tsuzuku yourself.")
+                    Text("After activation, pressing Home opens the minimal Tsuzuku Launcher screen.")
+                    Text("You can always switch back to your system launcher from Android settings.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showHowItWorks = false }) {
+                    Text("Got it")
+                }
+            }
+        )
+    }
+
     LauncherPageScaffold(title = "Activate Tsuzuku Launcher", onBack = onBack, modifier = modifier) {
         item {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
@@ -423,7 +549,7 @@ fun LauncherActivationInstructionsScreen(
                 Spacer(Modifier.width(10.dp))
                 Text("Open Default Launcher Settings", fontWeight = FontWeight.Bold)
             }
-            TextButton(onClick = { onOpenSettings(context) }, modifier = Modifier.fillMaxWidth()) {
+            TextButton(onClick = { showHowItWorks = true }, modifier = Modifier.fillMaxWidth()) {
                 Text("How it works?")
             }
         }
@@ -927,15 +1053,20 @@ private fun LauncherPageScaffold(
     action: @Composable RowScope.() -> Unit = {},
     content: LazyListScope.() -> Unit
 ) {
-    Scaffold(containerColor = LauncherBackground, modifier = modifier) { padding ->
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp),
+        modifier = modifier
+    ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(launcherGradient())
                 .padding(padding)
-                .padding(18.dp),
-            contentPadding = PaddingValues(bottom = 112.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+                .statusBarsPadding()
+                .padding(horizontal = 18.dp),
+            contentPadding = PaddingValues(top = 6.dp, bottom = 112.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -1023,8 +1154,7 @@ private fun TsuzukuLauncherSettingsPreview() {
     MyApplicationTheme(themePreference = "green") {
         TsuzukuLauncherSettingsScreen(
             uiState = LauncherUiState(installedApps = listOf(LauncherAppInfo("notes", "Keep Notes")), selectedAllowedPackages = listOf("notes")),
-            onNavigate = {},
-            onToggleAllowedApp = { true }
+            onNavigate = {}
         )
     }
 }

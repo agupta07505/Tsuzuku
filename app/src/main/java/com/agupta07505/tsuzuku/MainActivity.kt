@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agupta07505.tsuzuku.ui.HabitViewModel
 import com.agupta07505.tsuzuku.launcher.LauncherViewModel
+import com.agupta07505.tsuzuku.ui.screens.AllowedLauncherAppsScreen
 import com.agupta07505.tsuzuku.ui.screens.LauncherActivationInstructionsScreen
 import com.agupta07505.tsuzuku.ui.screens.LauncherFocusSettingsScreen
 import com.agupta07505.tsuzuku.ui.screens.LauncherPreviewScreen
@@ -107,7 +108,10 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        if (!focusRuntime.active && focusRuntime.lastResult == null) {
+                        if (!focusRuntime.active &&
+                            focusRuntime.lastResult == null &&
+                            !(currentTab == "launcher" && launcherRoute == LauncherRoute.Preview)
+                        ) {
                             NavigationBar(
                                 modifier = Modifier.testTag("bottom_nav_bar")
                             ) {
@@ -177,13 +181,18 @@ class MainActivity : ComponentActivity() {
                             LauncherRoute.Settings -> TsuzukuLauncherSettingsScreen(
                                 uiState = launcherUiState,
                                 onNavigate = { launcherRoute = it },
-                                onToggleAllowedApp = launcherViewModel::toggleAllowedApp,
                                 modifier = Modifier.fillMaxSize()
                             )
                             LauncherRoute.Activation -> LauncherActivationInstructionsScreen(
                                 isActive = launcherUiState.isDefaultLauncher,
                                 onBack = { launcherRoute = LauncherRoute.Settings },
                                 onOpenSettings = launcherViewModel::openDefaultLauncherSettings,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                            LauncherRoute.AllowedApps -> AllowedLauncherAppsScreen(
+                                uiState = launcherUiState,
+                                onBack = { launcherRoute = LauncherRoute.Settings },
+                                onToggleAllowedApp = launcherViewModel::toggleAllowedApp,
                                 modifier = Modifier.fillMaxSize()
                             )
                             LauncherRoute.Preview -> LauncherPreviewScreen(
