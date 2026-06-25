@@ -710,48 +710,47 @@ private fun AboutTsuzukuScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .background(
                 Brush.radialGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.background
+                        Color.Transparent,
+                        Color.Transparent
                     ),
                     center = androidx.compose.ui.geometry.Offset(180f, 180f),
                     radius = 980f
                 )
             )
             .statusBarsPadding()
-            .padding(horizontal = 12.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 116.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+            .padding(horizontal = 18.dp),
+        contentPadding = PaddingValues(top = 22.dp, bottom = 116.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 58.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.70f))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.20f), CircleShape)
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.offset(x = (-12).dp)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 }
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text("About Tsuzuku", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
-                    Text(
-                        "Learn more about the app and its mission.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+                Text(
+                    text = "About Tsuzuku",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Learn more about the app and its mission.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
 
@@ -770,8 +769,8 @@ private fun AboutTsuzukuScreen(
                     contentScale = ContentScale.Crop
                 )
                 Spacer(Modifier.height(12.dp))
-                Text("Tsuzuku", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Black)
-                Text("続く — Keep going, every day.", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Text("Tsuzuku", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+                Text("続く — Keep going, every day.", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(16.dp))
                 Text(
                     "Tsuzuku is a privacy-first habit tracker and focus companion.\nAll your data stays on your device. Always.",
@@ -1202,11 +1201,11 @@ fun SettingsScreen(
                     radius = 980f
                 )
             )
-            .padding(horizontal = 18.dp)
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(horizontal = 18.dp)
                 .testTag("settings_scroll"),
             contentPadding = PaddingValues(top = 22.dp, bottom = 116.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
