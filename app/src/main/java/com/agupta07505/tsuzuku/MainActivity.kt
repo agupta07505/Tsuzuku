@@ -214,7 +214,7 @@ class MainActivity : ComponentActivity() {
                             )
                             LauncherRoute.Focus -> LauncherFocusSettingsScreen(
                                 focusSettings = launcherUiState.focusSettings,
-                                canUseDnd = launcherViewModel.canUseDnd(),
+                                canUseDnd = launcherViewModel.canUseDndState,
                                 onBack = { launcherRoute = LauncherRoute.Settings },
                                 onOpenDndSettings = launcherViewModel::openDndPolicySettings,
                                 onDndChange = launcherViewModel::setFocusDnd,
@@ -251,6 +251,14 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        runCatching {
+            val launcherViewModel = androidx.lifecycle.ViewModelProvider(this)[LauncherViewModel::class.java]
+            launcherViewModel.refreshDndPermission()
         }
     }
 

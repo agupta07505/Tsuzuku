@@ -42,7 +42,7 @@ class LauncherPreferencesRepository(private val context: Context) {
 
     suspend fun setAllowedPackages(packages: List<String>) {
         dataStore.edit { preferences ->
-            preferences[Keys.allowedApps] = packages.take(2).toSet()
+            preferences[Keys.allowedApps] = packages.take(3).toSet()
         }
     }
 

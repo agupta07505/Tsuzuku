@@ -112,7 +112,7 @@ fun TsuzukuLauncherSettingsScreen(
                 .background(launcherGradient())
                 .padding(padding)
                 .padding(horizontal = LauncherHorizontalPadding),
-            contentPadding = PaddingValues(top = 10.dp, bottom = 112.dp),
+            contentPadding = PaddingValues(top = 10.dp, bottom = 160.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
@@ -151,7 +151,7 @@ fun TsuzukuLauncherSettingsScreen(
                         icon = Icons.Default.Apps,
                         iconTint = Color(0xFF38BDF8),
                         title = "Allowed Apps",
-                        subtitle = "${uiState.selectedCount}/2 selected besides Phone",
+                        subtitle = "${uiState.selectedCount}/3 selected besides Phone",
                         onClick = { onNavigate(LauncherRoute.AllowedApps) }
                     )
                     LauncherActionCard(
@@ -285,7 +285,7 @@ fun AllowedAppsSelector(
             Column(modifier = Modifier.weight(1f)) {
                 Text("Allowed Apps", fontWeight = FontWeight.Bold)
                 Text(
-                    if (expanded) "${uiState.selectedCount}/2 selected besides Phone" else "Choose only 2 apps",
+                    if (expanded) "${uiState.selectedCount}/3 selected besides Phone" else "Choose only 3 apps",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -315,7 +315,7 @@ fun AllowedAppsSelector(
                     )
                 }
                 Text(
-                    "Only Phone and these 2 selected apps will appear in launcher mode.",
+                    "Only Phone and these 3 selected apps will appear in launcher mode.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -347,7 +347,7 @@ fun AllowedLauncherAppsScreen(
                 .padding(padding)
                 .statusBarsPadding()
                 .padding(horizontal = LauncherHorizontalPadding),
-            contentPadding = PaddingValues(top = 6.dp, bottom = 112.dp),
+            contentPadding = PaddingValues(top = 6.dp, bottom = 160.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
@@ -361,7 +361,7 @@ fun AllowedLauncherAppsScreen(
                     )
                     AssistChip(
                         onClick = {},
-                        label = { Text("${uiState.selectedCount}/2") },
+                        label = { Text("${uiState.selectedCount}/3") },
                         colors = AssistChipDefaults.assistChipColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             labelColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -375,7 +375,7 @@ fun AllowedLauncherAppsScreen(
                     Text("Choose apps for launcher mode", fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "Phone is always available. Select up to 2 more apps that can be opened from Tsuzuku Launcher.",
+                        "Phone is always available. Select up to 3 more apps that can be opened from Tsuzuku Launcher.",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -426,7 +426,7 @@ fun AllowedLauncherAppsScreen(
                         selected = app.packageName in uiState.selectedAllowedPackages,
                         onClick = {
                             if (!onToggleAllowedApp(app.packageName)) {
-                                scope.launch { snackbarHostState.showSnackbar("Only 2 apps can be selected.") }
+                                scope.launch { snackbarHostState.showSnackbar("Only 3 apps can be selected.") }
                             }
                         }
                     )
@@ -760,7 +760,7 @@ fun TsuzukuLauncherHomeScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val quote = remember { Quotes.byIndex((System.currentTimeMillis() / 86_400_000L).toInt()) }
+    var quote by remember { mutableStateOf(Quotes.random()) }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -816,7 +816,7 @@ fun TsuzukuLauncherHomeScreen(
                 LauncherClockWidget()
 
                 if (uiState.widgets.firstOrNull { it.key == "motivational_quote" }?.enabled == true && uiState.focusSettings.showMotivationalQuote) {
-                    LauncherQuoteWidget(japanese = quote.japanese, english = quote.english)
+                    LauncherQuoteWidget(japanese = quote.japanese, english = quote.english, onClick = { quote = Quotes.random() })
                 }
             }
 
@@ -835,12 +835,12 @@ fun TsuzukuLauncherHomeScreen(
                     LauncherAppButton(label = "Phone", icon = null, fallback = Icons.Default.Phone) {
                         if (!onOpenPhone(context)) scope.launch { snackbarHostState.showSnackbar("Phone app is unavailable.") }
                     }
-                    uiState.selectedAllowedApps.take(2).forEach { app ->
+                    uiState.selectedAllowedApps.take(3).forEach { app ->
                         LauncherAppButton(label = app.label, icon = app.icon, fallback = Icons.Default.Apps) {
                             if (!onOpenApp(context, app.packageName)) scope.launch { snackbarHostState.showSnackbar("${app.label} is unavailable.") }
                         }
                     }
-                    repeat((2 - uiState.selectedAllowedApps.size).coerceAtLeast(0)) {
+                    repeat((3 - uiState.selectedAllowedApps.size).coerceAtLeast(0)) {
                         LauncherAppButton(label = "Select App", icon = null, fallback = Icons.Default.Apps) {
                             scope.launch { snackbarHostState.showSnackbar("Choose apps from Tsuzuku Launcher settings.") }
                         }
@@ -885,8 +885,18 @@ fun LauncherClockWidget(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun LauncherQuoteWidget(japanese: String, english: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+fun LauncherQuoteWidget(
+    japanese: String,
+    english: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(japanese, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
         Spacer(Modifier.height(6.dp))
         Text(english, color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
@@ -1073,7 +1083,7 @@ private fun LauncherPageScaffold(
                 .padding(padding)
                 .statusBarsPadding()
                 .padding(horizontal = LauncherHorizontalPadding),
-            contentPadding = PaddingValues(top = 6.dp, bottom = 112.dp),
+            contentPadding = PaddingValues(top = 6.dp, bottom = 160.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {

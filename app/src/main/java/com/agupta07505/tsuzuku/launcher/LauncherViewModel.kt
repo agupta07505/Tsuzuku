@@ -25,6 +25,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 class LauncherViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = LauncherPreferencesRepository(application.applicationContext)
@@ -68,9 +71,13 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LauncherUiState())
 
+    var canUseDndState by mutableStateOf(false)
+        private set
+
     init {
         refreshInstalledApps()
         refreshLauncherStatus()
+        refreshDndPermission()
     }
 
     fun refreshLauncherStatus() {
@@ -90,7 +97,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         return if (packageName in selected) {
             viewModelScope.launch { repository.setAllowedPackages(selected - packageName) }
             true
-        } else if (selected.size < 2) {
+        } else if (selected.size < 3) {
             viewModelScope.launch { repository.setAllowedPackages(selected + packageName) }
             true
         } else {
@@ -124,6 +131,10 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     fun setFocusLockRotation(enabled: Boolean) {
         viewModelScope.launch { repository.setFocusLockRotation(enabled) }
+    }
+
+    fun refreshDndPermission() {
+        canUseDndState = canUseDnd()
     }
 
     fun canUseDnd(): Boolean {
