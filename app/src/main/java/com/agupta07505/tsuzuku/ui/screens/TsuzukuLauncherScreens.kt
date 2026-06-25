@@ -87,6 +87,12 @@ sealed interface LauncherRoute {
     data object Focus : LauncherRoute
 }
 
+private val LauncherHorizontalPadding = 18.dp
+private val LauncherHomeTopPadding = 6.dp
+private val LauncherHomeTopSpacing = 14.dp
+private val LauncherHomeBottomPadding = 0.dp
+private val LauncherHomeBottomSpacing = 8.dp
+
 @Composable
 fun TsuzukuLauncherSettingsScreen(
     uiState: LauncherUiState,
@@ -105,7 +111,7 @@ fun TsuzukuLauncherSettingsScreen(
                 .fillMaxSize()
                 .background(launcherGradient())
                 .padding(padding)
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = LauncherHorizontalPadding),
             contentPadding = PaddingValues(top = 10.dp, bottom = 112.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
@@ -340,7 +346,7 @@ fun AllowedLauncherAppsScreen(
                 .background(launcherGradient())
                 .padding(padding)
                 .statusBarsPadding()
-                .padding(horizontal = 18.dp),
+                .padding(horizontal = LauncherHorizontalPadding),
             contentPadding = PaddingValues(top = 6.dp, bottom = 112.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
@@ -768,7 +774,7 @@ fun TsuzukuLauncherHomeScreen(
                 .padding(padding)
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = LauncherHorizontalPadding)
         ) {
             LauncherScenicBackground(modifier = Modifier.matchParentSize())
 
@@ -776,12 +782,14 @@ fun TsuzukuLauncherHomeScreen(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .fillMaxWidth()
-                    .padding(top = 0.dp),
+                    .padding(top = LauncherHomeTopPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(LauncherHomeTopSpacing)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (previewMode && onBack != null) {
@@ -816,9 +824,9 @@ fun TsuzukuLauncherHomeScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .padding(bottom = 0.dp),
+                    .padding(bottom = LauncherHomeBottomPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(LauncherHomeBottomSpacing)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1064,7 +1072,7 @@ private fun LauncherPageScaffold(
                 .background(launcherGradient())
                 .padding(padding)
                 .statusBarsPadding()
-                .padding(horizontal = 18.dp),
+                .padding(horizontal = LauncherHorizontalPadding),
             contentPadding = PaddingValues(top = 6.dp, bottom = 112.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
