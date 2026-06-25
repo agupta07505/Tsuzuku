@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
@@ -54,7 +55,6 @@ import androidx.compose.ui.window.Dialog
 import com.agupta07505.tsuzuku.data.Habit
 import com.agupta07505.tsuzuku.data.Quotes
 import com.agupta07505.tsuzuku.ui.HabitViewModel
-import com.agupta07505.tsuzuku.ui.components.StreakHeatmap
 import com.agupta07505.tsuzuku.util.DateUtils
 import com.agupta07505.tsuzuku.util.StreakCalculator
 import java.text.SimpleDateFormat
@@ -564,12 +564,15 @@ fun TrackerScreen(
                                     }
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
+                                val isSelectedToday = selectedDate == DateUtils.getTodayString()
                                 Box(
-                                    modifier = Modifier.size(42.dp).clip(CircleShape).background(if (isCompleted) habitColor else Color.Transparent).border(width = 1.5.dp, color = if (isCompleted) Color.Transparent else MaterialTheme.colorScheme.primary, shape = CircleShape).clickable { viewModel.toggleHabitLog(habit.id, selectedDate, !isCompleted) }.testTag("habit_checkbox_${habit.id}"),
+                                    modifier = Modifier.size(42.dp).clip(CircleShape).background(if (isCompleted) { if (isSelectedToday) habitColor else habitColor.copy(alpha = 0.5f) } else Color.Transparent).border(width = 1.5.dp, color = if (isCompleted) Color.Transparent else { if (isSelectedToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant }, shape = CircleShape).clickable(enabled = isSelectedToday) { viewModel.toggleHabitLog(habit.id, selectedDate, !isCompleted) }.testTag("habit_checkbox_${habit.id}"),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (isCompleted) {
                                         Icon(imageVector = Icons.Default.Check, contentDescription = "Completed", tint = Color.White, modifier = Modifier.size(22.dp))
+                                    } else if (!isSelectedToday) {
+                                        Icon(imageVector = Icons.Default.Lock, contentDescription = "Locked date", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                                     }
                                 }
                             }
@@ -715,8 +718,23 @@ fun TrackerScreen(
             )
         }
 
-        // Display Complete Streak Details Dialog on tap of Habit card!
         viewingStreakHabit?.let { habit ->
+            val habitLogs = logs.filter { it.habitId == habit.id }
+            HabitStreakDetailsDialog(
+                habit = habit,
+                logs = habitLogs,
+                onCellToggle = { dateStr, state ->
+                    viewModel.toggleHabitLog(habit.id, dateStr, state)
+                },
+                onEdit = {
+                    editingHabit = habit
+                    viewingStreakHabit = null
+                },
+                onDismiss = { viewingStreakHabit = null }
+            )
+        }
+
+        /*
             val habitLogs = logs.filter { it.habitId == habit.id }
             val currentMonthPrefix = remember { SimpleDateFormat("yyyy-MM", Locale.US).format(Date()) }
             val monthStart = remember {
@@ -901,6 +919,7 @@ fun TrackerScreen(
                 }
             }
         }
+        */
     }
 
 @OptIn(ExperimentalMaterial3Api::class)

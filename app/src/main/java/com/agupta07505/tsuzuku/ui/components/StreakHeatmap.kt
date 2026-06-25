@@ -13,6 +13,9 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -41,7 +44,7 @@ fun StreakHeatmap(
     weeksCount: Int = 18,
     selectedYear: Int? = null,
     title: String? = null,
-    allowPastToggle: Boolean = true
+    allowPastToggle: Boolean = false
 ) {
     val todayStr = remember { DateUtils.getTodayString() }
     val effectiveWeeksCount = if (selectedYear == null) weeksCount else 53
@@ -96,31 +99,10 @@ fun StreakHeatmap(
                 .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Days of the week row headers column
-            Column(
-                modifier = Modifier.padding(end = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                val weekLabels = listOf("Mon", "", "Wed", "", "Fri", "", "Sun")
-                weekLabels.forEach { label ->
-                    Box(
-                        modifier = Modifier.height(18.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Text(
-                            text = label,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.61f)
-                        )
-                    }
-                }
-            }
-
             // GitHub 7-rows × 18-weeks block columns
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 for (c in 0 until effectiveWeeksCount) {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         for (r in 0 until 7) {
                             val idx = c * 7 + r
                             val dateStr = dates.getOrNull(idx) ?: ""
@@ -129,22 +111,23 @@ fun StreakHeatmap(
                             val isFuture = dateStr > todayStr
                             val isOutsideYear = selectedYear != null && !dateStr.startsWith(selectedYear.toString())
                             val canToggle = !isFuture && !isOutsideYear && (allowPastToggle || isToday)
+                            val isLocked = !canToggle
                             
                             val cellColor = when {
-                                isOutsideYear || isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                                isOutsideYear || isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
                                 isCompleted -> habitColor
-                                isToday -> habitColor.copy(alpha = 0.35f)
-                                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                isToday -> habitColor.copy(alpha = 0.22f)
+                                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.82f)
                             }
                             
                             val cellBorder = if (isToday) {
-                                Modifier.border(1.2.dp, habitColor, RoundedCornerShape(3.dp))
+                                Modifier.border(1.4.dp, habitColor, RoundedCornerShape(5.dp))
                             } else Modifier
 
                             Box(
                                 modifier = Modifier
-                                    .size(18.dp)
-                                    .clip(RoundedCornerShape(3.dp))
+                                    .size(22.dp)
+                                    .clip(RoundedCornerShape(5.dp))
                                     .background(cellColor)
                                     .then(cellBorder)
                                     .clickable(enabled = canToggle) {
@@ -153,13 +136,12 @@ fun StreakHeatmap(
                                     .testTag("github_cell_${dateStr}_${habit.id}"),
                                 contentAlignment = Alignment.Center
                             ) {
-                                // Subtle today dot indicator or text
-                                if (isToday) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(5.dp)
-                                            .clip(RoundedCornerShape(2.dp))
-                                            .background(Color.White)
+                                if (isLocked && !isCompleted) {
+                                    Icon(
+                                        imageVector = Icons.Default.Lock,
+                                        contentDescription = "Locked date",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.58f),
+                                        modifier = Modifier.size(12.dp)
                                     )
                                 }
                             }

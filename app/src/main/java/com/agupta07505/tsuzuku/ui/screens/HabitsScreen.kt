@@ -2,6 +2,7 @@ package com.agupta07505.tsuzuku.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -414,9 +415,6 @@ private fun HabitManagementCard(
         runCatching { Color(android.graphics.Color.parseColor(habit.colorHex)) }
             .getOrDefault(defaultHabitColor)
     }
-    val created = remember(habit.createdAt) {
-        SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(habit.createdAt))
-    }
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -443,26 +441,44 @@ private fun HabitManagementCard(
                         }
                     }
                 }
-                Text("🔥 ${stats.currentStreak} day streak this month", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
-                Text("Created: $created", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "🔥 ${stats.currentStreak} day streak",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    if (habit.reminderHour != null && habit.reminderMinute != null) {
+                        Spacer(Modifier.width(6.dp))
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = "Reminder enabled",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
             }
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(if (completedToday) MaterialTheme.colorScheme.primary else Color.Transparent)
-                    .then(
-                        if (completedToday) Modifier
-                        else Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(
+                        width = 1.4.dp,
+                        color = if (completedToday) Color.Transparent else MaterialTheme.colorScheme.outline,
+                        shape = CircleShape
                     )
                     .clickable(enabled = !habit.isArchived, onClick = onToggleDone),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Default.Check,
-                    if (completedToday) "Mark not done" else "Mark done",
-                    tint = if (completedToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (completedToday) {
+                    Icon(
+                        Icons.Default.Check,
+                        "Mark not done",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
             Box {
                 IconButton(onClick = { menuExpanded = true }, modifier = Modifier.size(38.dp)) { Icon(Icons.Default.MoreVert, "More options") }

@@ -76,6 +76,9 @@ fun HabitStreakDetailsDialog(
         runCatching { Color(android.graphics.Color.parseColor(habit.colorHex)) }
             .getOrDefault(Color(0xFF10B981))
     }
+    val createdDate = remember(habit.createdAt) {
+        SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(habit.createdAt))
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -125,6 +128,13 @@ fun HabitStreakDetailsDialog(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
+                Text(
+                    text = "Created: $createdDate",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -157,7 +167,8 @@ fun HabitStreakDetailsDialog(
                     logs = logs,
                     onCellToggle = onCellToggle,
                     weeksCount = 5,
-                    title = "Last 30 Days Activity"
+                    title = "Last 30 Days Activity",
+                    allowPastToggle = false
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
