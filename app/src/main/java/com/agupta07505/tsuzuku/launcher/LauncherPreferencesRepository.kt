@@ -31,7 +31,7 @@ class LauncherPreferencesRepository(private val context: Context) {
 
     val focusSettings: Flow<LauncherFocusSettings> = dataStore.data.map { preferences ->
         LauncherFocusSettings(
-            dndEnabled = preferences[Keys.focusDnd] ?: true,
+            dndEnabled = preferences[Keys.focusDnd] ?: false,
             silentModeEnabled = preferences[Keys.focusSilent] ?: true,
             trackExits = preferences[Keys.focusTrackExits] ?: true,
             showMotivationalQuote = preferences[Keys.focusQuote] ?: true,
@@ -42,7 +42,7 @@ class LauncherPreferencesRepository(private val context: Context) {
 
     suspend fun setAllowedPackages(packages: List<String>) {
         dataStore.edit { preferences ->
-            preferences[Keys.allowedApps] = packages.take(3).toSet()
+            preferences[Keys.allowedApps] = packages.take(MAX_ALLOWED_LAUNCHER_APPS).toSet()
         }
     }
 

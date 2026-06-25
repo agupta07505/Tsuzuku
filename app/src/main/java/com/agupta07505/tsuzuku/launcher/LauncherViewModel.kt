@@ -97,7 +97,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         return if (packageName in selected) {
             viewModelScope.launch { repository.setAllowedPackages(selected - packageName) }
             true
-        } else if (selected.size < 3) {
+        } else if (selected.size < MAX_ALLOWED_LAUNCHER_APPS) {
             viewModelScope.launch { repository.setAllowedPackages(selected + packageName) }
             true
         } else {
@@ -194,7 +194,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         val context = getApplication<Application>().applicationContext
         val packageManager = context.packageManager
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL)
+        val launcherApps = packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL)
             .asSequence()
             .filter { it.activityInfo.packageName != context.packageName }
             .mapNotNull { resolveInfo ->
@@ -207,6 +207,24 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     )
                 }.getOrNull()
             }
+            .toList()
+
+        val launchIntentApps = packageManager.getInstalledApplications(PackageManager.MATCH_ALL)
+            .asSequence()
+            .filter { it.packageName != context.packageName }
+            .filter { packageManager.getLaunchIntentForPackage(it.packageName) != null }
+            .mapNotNull { appInfo ->
+                runCatching {
+                    LauncherAppInfo(
+                        packageName = appInfo.packageName,
+                        label = appInfo.loadLabel(packageManager).toString(),
+                        icon = appInfo.loadIcon(packageManager)
+                    )
+                }.getOrNull()
+            }
+            .toList()
+
+        (launcherApps + launchIntentApps)
             .distinctBy { it.packageName }
             .sortedBy { it.label.lowercase() }
             .toList()

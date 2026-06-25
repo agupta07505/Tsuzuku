@@ -310,6 +310,153 @@ private fun CollapsibleSettingsCardDanger(
     }
 }
 
+@Composable
+private fun SettingsSectionCard(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier,
+    accent: Color = MaterialTheme.colorScheme.primary,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.78f)
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.28f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(accent.copy(alpha = 0.14f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(icon, contentDescription = null, tint = accent)
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.22f))
+            content()
+        }
+    }
+}
+
+@Composable
+private fun SettingsActionRow(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    accent: Color = MaterialTheme.colorScheme.primary,
+    trailing: @Composable (() -> Unit)? = null
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = accent)
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.SemiBold)
+            Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+        }
+        trailing?.invoke()
+    }
+}
+
+@Composable
+private fun SettingsSwitchRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f))
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.SemiBold)
+            Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+        }
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+@Composable
+private fun SettingsThemeRow(
+    option: ThemeOption,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .background(
+                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.24f)
+            )
+            .border(
+                1.dp,
+                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+                else MaterialTheme.colorScheme.outline.copy(alpha = 0.16f),
+                RoundedCornerShape(16.dp)
+            )
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(selected = selected, onClick = onClick)
+        Spacer(Modifier.width(8.dp))
+        Text(option.label, modifier = Modifier.weight(1f), fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
+        ThemePreviewDots(option.colors)
+    }
+}
+
+@Composable
+private fun SettingsInfoPill(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.22f), RoundedCornerShape(18.dp))
+            .padding(14.dp)
+    ) {
+        Text(value, fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleLarge)
+        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -328,6 +475,12 @@ fun SettingsScreen(
     var expandedSection by remember { mutableStateOf<String?>(null) }
     var showJapaneseQuotes by remember {
         mutableStateOf(sharedPrefs.getBoolean("show_japanese_quotes", true))
+    }
+    var remindersEnabled by remember {
+        mutableStateOf(sharedPrefs.getBoolean("reminders_active", true))
+    }
+    var permanentNotificationEnabled by remember {
+        mutableStateOf(sharedPrefs.getBoolean("permanent_notification_active", false))
     }
 
 
@@ -514,6 +667,250 @@ fun SettingsScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("settings_scroll"),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Settings",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Keep Tsuzuku calm, private, and synced with your workflow.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(26.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.28f))
+                ) {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Local-first setup", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    "Your habits, check-ins, and Focus history stay on this device unless you export them.",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                            SettingsInfoPill("Habits", totalHabitsCount.toString(), Modifier.weight(1f))
+                            SettingsInfoPill("Check-ins", totalCheckInsCount.toString(), Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = "Appearance",
+                    subtitle = "Theme and accent color",
+                    icon = Icons.Default.Edit
+                ) {
+                    val themeOptions = listOf(
+                        ThemeOption("system", "System", listOf(Color(0xFFF8FAFC), Color(0xFF0F171F), Color(0xFF94A3B8))),
+                        ThemeOption("light", "Light", listOf(Color(0xFFE2E8F0), Color(0xFFF8FAFC), Color(0xFF2CB5C3))),
+                        ThemeOption("dark", "Dark", listOf(Color(0xFF090E14), Color(0xFF16222F), Color(0xFF2CB5C3))),
+                        ThemeOption("amoled", "AMOLED", listOf(Color(0xFF000000), Color(0xFF090E14), Color(0xFF2CB5C3))),
+                        ThemeOption("green", "Tsuzuku Green", listOf(Color(0xFF050E09), Color(0xFF122C1E), Color(0xFF22C55E))),
+                        ThemeOption("blue", "Tsuzuku Blue", listOf(Color(0xFF030914), Color(0xFF0E223F), Color(0xFF38BDF8)))
+                    )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        themeOptions.forEach { option ->
+                            SettingsThemeRow(
+                                option = option,
+                                selected = themeState == option.key,
+                                onClick = { onThemeChanged(option.key) }
+                            )
+                        }
+                        OutlinedTextField(
+                            value = customAccentColorHex,
+                            onValueChange = onAccentColorChanged,
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            label = { Text("Custom accent hex") },
+                            placeholder = { Text("#22C55E") },
+                            supportingText = { Text("Leave empty to use the selected theme accent.") },
+                            trailingIcon = {
+                                if (customAccentColorHex.isNotBlank()) {
+                                    IconButton(onClick = { onAccentColorChanged("") }) {
+                                        Icon(Icons.Default.Refresh, contentDescription = "Reset accent")
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = "Notifications",
+                    subtitle = "Habit reminders only",
+                    icon = Icons.Default.Notifications,
+                    accent = Color(0xFFEAB308)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SettingsSwitchRow(
+                            title = "Daily Habit Reminders",
+                            subtitle = "Use local notifications to remind you about active habits.",
+                            checked = remindersEnabled,
+                            onCheckedChange = { enabled ->
+                                remindersEnabled = enabled
+                                sharedPrefs.edit().putBoolean("reminders_active", enabled).apply()
+                            }
+                        )
+                        SettingsActionRow(
+                            title = "Reminder Time",
+                            subtitle = formattedReminderTime,
+                            icon = Icons.Default.Notifications,
+                            onClick = { showTimePickerDialog = true },
+                            accent = Color(0xFFEAB308),
+                            trailing = { Text("Change", color = Color(0xFFEAB308), fontWeight = FontWeight.Bold) }
+                        )
+                        SettingsSwitchRow(
+                            title = "Status Bar Motivation",
+                            subtitle = "Show a quiet ongoing motivational notification.",
+                            checked = permanentNotificationEnabled,
+                            onCheckedChange = { enabled ->
+                                permanentNotificationEnabled = enabled
+                                sharedPrefs.edit().putBoolean("permanent_notification_active", enabled).apply()
+                                if (enabled) {
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.updatePermanentNotification(context)
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.scheduleNextHourlyUpdate(context)
+                                } else {
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.cancelPermanentNotification(context)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = "Data Backup",
+                    subtitle = "Export or restore your local data",
+                    icon = Icons.Default.Share,
+                    accent = Color(0xFF10B981)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            "Includes habits, check-ins, and Focus history.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                            Button(
+                                onClick = { exportJsonLauncher.launch("Tsuzuku.json") },
+                                modifier = Modifier.weight(1f).testTag("btn_save_backup_file"),
+                                shape = RoundedCornerShape(14.dp)
+                            ) {
+                                Text("Save JSON", fontWeight = FontWeight.Bold)
+                            }
+                            OutlinedButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        val jsonContent = viewModel.exportDataJson()
+                                        shareBackup(jsonContent, "Tsuzuku.json")
+                                    }
+                                },
+                                modifier = Modifier.weight(1f).testTag("btn_export_json"),
+                                shape = RoundedCornerShape(14.dp)
+                            ) {
+                                Text("Share")
+                            }
+                        }
+                        Button(
+                            onClick = { showImportDialog = true },
+                            modifier = Modifier.fillMaxWidth().testTag("btn_import_json"),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEAB308), contentColor = Color(0xFF0F171F)),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text("Import / Restore Backup", fontWeight = FontWeight.Bold)
+                        }
+                        Text(
+                            "Last backup: $lastBackupDate • $lastBackupSize",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = "Privacy & App",
+                    subtitle = "Offline-first details",
+                    icon = Icons.Default.Info,
+                    accent = Color(0xFF64748B)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text("Tsuzuku ${BuildConfig.VERSION_NAME}", fontWeight = FontWeight.Bold)
+                        Text(
+                            "No ads. No telemetry. Your tracking data lives in the local Room database.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                            OutlinedButton(onClick = { showPrivacyDialog = true }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
+                                Text("Privacy")
+                            }
+                            OutlinedButton(onClick = { showTermsDialog = true }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
+                                Text("Terms")
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = "Danger Zone",
+                    subtitle = "Permanent local data actions",
+                    icon = Icons.Default.Warning,
+                    accent = MaterialTheme.colorScheme.error
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            "Deletes habits, check-ins, streak logs, and stored app data from this device.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Button(
+                            onClick = { showResetDialog = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
+                            modifier = Modifier.fillMaxWidth().testTag("btn_wipe_all_data"),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Delete All Data", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+
+        val showLegacySettings = remember { false }
+        if (showLegacySettings) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -1347,6 +1744,7 @@ fun SettingsScreen(
                     }
                 }
             }
+        }
         }
         
         // Time Picker Custom selection dialog

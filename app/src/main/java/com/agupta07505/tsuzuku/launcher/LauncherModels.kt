@@ -8,6 +8,8 @@ package com.agupta07505.tsuzuku.launcher
 
 import android.graphics.drawable.Drawable
 
+const val MAX_ALLOWED_LAUNCHER_APPS = 3
+
 data class LauncherAppInfo(
     val packageName: String,
     val label: String,
@@ -23,7 +25,7 @@ data class LauncherWidgetPreference(
 )
 
 data class LauncherFocusSettings(
-    val dndEnabled: Boolean = true,
+    val dndEnabled: Boolean = false,
     val silentModeEnabled: Boolean = true,
     val trackExits: Boolean = true,
     val showMotivationalQuote: Boolean = true,

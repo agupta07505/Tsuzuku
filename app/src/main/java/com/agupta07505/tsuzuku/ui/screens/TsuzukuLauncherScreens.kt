@@ -60,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
@@ -72,6 +73,7 @@ import com.agupta07505.tsuzuku.launcher.LauncherAppInfo
 import com.agupta07505.tsuzuku.launcher.LauncherFocusSettings
 import com.agupta07505.tsuzuku.launcher.LauncherUiState
 import com.agupta07505.tsuzuku.launcher.LauncherWidgetPreference
+import com.agupta07505.tsuzuku.launcher.MAX_ALLOWED_LAUNCHER_APPS
 import com.agupta07505.tsuzuku.launcher.defaultLauncherWidgets
 import com.agupta07505.tsuzuku.ui.theme.MyApplicationTheme
 import com.agupta07505.tsuzuku.util.DateUtils
@@ -94,6 +96,7 @@ private val LauncherHomeTopPadding = 6.dp
 private val LauncherHomeTopSpacing = 14.dp
 private val LauncherHomeBottomPadding = 0.dp
 private val LauncherHomeBottomSpacing = 8.dp
+private val LauncherListBottomPadding = 220.dp
 
 @Composable
 fun TsuzukuLauncherSettingsScreen(
@@ -114,7 +117,7 @@ fun TsuzukuLauncherSettingsScreen(
                 .background(launcherGradient())
                 .padding(padding)
                 .padding(horizontal = LauncherHorizontalPadding),
-            contentPadding = PaddingValues(top = 10.dp, bottom = 160.dp),
+            contentPadding = PaddingValues(top = 10.dp, bottom = LauncherListBottomPadding),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
@@ -153,7 +156,7 @@ fun TsuzukuLauncherSettingsScreen(
                         icon = Icons.Default.Apps,
                         iconTint = Color(0xFF38BDF8),
                         title = "Allowed Apps",
-                        subtitle = "${uiState.selectedCount}/3 selected besides Phone",
+                        subtitle = "${uiState.selectedCount}/$MAX_ALLOWED_LAUNCHER_APPS selected besides Phone",
                         onClick = { onNavigate(LauncherRoute.AllowedApps) }
                     )
                     LauncherActionCard(
@@ -287,7 +290,7 @@ fun AllowedAppsSelector(
             Column(modifier = Modifier.weight(1f)) {
                 Text("Allowed Apps", fontWeight = FontWeight.Bold)
                 Text(
-                    if (expanded) "${uiState.selectedCount}/3 selected besides Phone" else "Choose only 3 apps",
+                    if (expanded) "${uiState.selectedCount}/$MAX_ALLOWED_LAUNCHER_APPS selected besides Phone" else "Choose only $MAX_ALLOWED_LAUNCHER_APPS apps",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -317,7 +320,7 @@ fun AllowedAppsSelector(
                     )
                 }
                 Text(
-                    "Only Phone and these 3 selected apps will appear in launcher mode.",
+                    "Only Phone and these $MAX_ALLOWED_LAUNCHER_APPS selected apps will appear in launcher mode.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -349,7 +352,7 @@ fun AllowedLauncherAppsScreen(
                 .padding(padding)
                 .statusBarsPadding()
                 .padding(horizontal = LauncherHorizontalPadding),
-            contentPadding = PaddingValues(top = 6.dp, bottom = 160.dp),
+            contentPadding = PaddingValues(top = 6.dp, bottom = LauncherListBottomPadding),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
@@ -363,7 +366,7 @@ fun AllowedLauncherAppsScreen(
                     )
                     AssistChip(
                         onClick = {},
-                        label = { Text("${uiState.selectedCount}/3") },
+                        label = { Text("${uiState.selectedCount}/$MAX_ALLOWED_LAUNCHER_APPS") },
                         colors = AssistChipDefaults.assistChipColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             labelColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -377,7 +380,7 @@ fun AllowedLauncherAppsScreen(
                     Text("Choose apps for launcher mode", fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "Phone is always available. Select up to 3 more apps that can be opened from Tsuzuku Launcher.",
+                        "Phone is always available. Select up to $MAX_ALLOWED_LAUNCHER_APPS more apps that can be opened from Tsuzuku Launcher.",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -428,7 +431,7 @@ fun AllowedLauncherAppsScreen(
                         selected = app.packageName in uiState.selectedAllowedPackages,
                         onClick = {
                             if (!onToggleAllowedApp(app.packageName)) {
-                                scope.launch { snackbarHostState.showSnackbar("Only 3 apps can be selected.") }
+                                scope.launch { snackbarHostState.showSnackbar("Only $MAX_ALLOWED_LAUNCHER_APPS apps can be selected.") }
                             }
                         }
                     )
@@ -653,6 +656,36 @@ fun LauncherFocusSettingsScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    var showDndPermissionDialog by remember { mutableStateOf(false) }
+
+    if (showDndPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showDndPermissionDialog = false },
+            title = { Text("Allow Do Not Disturb access?") },
+            text = {
+                Text(
+                    "Android requires Notification Policy Access before Tsuzuku can enable Do Not Disturb. You can open settings now, or continue using launcher Focus Mode without DND.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDndPermissionDialog = false
+                        onOpenDndSettings(context)
+                    }
+                ) {
+                    Text("Open Settings")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDndPermissionDialog = false }) {
+                    Text("Continue without DND")
+                }
+            }
+        )
+    }
+
     LauncherPageScaffold(
         title = "Focus Mode",
         onBack = onBack,
@@ -669,7 +702,19 @@ fun LauncherFocusSettingsScreen(
         }
         item {
             PremiumCard(contentPadding = PaddingValues(0.dp)) {
-                FocusSettingRow(Icons.Outlined.NotificationsOff, "Do Not Disturb", "Block notifications", focusSettings.dndEnabled, onDndChange)
+                FocusSettingRow(
+                    Icons.Outlined.NotificationsOff,
+                    "Do Not Disturb",
+                    if (canUseDnd) "Block notifications" else "Permission needed before DND can turn on",
+                    focusSettings.dndEnabled && canUseDnd
+                ) { enabled ->
+                    if (enabled && !canUseDnd) {
+                        onDndChange(false)
+                        showDndPermissionDialog = true
+                    } else {
+                        onDndChange(enabled)
+                    }
+                }
                 FocusSettingRow(Icons.AutoMirrored.Outlined.VolumeOff, "Silent Mode", "Mute calls, alerts and media", focusSettings.silentModeEnabled, onSilentChange)
                 FocusSettingRow(Icons.Outlined.WarningAmber, "Track Exits", "Track how many times you exit", focusSettings.trackExits, onTrackExitsChange)
                 FocusSettingRow(Icons.Outlined.FormatQuote, "Motivational Quote", "Show daily motivation", focusSettings.showMotivationalQuote, onQuoteChange)
@@ -677,12 +722,12 @@ fun LauncherFocusSettingsScreen(
                 FocusSettingRow(Icons.Outlined.ScreenRotation, "Lock Device Rotation", "Prevent accidental rotation", focusSettings.lockOrientation, onLockRotationChange)
             }
         }
-        if (focusSettings.dndEnabled && !canUseDnd) {
+        if (!canUseDnd) {
             item {
                 PremiumCard {
                     Text("DND permission is not granted", color = Color(0xFFFFC857), fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(6.dp))
-                    Text("Tsuzuku can continue without DND, or you can allow Notification Policy Access in settings.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("Tsuzuku will keep Focus Mode usable without DND. Grant access only if you want launcher Focus Mode to silence notifications automatically.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(12.dp))
                     OutlinedButton(onClick = { onOpenDndSettings(context) }) {
                         Text("Open DND Permission Settings")
@@ -763,7 +808,17 @@ fun TsuzukuLauncherHomeScreen(
         val context = LocalContext.current
         val snackbarHostState = remember { SnackbarHostState() }
         val scope = rememberCoroutineScope()
-        var quote by remember { mutableStateOf(Quotes.random()) }
+        var quoteSeed by remember { mutableStateOf(System.currentTimeMillis()) }
+        LaunchedEffect(Unit) {
+            while (true) {
+                quoteSeed = System.currentTimeMillis()
+                kotlinx.coroutines.delay(60_000)
+            }
+        }
+        var quote by remember(quoteSeed) {
+            val minuteBucket = quoteSeed / 60_000L
+            mutableStateOf(Quotes.byIndex((minuteBucket % Quotes.all.size).toInt()))
+        }
 
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -838,12 +893,12 @@ fun TsuzukuLauncherHomeScreen(
                         LauncherAppButton(label = "Phone", icon = null, fallback = Icons.Default.Phone) {
                             if (!onOpenPhone(context)) scope.launch { snackbarHostState.showSnackbar("Phone app is unavailable.") }
                         }
-                        uiState.selectedAllowedApps.take(3).forEach { app ->
+                        uiState.selectedAllowedApps.take(MAX_ALLOWED_LAUNCHER_APPS).forEach { app ->
                             LauncherAppButton(label = app.label, icon = app.icon, fallback = Icons.Default.Apps) {
                                 if (!onOpenApp(context, app.packageName)) scope.launch { snackbarHostState.showSnackbar("${app.label} is unavailable.") }
                             }
                         }
-                        repeat((3 - uiState.selectedAllowedApps.size).coerceAtLeast(0)) {
+                        repeat((MAX_ALLOWED_LAUNCHER_APPS - uiState.selectedAllowedApps.size).coerceAtLeast(0)) {
                             LauncherAppButton(label = "Select App", icon = null, fallback = Icons.Default.Apps) {
                                 scope.launch { snackbarHostState.showSnackbar("Choose apps from Tsuzuku Launcher settings.") }
                             }
@@ -1100,20 +1155,23 @@ private fun LauncherAppButton(
     label: String,
     icon: Drawable?,
     fallback: ImageVector,
+    width: Dp = 76.dp,
+    iconSize: Dp = 58.dp,
+    fallbackSize: Dp = 30.dp,
     onClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier.width(88.dp).clickable(onClick = onClick),
+        modifier = Modifier.width(width).clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .size(64.dp)
+                .size(iconSize)
                 .clip(RoundedCornerShape(18.dp))
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)),
             contentAlignment = Alignment.Center
         ) {
-            LauncherAppIcon(icon = icon, fallback = fallback, size = 64.dp, fallbackSize = 34.dp)
+            LauncherAppIcon(icon = icon, fallback = fallback, size = iconSize, fallbackSize = fallbackSize)
         }
         Spacer(Modifier.height(8.dp))
         Text(
@@ -1175,7 +1233,7 @@ private fun LauncherPageScaffold(
                 .padding(padding)
                 .statusBarsPadding()
                 .padding(horizontal = LauncherHorizontalPadding),
-            contentPadding = PaddingValues(top = 6.dp, bottom = 160.dp),
+            contentPadding = PaddingValues(top = 6.dp, bottom = LauncherListBottomPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
