@@ -771,17 +771,16 @@ fun TsuzukuLauncherHomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(launcherHomeGradient())
-                .padding(padding)
-                .statusBarsPadding()
-                .navigationBarsPadding()
-                .padding(horizontal = LauncherHorizontalPadding)
         ) {
-            LauncherScenicBackground(modifier = Modifier.matchParentSize())
+            LauncherScenicBackground(modifier = Modifier.fillMaxSize())
 
             Column(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .fillMaxWidth()
+                    .padding(padding)
+                    .statusBarsPadding()
+                    .padding(horizontal = LauncherHorizontalPadding)
                     .padding(top = LauncherHomeTopPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(LauncherHomeTopSpacing)
@@ -824,6 +823,9 @@ fun TsuzukuLauncherHomeScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
+                    .padding(padding)
+                    .navigationBarsPadding()
+                    .padding(horizontal = LauncherHorizontalPadding)
                     .padding(bottom = LauncherHomeBottomPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(LauncherHomeBottomSpacing)
@@ -905,100 +907,144 @@ fun LauncherQuoteWidget(
 
 @Composable
 private fun LauncherScenicBackground(modifier: Modifier = Modifier) {
-    val primary = MaterialTheme.colorScheme.primary
-    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
-    val background = MaterialTheme.colorScheme.background
-
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val horizon = h * 0.48f
+        val horizon = h * 0.65f
 
-        drawCircle(
-            color = primary.copy(alpha = 0.22f),
-            radius = w * 0.11f,
-            center = Offset(w * 0.50f, horizon + h * 0.02f)
-        )
-
-        val farMountains = Path().apply {
-            moveTo(0f, horizon + h * 0.13f)
-            lineTo(w * 0.16f, horizon + h * 0.03f)
-            lineTo(w * 0.31f, horizon + h * 0.10f)
-            lineTo(w * 0.46f, horizon - h * 0.02f)
-            lineTo(w * 0.62f, horizon + h * 0.11f)
-            lineTo(w * 0.78f, horizon + h * 0.00f)
-            lineTo(w, horizon + h * 0.12f)
-            lineTo(w, h)
-            lineTo(0f, h)
-            close()
-        }
-        drawPath(farMountains, primaryContainer.copy(alpha = 0.30f))
-
-        val nearMountains = Path().apply {
-            moveTo(0f, horizon + h * 0.18f)
-            lineTo(w * 0.22f, horizon + h * 0.06f)
-            lineTo(w * 0.40f, horizon + h * 0.17f)
-            lineTo(w * 0.57f, horizon + h * 0.04f)
-            lineTo(w * 0.76f, horizon + h * 0.18f)
-            lineTo(w, horizon + h * 0.07f)
-            lineTo(w, h)
-            lineTo(0f, h)
-            close()
-        }
-        drawPath(nearMountains, primary.copy(alpha = 0.13f))
-
-        val ridge = Path().apply {
-            moveTo(0f, horizon + h * 0.22f)
-            lineTo(w * 0.18f, horizon + h * 0.13f)
-            lineTo(w * 0.35f, horizon + h * 0.21f)
-            lineTo(w * 0.50f, horizon + h * 0.15f)
-            lineTo(w * 0.66f, horizon + h * 0.23f)
-            lineTo(w * 0.84f, horizon + h * 0.14f)
-            lineTo(w, horizon + h * 0.22f)
-            lineTo(w, h)
-            lineTo(0f, h)
-            close()
-        }
-        drawPath(ridge, background.copy(alpha = 0.44f))
-
-        fun pine(x: Float, base: Float, height: Float, alpha: Float) {
-            val trunkWidth = height * 0.07f
-            drawRect(
-                color = Color.Black.copy(alpha = alpha),
-                topLeft = Offset(x - trunkWidth / 2f, base - height * 0.18f),
-                size = androidx.compose.ui.geometry.Size(trunkWidth, height * 0.18f)
-            )
-            repeat(4) { index ->
-                val top = base - height + height * 0.18f * index
-                val half = height * (0.25f - index * 0.025f)
-                val treePath = Path().apply {
-                    moveTo(x, top)
-                    lineTo(x - half, base - height * 0.08f * index)
-                    lineTo(x + half, base - height * 0.08f * index)
-                    close()
-                }
-                drawPath(treePath, Color.Black.copy(alpha = alpha))
-            }
-        }
-
-        val treeBase = horizon + h * 0.25f
-        listOf(0.02f, 0.08f, 0.15f, 0.88f, 0.94f, 1.00f).forEachIndexed { index, xRatio ->
-            pine(
-                x = w * xRatio,
-                base = treeBase + h * 0.02f * (index % 2),
-                height = h * (0.13f + 0.02f * (index % 3)),
-                alpha = 0.32f
-            )
-        }
-
+        // Draw sky vertical gradient
         drawRect(
             brush = Brush.verticalGradient(
-                colors = listOf(Color.Transparent, background.copy(alpha = 0.76f)),
-                startY = horizon + h * 0.18f,
-                endY = h
+                colors = listOf(
+                    Color(0xFF030A05), // Dark green-black top
+                    Color(0xFF0A2213), // Forest green middle
+                    Color(0xFF1C3A23)  // Rich foliage green bottom
+                ),
+                startY = 0f,
+                endY = horizon
             ),
             topLeft = Offset.Zero,
             size = size
+        )
+
+        // Draw Sun/Moon and Glow
+        val sunX = w * 0.50f
+        val sunY = horizon
+        val sunRadius = w * 0.16f
+
+        // Outer glow
+        drawCircle(
+            color = Color(0xFFE2F4C5).copy(alpha = 0.07f),
+            radius = sunRadius * 1.8f,
+            center = Offset(sunX, sunY)
+        )
+        // Inner glow
+        drawCircle(
+            color = Color(0xFFE2F4C5).copy(alpha = 0.16f),
+            radius = sunRadius * 1.3f,
+            center = Offset(sunX, sunY)
+        )
+        // Core
+        drawCircle(
+            color = Color(0xFFE2F4C5),
+            radius = sunRadius,
+            center = Offset(sunX, sunY)
+        )
+
+        // Draw Far Hills
+        val farHills = Path().apply {
+            moveTo(0f, horizon + h * 0.02f)
+            quadraticTo(w * 0.25f, horizon - h * 0.02f, w * 0.50f, horizon + h * 0.01f)
+            quadraticTo(w * 0.75f, horizon + h * 0.04f, w, horizon + h * 0.01f)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(farHills, Color(0xFF132A1C))
+
+        // Pine Tree Drawing Helper
+        fun drawPineTree(x: Float, base: Float, height: Float, color: Color) {
+            // Trunk
+            val trunkWidth = height * 0.08f
+            val trunkHeight = height * 0.20f
+            drawRect(
+                color = color,
+                topLeft = Offset(x - trunkWidth / 2f, base - trunkHeight),
+                size = androidx.compose.ui.geometry.Size(trunkWidth, trunkHeight)
+            )
+
+            // Leaf Layers (5 layered triangles)
+            val leafBaseY = base - trunkHeight + height * 0.05f
+            val leafHeight = height - trunkHeight
+            val layers = 5
+            for (i in 0 until layers) {
+                val layerProgress = i.toFloat() / (layers - 1)
+                val layerHeight = leafHeight * 0.35f
+                val layerWidth = height * (0.42f - layerProgress * 0.26f)
+
+                val layerBottom = leafBaseY - (leafHeight * 0.75f * layerProgress)
+                val layerTop = layerBottom - layerHeight
+
+                val path = Path().apply {
+                    moveTo(x, layerTop)
+                    lineTo(x - layerWidth / 2f, layerBottom)
+                    lineTo(x + layerWidth / 2f, layerBottom)
+                    close()
+                }
+                drawPath(path, color)
+            }
+        }
+
+        // Draw Middle Hills
+        val midHills = Path().apply {
+            moveTo(0f, horizon + h * 0.06f)
+            quadraticTo(w * 0.30f, horizon + h * 0.02f, w * 0.60f, horizon + h * 0.07f)
+            quadraticTo(w * 0.85f, horizon + h * 0.09f, w, horizon + h * 0.05f)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(midHills, Color(0xFF0C1D13))
+
+        // Draw Trees on Middle Hills (blended for atmospheric perspective)
+        val midTreeColor = Color(0xFF0C1D13)
+        drawPineTree(w * 0.26f, horizon + h * 0.045f, h * 0.06f, midTreeColor)
+        drawPineTree(w * 0.34f, horizon + h * 0.05f, h * 0.05f, midTreeColor)
+        drawPineTree(w * 0.72f, horizon + h * 0.08f, h * 0.065f, midTreeColor)
+
+        // Draw Foreground Ridge
+        val nearRidge = Path().apply {
+            moveTo(0f, horizon + h * 0.11f)
+            quadraticTo(w * 0.40f, horizon + h * 0.15f, w * 0.70f, horizon + h * 0.12f)
+            quadraticTo(w * 0.85f, horizon + h * 0.10f, w, horizon + h * 0.13f)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(nearRidge, Color(0xFF060E0A))
+
+        // Draw Trees on Foreground (Dark Silhouettes)
+        val foreTreeColor = Color(0xFF040A06)
+        
+        // Left foreground tree group
+        drawPineTree(w * 0.06f, horizon + h * 0.12f, h * 0.15f, foreTreeColor)
+        drawPineTree(w * 0.12f, horizon + h * 0.128f, h * 0.11f, foreTreeColor)
+        drawPineTree(w * 0.18f, horizon + h * 0.134f, h * 0.085f, foreTreeColor)
+
+        // Right foreground tree group
+        drawPineTree(w * 0.82f, horizon + h * 0.11f, h * 0.10f, foreTreeColor)
+        drawPineTree(w * 0.88f, horizon + h * 0.118f, h * 0.14f, foreTreeColor)
+        drawPineTree(w * 0.94f, horizon + h * 0.125f, h * 0.12f, foreTreeColor)
+
+        // Draw Foreground gradient overlay to smoothly transition to black at bottom of screen
+        drawRect(
+            brush = Brush.verticalGradient(
+                colors = listOf(Color.Transparent, Color(0xFF020503).copy(alpha = 0.92f)),
+                startY = horizon + h * 0.11f,
+                endY = h
+            ),
+            topLeft = Offset(0f, horizon + h * 0.11f),
+            size = androidx.compose.ui.geometry.Size(w, h - (horizon + h * 0.11f))
         )
     }
 }
