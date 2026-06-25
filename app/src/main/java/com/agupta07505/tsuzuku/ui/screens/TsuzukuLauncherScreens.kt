@@ -22,8 +22,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.VolumeOff
 import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
@@ -39,7 +40,6 @@ import androidx.compose.material.icons.outlined.FormatQuote
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material.icons.outlined.ScreenRotation
-import androidx.compose.material.icons.outlined.VolumeOff
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -354,7 +354,7 @@ fun AllowedLauncherAppsScreen(
         ) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                     Text(
                         "Allowed Apps",
                         fontWeight = FontWeight.Bold,
@@ -670,7 +670,7 @@ fun LauncherFocusSettingsScreen(
         item {
             PremiumCard(contentPadding = PaddingValues(0.dp)) {
                 FocusSettingRow(Icons.Outlined.NotificationsOff, "Do Not Disturb", "Block notifications", focusSettings.dndEnabled, onDndChange)
-                FocusSettingRow(Icons.Outlined.VolumeOff, "Silent Mode", "Mute calls, alerts and media", focusSettings.silentModeEnabled, onSilentChange)
+                FocusSettingRow(Icons.AutoMirrored.Outlined.VolumeOff, "Silent Mode", "Mute calls, alerts and media", focusSettings.silentModeEnabled, onSilentChange)
                 FocusSettingRow(Icons.Outlined.WarningAmber, "Track Exits", "Track how many times you exit", focusSettings.trackExits, onTrackExitsChange)
                 FocusSettingRow(Icons.Outlined.FormatQuote, "Motivational Quote", "Show daily motivation", focusSettings.showMotivationalQuote, onQuoteChange)
                 FocusSettingRow(Icons.Default.Visibility, "Hide Distracting UI", "Keep launcher minimal", focusSettings.hideDistractingUi, onHideUiChange)
@@ -794,7 +794,7 @@ fun TsuzukuLauncherHomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (previewMode && onBack != null) {
-                            IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
+                            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                         }
                         TsuzukuMiniLogo()
                         Spacer(Modifier.weight(1f))
@@ -1180,7 +1180,7 @@ private fun LauncherPageScaffold(
         ) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                     Text(title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
                     action()
                 }

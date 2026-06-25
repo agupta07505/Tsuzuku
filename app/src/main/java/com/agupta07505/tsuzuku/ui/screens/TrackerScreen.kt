@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
@@ -31,7 +32,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.RadioButtonChecked
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
@@ -668,7 +668,7 @@ fun TrackerScreen(
                         Card(modifier = Modifier.weight(1f).heightIn(min = 100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
                             Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(imageVector = Icons.Default.TrendingUp, contentDescription = "Success", tint = Color(0xFF60A5FA), modifier = Modifier.size(16.dp))
+                                    Icon(imageVector = Icons.AutoMirrored.Filled.TrendingUp, contentDescription = "Success", tint = Color(0xFF60A5FA), modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Success Rate", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }

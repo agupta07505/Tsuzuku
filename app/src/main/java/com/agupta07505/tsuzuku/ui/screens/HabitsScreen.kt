@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -136,7 +137,7 @@ fun HabitsScreen(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HabitStatsCard("Total Habits", overview.activeCount.toString(), "Active", Icons.Default.List, Modifier.weight(1f))
+                    HabitStatsCard("Total Habits", overview.activeCount.toString(), "Active", Icons.AutoMirrored.Filled.List, Modifier.weight(1f))
                     HabitStatsCard("Best Streak", overview.bestStreak.toString(), "Days • This Month", Icons.Default.LocalFireDepartment, Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {

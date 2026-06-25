@@ -21,12 +21,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Refresh
@@ -222,7 +222,7 @@ private fun CollapsibleSettingsCard(
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, bottom = 20.dp)
                 ) {
-                    Divider(
+                    HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -299,7 +299,7 @@ private fun CollapsibleSettingsCardDanger(
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, bottom = 20.dp)
                 ) {
-                    Divider(
+                    HorizontalDivider(
                         color = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -647,7 +647,7 @@ fun SettingsScreen(
                             )
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -689,7 +689,7 @@ fun SettingsScreen(
                             )
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         // Added clickable time picker row
                         Row(
@@ -730,7 +730,7 @@ fun SettingsScreen(
                             }
                         }
                         
-                        Divider(color = Color(0xFF16222F))
+                        HorizontalDivider(color = Color(0xFF16222F))
                         
                         Button(
                             onClick = {
@@ -797,7 +797,7 @@ fun SettingsScreen(
                             )
                         }
                         
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -881,7 +881,7 @@ fun SettingsScreen(
                             )
                         }
                         
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -914,7 +914,7 @@ fun SettingsScreen(
                             )
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         // Sleek Interactive Quote Showcase box
                         val mantraPairList = remember {
@@ -1134,7 +1134,7 @@ fun SettingsScreen(
             item {
                 CollapsibleSettingsCard(
                     title = "App Statistics",
-                    icon = Icons.Default.List,
+                    icon = Icons.AutoMirrored.Filled.List,
                     isExpanded = expandedSection == "stats",
                     onToggle = { expandedSection = if (expandedSection == "stats") null else "stats" },
                     primaryColor = Color(0xFF8B5CF6)
@@ -1156,7 +1156,7 @@ fun SettingsScreen(
                             Text("$totalHabitsCount", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1167,7 +1167,7 @@ fun SettingsScreen(
                             Text("$totalCheckInsCount", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1178,7 +1178,7 @@ fun SettingsScreen(
                             Text("$daysUsingCount", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1273,7 +1273,7 @@ fun SettingsScreen(
                         }
                         
                         Spacer(modifier = Modifier.height(10.dp))
-                        Divider(color = Color(0xFF16222F))
+                        HorizontalDivider(color = Color(0xFF16222F))
                         Spacer(modifier = Modifier.height(14.dp))
                         
                         // Developer footer note
@@ -1479,7 +1479,7 @@ fun SettingsScreen(
                             Text("Select Backup File (.json)", fontWeight = FontWeight.Bold)
                         }
                         
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(vertical = 4.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(vertical = 4.dp))
                         
                         Text(
                             text = "Or, paste the raw text content of your backup schema manually below:",

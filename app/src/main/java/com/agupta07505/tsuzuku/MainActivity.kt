@@ -18,11 +18,11 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.BarChart
@@ -125,7 +125,7 @@ class MainActivity : ComponentActivity() {
                             NavigationBarItem(
                                 selected = currentTab == "habits",
                                 onClick = { currentTab = "habits" },
-                                icon = { Icon(Icons.Default.List, contentDescription = "Habits") },
+                                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Habits") },
                                 label = { Text("Habits") },
                                 modifier = Modifier.testTag("tab_habits")
                             )

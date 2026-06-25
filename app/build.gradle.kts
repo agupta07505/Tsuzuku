@@ -55,6 +55,7 @@ android {
       signingConfig = signingConfigs.getByName("release")
     }
     debug {
+      applicationIdSuffix = ".debug"
       signingConfig = if (file("${rootDir}/debug.keystore").exists()) {
         signingConfigs.getByName("debugConfig")
       } else {

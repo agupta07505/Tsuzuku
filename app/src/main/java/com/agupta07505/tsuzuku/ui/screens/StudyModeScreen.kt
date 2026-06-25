@@ -23,22 +23,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloseFullscreen
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.StayCurrentPortrait
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -240,7 +240,7 @@ private fun FocusMetricsBoard(state: FocusUiState) {
             )
             HorizontalDivider(color = FocusOutline, modifier = Modifier.padding(vertical = 8.dp))
             MetricRow(
-                left = Triple("Success Rate", "${state.successRate}%", Icons.Default.TrendingUp),
+                left = Triple("Success Rate", "${state.successRate}%", Icons.AutoMirrored.Filled.TrendingUp),
                 right = Triple("Current Streak", "${state.currentStreakDays} days", Icons.Default.LocalFireDepartment),
                 rightColor = FocusOrange
             )
@@ -288,7 +288,7 @@ private fun RecentSessionCard(session: FocusSession) {
     OutlinedFocusCard {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(shape = CircleShape, color = FocusGreen.copy(alpha = .13f)) {
-                Icon(Icons.Default.MenuBook, null, tint = FocusGreen, modifier = Modifier.padding(9.dp).size(20.dp))
+                Icon(Icons.AutoMirrored.Filled.MenuBook, null, tint = FocusGreen, modifier = Modifier.padding(9.dp).size(20.dp))
             }
             Column(Modifier.padding(start = 11.dp).weight(1f)) {
                 Text(session.sessionName, fontWeight = FontWeight.SemiBold)
@@ -366,7 +366,7 @@ private fun FocusSetupSheet(onDismiss: () -> Unit, onStart: (String, Int, Int) -
                     value = name,
                     onValueChange = { name = it.take(30) },
                     placeholder = { Text("Math Revision") },
-                    leadingIcon = { Icon(Icons.Default.MenuBook, null, tint = FocusGreen) },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.MenuBook, null, tint = FocusGreen) },
                     supportingText = { Text("${name.length}/30", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = FocusGreen),
@@ -499,7 +499,7 @@ private fun ActiveFocusScreen(runtime: FocusRuntimeState, onEnd: () -> Unit) {
         item {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Surface(shape = CircleShape, color = FocusGreen.copy(alpha = .12f), border = BorderStroke(1.dp, FocusOutline)) {
-                    Icon(Icons.Default.MenuBook, null, tint = FocusGreen, modifier = Modifier.padding(12.dp).size(28.dp))
+                    Icon(Icons.AutoMirrored.Filled.MenuBook, null, tint = FocusGreen, modifier = Modifier.padding(12.dp).size(28.dp))
                 }
                 Column(Modifier.padding(start = 13.dp).weight(1f)) {
                     Text(runtime.sessionName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -636,7 +636,7 @@ private fun FocusWarningScreen(runtime: FocusRuntimeState, onEndSession: () -> U
         }
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.ExitToApp, null, tint = FocusOrange, modifier = Modifier.size(32.dp))
+                Icon(Icons.AutoMirrored.Filled.ExitToApp, null, tint = FocusOrange, modifier = Modifier.size(32.dp))
                 Spacer(Modifier.size(11.dp))
                 Text("Put your phone down and keep going", color = FocusOrange, fontWeight = FontWeight.SemiBold)
             }
@@ -667,7 +667,7 @@ private fun ReturnToFocusScreen(runtime: FocusRuntimeState) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Surface(shape = CircleShape, color = FocusPurple.copy(alpha = .12f), border = BorderStroke(3.dp, FocusPurple.copy(alpha = .35f))) {
-                Icon(Icons.Default.ExitToApp, null, tint = FocusPurple, modifier = Modifier.padding(20.dp).size(48.dp))
+                Icon(Icons.AutoMirrored.Filled.ExitToApp, null, tint = FocusPurple, modifier = Modifier.padding(20.dp).size(48.dp))
             }
             Text("Return to Focus Session", color = FocusPurple, fontSize = 23.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 25.dp))
             Text("You left the app.", modifier = Modifier.padding(top = 16.dp))
@@ -743,7 +743,7 @@ private fun FocusResultScreen(result: FocusSession, onDone: () -> Unit) {
         item {
             OutlinedFocusCard {
                 Column(Modifier.padding(horizontal = 17.dp)) {
-                    ResultRow("Session Name", result.sessionName, Icons.Default.MenuBook)
+                    ResultRow("Session Name", result.sessionName, Icons.AutoMirrored.Filled.MenuBook)
                     HorizontalDivider(color = FocusOutline)
                     ResultRow("Planned Duration", "${result.plannedDurationMinutes} min")
                     HorizontalDivider(color = FocusOutline)
