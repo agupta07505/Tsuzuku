@@ -450,12 +450,20 @@ private fun HabitManagementCard(
                     )
                     if (habit.reminderHour != null && habit.reminderMinute != null) {
                         Spacer(Modifier.width(6.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             Icons.Default.Notifications,
                             contentDescription = "Reminder enabled",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(14.dp)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.size(10.dp)
                         )
+                        Spacer(Modifier.width(2.dp))
+                        Text(
+                            text = String.format("%02d:%02d", habit.reminderHour, habit.reminderMinute),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            fontSize = 11.sp
+                        )
+                        }
                     }
                 }
             }

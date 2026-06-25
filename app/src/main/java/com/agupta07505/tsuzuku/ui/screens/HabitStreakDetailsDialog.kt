@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.agupta07505.tsuzuku.data.Habit
 import com.agupta07505.tsuzuku.data.HabitLog
-import com.agupta07505.tsuzuku.ui.components.StreakHeatmap
+import com.agupta07505.tsuzuku.ui.components.CurrentMonthHabitHeatmap
 import com.agupta07505.tsuzuku.util.StreakCalculator
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -162,13 +162,10 @@ fun HabitStreakDetailsDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                StreakHeatmap(
+                CurrentMonthHabitHeatmap(
                     habit = habit,
                     logs = logs,
-                    onCellToggle = onCellToggle,
-                    weeksCount = 5,
-                    title = "Last 30 Days Activity",
-                    allowPastToggle = false
+                    onTodayToggle = onCellToggle
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

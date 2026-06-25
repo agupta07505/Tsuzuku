@@ -13,9 +13,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -111,8 +108,6 @@ fun StreakHeatmap(
                             val isFuture = dateStr > todayStr
                             val isOutsideYear = selectedYear != null && !dateStr.startsWith(selectedYear.toString())
                             val canToggle = !isFuture && !isOutsideYear && (allowPastToggle || isToday)
-                            val isLocked = !canToggle
-                            
                             val cellColor = when {
                                 isOutsideYear || isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
                                 isCompleted -> habitColor
@@ -135,17 +130,88 @@ fun StreakHeatmap(
                                     }
                                     .testTag("github_cell_${dateStr}_${habit.id}"),
                                 contentAlignment = Alignment.Center
-                            ) {
-                                if (isLocked && !isCompleted) {
-                                    Icon(
-                                        imageVector = Icons.Default.Lock,
-                                        contentDescription = "Locked date",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.58f),
-                                        modifier = Modifier.size(12.dp)
-                                    )
-                                }
-                            }
+                            ) {}
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CurrentMonthHabitHeatmap(
+    habit: Habit,
+    logs: List<HabitLog>,
+    onTodayToggle: (String, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val todayStr = remember { DateUtils.getTodayString() }
+    val calendar = remember { Calendar.getInstance() }
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val monthDates = remember(year, month) { DateUtils.getMonthGridDates(year, month) }
+    val rows = remember(monthDates) { monthDates.chunked(7) }
+    val completedDates = remember(logs) {
+        logs.filter { it.isCompleted }.map { it.date }.toSet()
+    }
+    val habitColor = try {
+        Color(android.graphics.Color.parseColor(habit.colorHex))
+    } catch (e: Exception) {
+        MaterialTheme.colorScheme.primary
+    }
+    val emptyColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.88f)
+    val futureColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.32f)
+
+    Column(modifier = modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        Text(
+            text = "This Month Activity",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            rows.forEach { week ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    week.forEach { dateStr ->
+                        if (dateStr == null) {
+                            Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
+                        } else {
+                            val isToday = dateStr == todayStr
+                            val isCompleted = dateStr in completedDates
+                            val isFuture = dateStr > todayStr
+                            val cellColor = when {
+                                isCompleted -> habitColor
+                                isFuture -> futureColor
+                                else -> emptyColor
+                            }
+                            val border = if (isToday) {
+                                Modifier.border(1.6.dp, habitColor, RoundedCornerShape(7.dp))
+                            } else {
+                                Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f), RoundedCornerShape(7.dp))
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(7.dp))
+                                    .background(cellColor)
+                                    .then(border)
+                                    .clickable(enabled = isToday) {
+                                        onTodayToggle(dateStr, !isCompleted)
+                                    }
+                                    .testTag("month_cell_${dateStr}_${habit.id}")
+                            )
+                        }
+                    }
+                    repeat(7 - week.size) {
+                        Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
                     }
                 }
             }
