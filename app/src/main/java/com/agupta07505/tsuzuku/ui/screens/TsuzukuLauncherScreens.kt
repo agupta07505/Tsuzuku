@@ -9,6 +9,7 @@ package com.agupta07505.tsuzuku.ui.screens
 import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,7 +28,6 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
@@ -45,8 +45,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -85,16 +87,13 @@ sealed interface LauncherRoute {
 }
 
 private val LauncherBackground = Color(0xFF041008)
-private val LauncherCard = Color(0xFF0B1A12)
 @Composable
 fun TsuzukuLauncherSettingsScreen(
     uiState: LauncherUiState,
     onNavigate: (LauncherRoute) -> Unit,
     onToggleAllowedApp: (String) -> Boolean,
-    onOpenLauncherSettings: (Context) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var allowedAppsExpanded by remember { mutableStateOf(false) }
@@ -110,7 +109,7 @@ fun TsuzukuLauncherSettingsScreen(
                 .background(launcherGradient())
                 .padding(padding)
                 .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(top = 10.dp, bottom = 12.dp),
+            contentPadding = PaddingValues(top = 10.dp, bottom = 112.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
@@ -145,13 +144,6 @@ fun TsuzukuLauncherSettingsScreen(
 
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    LauncherActionCard(
-                        icon = Icons.Default.RocketLaunch,
-                        iconTint = MaterialTheme.colorScheme.primary,
-                        title = "Activate Tsuzuku Launcher",
-                        subtitle = "Set as default launcher",
-                        onClick = { onNavigate(LauncherRoute.Activation) }
-                    )
                     AllowedAppsSelector(
                         uiState = uiState,
                         icon = Icons.Default.Apps,
@@ -185,22 +177,6 @@ fun TsuzukuLauncherSettingsScreen(
                         subtitle = "Configure focus environment",
                         onClick = { onNavigate(LauncherRoute.Focus) }
                     )
-                }
-            }
-
-            item {
-                Button(
-                    onClick = { onOpenLauncherSettings(context) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Icon(Icons.Default.RocketLaunch, contentDescription = null)
-                    Spacer(Modifier.width(10.dp))
-                    Text("Activate Launcher", fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -668,6 +644,8 @@ fun TsuzukuLauncherHomeScreen(
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp)
         ) {
+            LauncherScenicBackground(modifier = Modifier.matchParentSize())
+
             Column(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -782,6 +760,106 @@ fun LauncherQuoteWidget(japanese: String, english: String, modifier: Modifier = 
 }
 
 @Composable
+private fun LauncherScenicBackground(modifier: Modifier = Modifier) {
+    val primary = MaterialTheme.colorScheme.primary
+    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
+    val background = MaterialTheme.colorScheme.background
+
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val horizon = h * 0.48f
+
+        drawCircle(
+            color = primary.copy(alpha = 0.22f),
+            radius = w * 0.11f,
+            center = Offset(w * 0.50f, horizon + h * 0.02f)
+        )
+
+        val farMountains = Path().apply {
+            moveTo(0f, horizon + h * 0.13f)
+            lineTo(w * 0.16f, horizon + h * 0.03f)
+            lineTo(w * 0.31f, horizon + h * 0.10f)
+            lineTo(w * 0.46f, horizon - h * 0.02f)
+            lineTo(w * 0.62f, horizon + h * 0.11f)
+            lineTo(w * 0.78f, horizon + h * 0.00f)
+            lineTo(w, horizon + h * 0.12f)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(farMountains, primaryContainer.copy(alpha = 0.30f))
+
+        val nearMountains = Path().apply {
+            moveTo(0f, horizon + h * 0.18f)
+            lineTo(w * 0.22f, horizon + h * 0.06f)
+            lineTo(w * 0.40f, horizon + h * 0.17f)
+            lineTo(w * 0.57f, horizon + h * 0.04f)
+            lineTo(w * 0.76f, horizon + h * 0.18f)
+            lineTo(w, horizon + h * 0.07f)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(nearMountains, primary.copy(alpha = 0.13f))
+
+        val ridge = Path().apply {
+            moveTo(0f, horizon + h * 0.22f)
+            lineTo(w * 0.18f, horizon + h * 0.13f)
+            lineTo(w * 0.35f, horizon + h * 0.21f)
+            lineTo(w * 0.50f, horizon + h * 0.15f)
+            lineTo(w * 0.66f, horizon + h * 0.23f)
+            lineTo(w * 0.84f, horizon + h * 0.14f)
+            lineTo(w, horizon + h * 0.22f)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(ridge, background.copy(alpha = 0.44f))
+
+        fun pine(x: Float, base: Float, height: Float, alpha: Float) {
+            val trunkWidth = height * 0.07f
+            drawRect(
+                color = Color.Black.copy(alpha = alpha),
+                topLeft = Offset(x - trunkWidth / 2f, base - height * 0.18f),
+                size = androidx.compose.ui.geometry.Size(trunkWidth, height * 0.18f)
+            )
+            repeat(4) { index ->
+                val top = base - height + height * 0.18f * index
+                val half = height * (0.25f - index * 0.025f)
+                val treePath = Path().apply {
+                    moveTo(x, top)
+                    lineTo(x - half, base - height * 0.08f * index)
+                    lineTo(x + half, base - height * 0.08f * index)
+                    close()
+                }
+                drawPath(treePath, Color.Black.copy(alpha = alpha))
+            }
+        }
+
+        val treeBase = horizon + h * 0.25f
+        listOf(0.02f, 0.08f, 0.15f, 0.88f, 0.94f, 1.00f).forEachIndexed { index, xRatio ->
+            pine(
+                x = w * xRatio,
+                base = treeBase + h * 0.02f * (index % 2),
+                height = h * (0.13f + 0.02f * (index % 3)),
+                alpha = 0.32f
+            )
+        }
+
+        drawRect(
+            brush = Brush.verticalGradient(
+                colors = listOf(Color.Transparent, background.copy(alpha = 0.76f)),
+                startY = horizon + h * 0.18f,
+                endY = h
+            ),
+            topLeft = Offset.Zero,
+            size = size
+        )
+    }
+}
+
+@Composable
 private fun LauncherAppButton(
     label: String,
     icon: Drawable?,
@@ -856,6 +934,7 @@ private fun LauncherPageScaffold(
                 .background(launcherGradient())
                 .padding(padding)
                 .padding(18.dp),
+            contentPadding = PaddingValues(bottom = 112.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             item {
@@ -945,8 +1024,7 @@ private fun TsuzukuLauncherSettingsPreview() {
         TsuzukuLauncherSettingsScreen(
             uiState = LauncherUiState(installedApps = listOf(LauncherAppInfo("notes", "Keep Notes")), selectedAllowedPackages = listOf("notes")),
             onNavigate = {},
-            onToggleAllowedApp = { true },
-            onOpenLauncherSettings = {}
+            onToggleAllowedApp = { true }
         )
     }
 }

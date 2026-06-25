@@ -178,14 +178,13 @@ class MainActivity : ComponentActivity() {
                                 uiState = launcherUiState,
                                 onNavigate = { launcherRoute = it },
                                 onToggleAllowedApp = launcherViewModel::toggleAllowedApp,
-                                onOpenLauncherSettings = launcherViewModel::openDefaultLauncherSettings,
-                                modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+                                modifier = Modifier.fillMaxSize()
                             )
                             LauncherRoute.Activation -> LauncherActivationInstructionsScreen(
                                 isActive = launcherUiState.isDefaultLauncher,
                                 onBack = { launcherRoute = LauncherRoute.Settings },
                                 onOpenSettings = launcherViewModel::openDefaultLauncherSettings,
-                                modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+                                modifier = Modifier.fillMaxSize()
                             )
                             LauncherRoute.Preview -> LauncherPreviewScreen(
                                 uiState = launcherUiState,
@@ -196,13 +195,13 @@ class MainActivity : ComponentActivity() {
                                 onOpenApp = launcherViewModel::openApp,
                                 onOpenPhone = launcherViewModel::openPhone,
                                 onOpenSettings = { launcherRoute = LauncherRoute.Settings },
-                                modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+                                modifier = Modifier.fillMaxSize()
                             )
                             LauncherRoute.Widgets -> ManageLauncherWidgetsScreen(
                                 widgets = launcherUiState.widgets,
                                 onBack = { launcherRoute = LauncherRoute.Settings },
                                 onToggleWidget = launcherViewModel::setWidgetEnabled,
-                                modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+                                modifier = Modifier.fillMaxSize()
                             )
                             LauncherRoute.Focus -> LauncherFocusSettingsScreen(
                                 focusSettings = launcherUiState.focusSettings,
@@ -215,7 +214,7 @@ class MainActivity : ComponentActivity() {
                                 onQuoteChange = launcherViewModel::setFocusQuote,
                                 onHideUiChange = launcherViewModel::setFocusHideUi,
                                 onLockRotationChange = launcherViewModel::setFocusLockRotation,
-                                modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                         "study_mode" -> com.agupta07505.tsuzuku.ui.screens.StudyModeScreen(
