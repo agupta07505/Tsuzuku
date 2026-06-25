@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -171,8 +172,16 @@ fun CurrentMonthHabitHeatmap(
     } catch (e: Exception) {
         MaterialTheme.colorScheme.primary
     }
-    val emptyColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.74f)
-    val futureColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
+    val emptyColor = lerp(
+        MaterialTheme.colorScheme.surfaceVariant,
+        MaterialTheme.colorScheme.onSurface,
+        0.12f
+    ).copy(alpha = 0.95f)
+    val futureColor = lerp(
+        MaterialTheme.colorScheme.surfaceVariant,
+        MaterialTheme.colorScheme.onSurface,
+        0.06f
+    ).copy(alpha = 0.62f)
     val legendColors = listOf(
         emptyColor,
         habitColor.copy(alpha = 0.35f),
@@ -186,7 +195,7 @@ fun CurrentMonthHabitHeatmap(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f))
+                .background(lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant, 0.38f))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f), RoundedCornerShape(18.dp))
                 .padding(14.dp)
         ) {
