@@ -22,13 +22,25 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Refresh
@@ -610,6 +622,207 @@ private fun SettingsBrandFooter() {
     }
 }
 
+@Composable
+private fun AboutTsuzukuScreen(
+    versionName: String,
+    onBack: () -> Unit,
+    onPrivacy: () -> Unit,
+    onTerms: () -> Unit,
+    onOpenSource: () -> Unit,
+    onGitHub: () -> Unit,
+    onInstagram: () -> Unit,
+    onLinkedIn: () -> Unit,
+    onEmail: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.background
+                    ),
+                    center = androidx.compose.ui.geometry.Offset(180f, 180f),
+                    radius = 980f
+                )
+            )
+            .statusBarsPadding()
+            .padding(horizontal = 18.dp),
+        contentPadding = PaddingValues(top = 18.dp, bottom = 116.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .size(54.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.70f))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.20f), CircleShape)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+                Spacer(Modifier.width(16.dp))
+                Column {
+                    Text("About Tsuzuku", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+                    Text("Learn more about the app and its mission.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+
+        item {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_tsuzuku_create_habbit_logo),
+                    contentDescription = "Tsuzuku",
+                    modifier = Modifier
+                        .size(126.dp)
+                        .clip(CircleShape)
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.30f), CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(Modifier.height(12.dp))
+                Text("Tsuzuku", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Black)
+                Text("続く — Keep going, every day.", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    "Tsuzuku is a privacy-first habit tracker and focus companion.\nAll your data stays on your device. Always.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
+                    lineHeight = 24.sp
+                )
+            }
+        }
+
+        item {
+            SettingsGroupedCard {
+                SettingsMenuRow(
+                    icon = Icons.Default.Info,
+                    title = "Version",
+                    subtitle = versionName,
+                    iconColor = Color(0xFF4ADE80),
+                    badge = "Latest",
+                    showChevron = false,
+                    onClick = {}
+                )
+                SettingsMenuDivider()
+                SettingsMenuRow(
+                    icon = Icons.Default.CloudOff,
+                    title = "Privacy",
+                    subtitle = "100% Offline. Your data never leaves your device.",
+                    iconColor = Color(0xFF38BDF8),
+                    onClick = onPrivacy
+                )
+                SettingsMenuDivider()
+                SettingsMenuRow(
+                    icon = Icons.Default.Gavel,
+                    title = "Terms of Use",
+                    subtitle = "Read the terms and conditions for using Tsuzuku.",
+                    iconColor = Color(0xFFFACC15),
+                    chevronColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    onClick = onTerms
+                )
+                SettingsMenuDivider()
+                SettingsMenuRow(
+                    icon = Icons.Default.PrivacyTip,
+                    title = "Privacy Policy",
+                    subtitle = "Learn how we protect your privacy.",
+                    iconColor = Color(0xFFC084FC),
+                    chevronColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    onClick = onPrivacy
+                )
+                SettingsMenuDivider()
+                SettingsMenuRow(
+                    icon = Icons.Default.Code,
+                    title = "Open Source",
+                    subtitle = "Tsuzuku is open source and community driven.",
+                    iconColor = Color(0xFF22C55E),
+                    chevronColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    showChevron = false,
+                    onClick = onOpenSource
+                )
+            }
+        }
+
+        item {
+            SettingsGroupedCard {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(12.dp))
+                    Text("Our Mission", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                }
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    "To help you build better habits, stay focused, and live intentionally.\nNo ads. No tracking. Just you and your journey.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyLarge,
+                    lineHeight = 25.sp
+                )
+            }
+        }
+
+        item {
+            SettingsGroupedCard {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFFB7185))
+                    Spacer(Modifier.width(12.dp))
+                    Text("Made with love by", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                }
+                Spacer(Modifier.height(12.dp))
+                Text("Animesh Gupta", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+                Text("Developer • Designer • Lifelong Learner", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+
+        item {
+            SettingsGroupedCard {
+                Text("Connect with me", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(12.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(onClick = onGitHub, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
+                            Text("GitHub")
+                        }
+                        OutlinedButton(onClick = onInstagram, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
+                            Text("Instagram")
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(onClick = onLinkedIn, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
+                            Text("LinkedIn")
+                        }
+                        OutlinedButton(onClick = onEmail, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
+                            Text("Email")
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
+            SettingsGroupedCard {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.CloudOff, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(14.dp))
+                    Text(
+                        "Tsuzuku is and always will be ad-free and analytics-free.\nYour trust means everything.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 23.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
 private fun formatBytes(bytes: Long): String {
     if (bytes <= 0L) return "0 B"
     val units = listOf("B", "KB", "MB", "GB")
@@ -669,7 +882,6 @@ fun SettingsScreen(
 
     // Dialog state
     var showImportDialog by remember { mutableStateOf(false) }
-    var importText by remember { mutableStateOf("") }
     
     var showResetDialog by remember { mutableStateOf(false) }
     var showResetFocusDialog by remember { mutableStateOf(false) }
@@ -759,13 +971,6 @@ fun SettingsScreen(
     }
     var lastBackupSize by remember {
         mutableStateOf(sharedPrefs.getString("last_backup_size", "0 B") ?: "0 B")
-    }
-
-    val databaseSizeText = remember(habitsList, logsList, focusSessionsList) {
-        formatBytes(databaseSizeBytes(context))
-    }
-    val storageUsageText = remember(habitsList, logsList, focusSessionsList) {
-        formatBytes(appStorageBytes(context))
     }
 
     fun openUrl(url: String, fallbackMessage: String) {
@@ -955,7 +1160,7 @@ fun SettingsScreen(
                     SettingsSectionLabel("Local Data")
                     SettingsGroupedCard {
                         SettingsMenuRow(
-                            icon = Icons.Default.Share,
+                            icon = Icons.Default.FileUpload,
                             title = "Export Data (.json)",
                             subtitle = "Export all habits, focus sessions and settings to a JSON file",
                             iconColor = Color(0xFFC084FC),
@@ -965,7 +1170,7 @@ fun SettingsScreen(
                         )
                         SettingsMenuDivider()
                         SettingsMenuRow(
-                            icon = Icons.Default.Add,
+                            icon = Icons.Default.FileDownload,
                             title = "Import Data (.json)",
                             subtitle = "Restore data from a previously exported JSON file",
                             iconColor = Color(0xFF38BDF8),
@@ -991,27 +1196,7 @@ fun SettingsScreen(
                         )
                         SettingsMenuDivider()
                         SettingsMenuRow(
-                            icon = Icons.Default.Info,
-                            title = "About Tsuzuku",
-                            subtitle = "Version, developer and app information",
-                            iconColor = Color(0xFF38BDF8),
-                            chevronColor = Color(0xFF38BDF8),
-                            value = "v${BuildConfig.VERSION_NAME}",
-                            onClick = { showAboutDialog = true }
-                        )
-                        SettingsMenuDivider()
-                        SettingsMenuRow(
-                            icon = Icons.Default.Warning,
-                            title = "Report a Bug",
-                            subtitle = "Found an issue? Let us know",
-                            iconColor = Color(0xFFEF4444),
-                            chevronColor = Color(0xFFEF4444),
-                            showChevron = false,
-                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/issues/new?template=bug_report.md", "Cannot open bug report page.") }
-                        )
-                        SettingsMenuDivider()
-                        SettingsMenuRow(
-                            icon = Icons.Default.Add,
+                            icon = Icons.Default.Lightbulb,
                             title = "Request a Feature",
                             subtitle = "Suggest a new feature or improvement",
                             iconColor = Color(0xFFFACC15),
@@ -1021,7 +1206,17 @@ fun SettingsScreen(
                         )
                         SettingsMenuDivider()
                         SettingsMenuRow(
-                            icon = Icons.Default.Check,
+                            icon = Icons.Default.BugReport,
+                            title = "Report Bugs",
+                            subtitle = "Found an issue? Let us know",
+                            iconColor = Color(0xFFEF4444),
+                            chevronColor = Color(0xFFEF4444),
+                            showChevron = false,
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/issues/new?template=bug_report.md", "Cannot open bug report page.") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.RateReview,
                             title = "App Review",
                             subtitle = "Share feedback and review Tsuzuku",
                             iconColor = Color(0xFF4ADE80),
@@ -1031,7 +1226,7 @@ fun SettingsScreen(
                         )
                         SettingsMenuDivider()
                         SettingsMenuRow(
-                            icon = Icons.Default.Notifications,
+                            icon = Icons.Default.Groups,
                             title = "Join Community",
                             subtitle = "Join the discussion and share your journey",
                             iconColor = Color(0xFFC084FC),
@@ -1042,13 +1237,23 @@ fun SettingsScreen(
                         )
                         SettingsMenuDivider()
                         SettingsMenuRow(
-                            icon = Icons.Default.Info,
+                            icon = Icons.Default.Gavel,
                             title = "MIT License",
                             subtitle = "Open source and free to use",
                             iconColor = Color(0xFF2DD4BF),
                             chevronColor = Color(0xFF2DD4BF),
                             showChevron = false,
                             onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/blob/main/LICENSE", "Cannot open license.") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Info,
+                            title = "About Tsuzuku",
+                            subtitle = "Version, developer and app information",
+                            iconColor = Color(0xFF38BDF8),
+                            chevronColor = Color(0xFF38BDF8),
+                            value = "v${BuildConfig.VERSION_NAME}",
+                            onClick = { showAboutDialog = true }
                         )
                     }
                 }
@@ -2332,26 +2537,17 @@ fun SettingsScreen(
         }
 
         if (showAboutDialog) {
-            AlertDialog(
-                onDismissRequest = { showAboutDialog = false },
-                title = { Text("About Tsuzuku", fontWeight = FontWeight.Bold) },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        SettingsBrandFooter()
-                        Text("Version ${BuildConfig.VERSION_NAME}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                            OutlinedButton(onClick = { showPrivacyDialog = true }, modifier = Modifier.weight(1f)) {
-                                Text("Privacy")
-                            }
-                            OutlinedButton(onClick = { showTermsDialog = true }, modifier = Modifier.weight(1f)) {
-                                Text("Terms")
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showAboutDialog = false }) { Text("Done") }
-                }
+            AboutTsuzukuScreen(
+                versionName = BuildConfig.VERSION_NAME,
+                onBack = { showAboutDialog = false },
+                onPrivacy = { showPrivacyDialog = true },
+                onTerms = { showTermsDialog = true },
+                onOpenSource = { openUrl("https://github.com/agupta07505/Tsuzuku", "Cannot open GitHub.") },
+                onGitHub = { openUrl("https://github.com/agupta07505", "Cannot open GitHub.") },
+                onInstagram = { openUrl("https://instagram.com/agupta07505", "Cannot open Instagram.") },
+                onLinkedIn = { openUrl("https://www.linkedin.com/in/agupta07505", "Cannot open LinkedIn.") },
+                onEmail = { sendMail("Tsuzuku", "") },
+                modifier = Modifier.matchParentSize()
             )
         }
 
@@ -2490,7 +2686,7 @@ fun SettingsScreen(
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
-                            text = "Select a Tsuzuku JSON backup containing habits, check-ins, and Focus sessions, or paste its contents below:",
+                            text = "Select a Tsuzuku JSON backup containing habits, check-ins, and Focus sessions.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -2510,56 +2706,20 @@ fun SettingsScreen(
                         ) {
                             Text("Select Backup File (.json)", fontWeight = FontWeight.Bold)
                         }
-                        
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(vertical = 4.dp))
-                        
                         Text(
-                            text = "Or, paste the raw text content of your backup schema manually below:",
+                            text = "Import will replace the current local data after the file is read successfully.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        OutlinedTextField(
-                            value = importText,
-                            onValueChange = { importText = it },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(130.dp)
-                                .testTag("import_text_field"),
-                            placeholder = { Text("{ \"habits\": [...], \"logs\": [...] }") },
-                            textStyle = LocalTextStyle.current.copy(fontSize = 11.sp, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                         )
                     }
                 },
                 confirmButton = {
-                    Button(
-                        onClick = {
-                            if (importText.trim().isNotEmpty()) {
-                                viewModel.importDataJson(
-                                    importText,
-                                    onSuccess = {
-                                        showImportDialog = false
-                                        importText = ""
-                                        Toast.makeText(context, "Backup successfully loaded!", Toast.LENGTH_LONG).show()
-                                    },
-                                    onError = { err ->
-                                        Toast.makeText(context, "Error: $err", Toast.LENGTH_LONG).show()
-                                    }
-                                )
-                            }
-                        },
-                        enabled = importText.trim().isNotEmpty(),
-                        modifier = Modifier.testTag("import_confirm_button"),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF10B981)
-                        )
-                    ) {
-                        Text("Verify & Overwrite Data")
+                    TextButton(onClick = { showImportDialog = false }) {
+                        Text("Close")
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showImportDialog = false }) {
-                        Text("Nevermind")
-                    }
+                    TextButton(onClick = { importJsonFileLauncher.launch("*/*") }) { Text("Choose File") }
                 }
             )
         }
