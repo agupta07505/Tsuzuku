@@ -767,6 +767,7 @@ fun TsuzukuLauncherHomeScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp),
         modifier = modifier
     ) { padding ->
         Box(
@@ -780,10 +781,8 @@ fun TsuzukuLauncherHomeScreen(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .fillMaxWidth()
-                    .padding(padding)
                     .statusBarsPadding()
-                    .padding(horizontal = LauncherHorizontalPadding)
-                    .padding(top = LauncherHomeTopPadding),
+                    .padding(horizontal = LauncherHorizontalPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(LauncherHomeTopSpacing)
             ) {
@@ -825,10 +824,9 @@ fun TsuzukuLauncherHomeScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .padding(padding)
                     .navigationBarsPadding()
                     .padding(horizontal = LauncherHorizontalPadding)
-                    .padding(bottom = LauncherHomeBottomPadding),
+                    .padding(bottom = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(LauncherHomeBottomSpacing)
             ) {
