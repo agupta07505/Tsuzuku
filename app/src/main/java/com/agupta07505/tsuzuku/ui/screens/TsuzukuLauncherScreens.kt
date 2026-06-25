@@ -7,6 +7,7 @@
 package com.agupta07505.tsuzuku.ui.screens
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.outlined.FormatQuote
+import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material.icons.outlined.ScreenRotation
 import androidx.compose.material.icons.outlined.VolumeOff
@@ -854,11 +856,20 @@ fun TsuzukuLauncherHomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { scope.launch { snackbarHostState.showSnackbar("Only selected apps are available in Tsuzuku Launcher.") } }) {
-                        Icon(Icons.Default.GridView, contentDescription = "Apps", tint = MaterialTheme.colorScheme.primary)
-                    }
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
+                    }
+                    IconButton(onClick = {
+                        runCatching {
+                            val cameraIntent = Intent(android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(cameraIntent)
+                        }.onFailure {
+                            scope.launch { snackbarHostState.showSnackbar("Camera app is unavailable.") }
+                        }
+                    }) {
+                        Icon(Icons.Outlined.PhotoCamera, contentDescription = "Camera", tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -927,21 +938,56 @@ private fun LauncherScenicBackground(modifier: Modifier = Modifier) {
             size = size
         )
 
+        // Draw sky stars (minimal glowing stars)
+        val stars = listOf(
+            Triple(0.08f, 0.12f, 0.7f),
+            Triple(0.18f, 0.28f, 0.5f),
+            Triple(0.05f, 0.40f, 0.6f),
+            Triple(0.28f, 0.15f, 0.8f),
+            Triple(0.38f, 0.08f, 0.4f),
+            Triple(0.48f, 0.22f, 0.7f),
+            Triple(0.60f, 0.10f, 0.6f),
+            Triple(0.72f, 0.25f, 0.5f),
+            Triple(0.82f, 0.14f, 0.8f),
+            Triple(0.92f, 0.32f, 0.6f),
+            Triple(0.85f, 0.42f, 0.5f),
+            Triple(0.68f, 0.35f, 0.7f),
+            Triple(0.95f, 0.18f, 0.8f),
+            Triple(0.22f, 0.45f, 0.5f)
+        )
+        stars.forEach { (xRatio, yRatio, alpha) ->
+            // Glowing star halo
+            drawCircle(
+                color = Color(0xFFE2F4C5).copy(alpha = alpha * 0.18f),
+                radius = 5.dp.toPx(),
+                center = Offset(w * xRatio, horizon * yRatio)
+            )
+            // Star core
+            drawCircle(
+                color = Color(0xFFE2F4C5).copy(alpha = alpha),
+                radius = 1.2.dp.toPx(),
+                center = Offset(w * xRatio, horizon * yRatio)
+            )
+        }
+
         // Draw Sun/Moon and Glow
         val sunX = w * 0.50f
         val sunY = horizon
         val sunRadius = w * 0.16f
 
-        // Outer glow
+        // Sexy natural blur growing radial glow
         drawCircle(
-            color = Color(0xFFE2F4C5).copy(alpha = 0.07f),
-            radius = sunRadius * 1.8f,
-            center = Offset(sunX, sunY)
-        )
-        // Inner glow
-        drawCircle(
-            color = Color(0xFFE2F4C5).copy(alpha = 0.16f),
-            radius = sunRadius * 1.3f,
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFFE2F4C5).copy(alpha = 0.35f),
+                    Color(0xFFE2F4C5).copy(alpha = 0.14f),
+                    Color(0xFFE2F4C5).copy(alpha = 0.03f),
+                    Color.Transparent
+                ),
+                center = Offset(sunX, sunY),
+                radius = sunRadius * 2.2f
+            ),
+            radius = sunRadius * 2.2f,
             center = Offset(sunX, sunY)
         )
         // Core
