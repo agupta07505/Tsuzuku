@@ -39,7 +39,9 @@ fun StreakHeatmap(
     onCellToggle: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     weeksCount: Int = 18,
-    selectedYear: Int? = null
+    selectedYear: Int? = null,
+    title: String? = null,
+    allowPastToggle: Boolean = true
 ) {
     val todayStr = remember { DateUtils.getTodayString() }
     val effectiveWeeksCount = if (selectedYear == null) weeksCount else 53
@@ -79,22 +81,11 @@ fun StreakHeatmap(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = selectedYear?.let { "$it Activity" } ?: "Last $weeksCount Weeks Activity",
+                text = title ?: selectedYear?.let { "$it Activity" } ?: "Last $weeksCount Weeks Activity",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f, fill = false)
-            )
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            Text(
-                text = "Only Today can be marked",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.End,
-                modifier = Modifier.wrapContentWidth(Alignment.End)
             )
         }
 
@@ -137,6 +128,7 @@ fun StreakHeatmap(
                             val isCompleted = logs.any { it.date == dateStr && it.isCompleted }
                             val isFuture = dateStr > todayStr
                             val isOutsideYear = selectedYear != null && !dateStr.startsWith(selectedYear.toString())
+                            val canToggle = !isFuture && !isOutsideYear && (allowPastToggle || isToday)
                             
                             val cellColor = when {
                                 isOutsideYear || isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
@@ -155,7 +147,7 @@ fun StreakHeatmap(
                                     .clip(RoundedCornerShape(3.dp))
                                     .background(cellColor)
                                     .then(cellBorder)
-                                    .clickable(enabled = isToday) {
+                                    .clickable(enabled = canToggle) {
                                         onCellToggle(dateStr, !isCompleted)
                                     }
                                     .testTag("github_cell_${dateStr}_${habit.id}"),

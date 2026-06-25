@@ -68,6 +68,7 @@ fun HabitsScreen(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showAddDialog by remember { mutableStateOf(false) }
     var editingHabit by remember { mutableStateOf<Habit?>(null) }
+    var viewingStreakHabit by remember { mutableStateOf<Habit?>(null) }
     var deleteCandidate by remember { mutableStateOf<Habit?>(null) }
 
     val currentMonthPrefix = remember { SimpleDateFormat("yyyy-MM", Locale.US).format(Date()) }
@@ -172,7 +173,7 @@ fun HabitsScreen(
                     completedToday = logs.any {
                         it.habitId == habit.id && it.date == DateUtils.getTodayString() && it.isCompleted
                     },
-                    onClick = { editingHabit = habit },
+                    onClick = { viewingStreakHabit = habit },
                     onToggleDone = {
                         val completed = logs.any {
                             it.habitId == habit.id && it.date == DateUtils.getTodayString() && it.isCompleted
@@ -219,6 +220,22 @@ fun HabitsScreen(
                 editingHabit = null
                 deleteCandidate = habit
             }
+        )
+    }
+
+    viewingStreakHabit?.let { habit ->
+        val habitLogs = logs.filter { it.habitId == habit.id }
+        HabitStreakDetailsDialog(
+            habit = habit,
+            logs = habitLogs,
+            onCellToggle = { dateStr, state ->
+                viewModel.toggleHabitLog(habit.id, dateStr, state)
+            },
+            onEdit = {
+                editingHabit = habit
+                viewingStreakHabit = null
+            },
+            onDismiss = { viewingStreakHabit = null }
         )
     }
 
@@ -447,7 +464,6 @@ private fun HabitManagementCard(
                     tint = if (completedToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            IconButton(onClick = onEdit, modifier = Modifier.size(38.dp)) { Icon(Icons.Default.Edit, "Edit ${habit.name}", modifier = Modifier.size(19.dp)) }
             Box {
                 IconButton(onClick = { menuExpanded = true }, modifier = Modifier.size(38.dp)) { Icon(Icons.Default.MoreVert, "More options") }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {

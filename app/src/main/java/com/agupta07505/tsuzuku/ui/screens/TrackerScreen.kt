@@ -564,15 +564,12 @@ fun TrackerScreen(
                                     }
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
-                                val isSelectedToday = selectedDate == DateUtils.getTodayString()
                                 Box(
-                                    modifier = Modifier.size(42.dp).clip(CircleShape).background(if (isCompleted) { if (isSelectedToday) habitColor else habitColor.copy(alpha = 0.5f) } else Color.Transparent).border(width = 1.5.dp, color = if (isCompleted) Color.Transparent else { if (isSelectedToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant }, shape = CircleShape).clickable(enabled = isSelectedToday) { viewModel.toggleHabitLog(habit.id, selectedDate, !isCompleted) }.testTag("habit_checkbox_${habit.id}"),
+                                    modifier = Modifier.size(42.dp).clip(CircleShape).background(if (isCompleted) habitColor else Color.Transparent).border(width = 1.5.dp, color = if (isCompleted) Color.Transparent else MaterialTheme.colorScheme.primary, shape = CircleShape).clickable { viewModel.toggleHabitLog(habit.id, selectedDate, !isCompleted) }.testTag("habit_checkbox_${habit.id}"),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (isCompleted) {
                                         Icon(imageVector = Icons.Default.Check, contentDescription = "Completed", tint = Color.White, modifier = Modifier.size(22.dp))
-                                    } else if (!isSelectedToday) {
-                                        Text("🔒", fontSize = 11.sp)
                                     }
                                 }
                             }
@@ -721,8 +718,21 @@ fun TrackerScreen(
         // Display Complete Streak Details Dialog on tap of Habit card!
         viewingStreakHabit?.let { habit ->
             val habitLogs = logs.filter { it.habitId == habit.id }
-            val stats = remember(habitLogs) {
-                StreakCalculator.calculate(habitLogs, habit.createdAt)
+            val currentMonthPrefix = remember { SimpleDateFormat("yyyy-MM", Locale.US).format(Date()) }
+            val monthStart = remember {
+                Calendar.getInstance().apply {
+                    set(Calendar.DAY_OF_MONTH, 1)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+            }
+            val monthLogs = remember(habitLogs, currentMonthPrefix) {
+                habitLogs.filter { it.date.startsWith(currentMonthPrefix) }
+            }
+            val stats = remember(monthLogs, monthStart, habit.createdAt) {
+                StreakCalculator.calculate(monthLogs, maxOf(habit.createdAt, monthStart))
             }
             val habitColor = remember(habit.colorHex) {
                 try {
@@ -847,7 +857,9 @@ fun TrackerScreen(
                             logs = habitLogs,
                             onCellToggle = { dateStr, state ->
                                 viewModel.toggleHabitLog(habit.id, dateStr, state)
-                            }
+                            },
+                            weeksCount = 5,
+                            title = "Last 30 Days Activity"
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
