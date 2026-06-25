@@ -728,7 +728,7 @@ private fun AboutTsuzukuScreen(
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -739,17 +739,19 @@ private fun AboutTsuzukuScreen(
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
+                    Text(
+                        text = "About Tsuzuku",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.offset(x = (-4).dp)
+                    )
                 }
-                Text(
-                    text = "About Tsuzuku",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Black,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
                 Text(
                     text = "Learn more about the app and its mission.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 32.dp, top = 2.dp)
                 )
             }
         }
@@ -865,27 +867,34 @@ private fun AboutTsuzukuScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .size(42.dp)
+                                    .size(32.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFFB7185).copy(alpha = 0.13f)),
+                                    .background(Color(0xFFFB7185).copy(alpha = 0.12f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFFB7185))
+                                Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFFB7185), modifier = Modifier.size(16.dp))
                             }
-                            Spacer(Modifier.width(12.dp))
-                            Text("Made with love by", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                            Spacer(Modifier.width(10.dp))
+                            Text(
+                                "MADE WITH LOVE BY",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelSmall,
+                                letterSpacing = 1.sp,
+                                color = Color(0xFFFB7185)
+                            )
                         }
-                        Spacer(Modifier.height(14.dp))
-                        Text("Animesh Gupta", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
-                        Text("Developer • Designer • Lifelong Learner", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.height(10.dp))
+                        Text("Animesh Gupta", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                        Spacer(Modifier.height(4.dp))
+                        Text("Developer • Designer • Lifelong Learner", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
                     }
                     Image(
                         painter = painterResource(id = R.drawable.developer),
                         contentDescription = "Animesh Gupta",
                         modifier = Modifier
-                            .size(92.dp)
+                            .size(72.dp)
                             .clip(CircleShape)
-                            .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), CircleShape),
+                            .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
                         contentScale = ContentScale.Crop
                     )
                 }
