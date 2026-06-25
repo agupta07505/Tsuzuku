@@ -11,6 +11,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
@@ -40,8 +42,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
@@ -63,6 +67,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.net.Uri
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import com.agupta07505.tsuzuku.BuildConfig
 
@@ -457,6 +462,200 @@ private fun SettingsInfoPill(
     }
 }
 
+@Composable
+private fun SettingsSectionLabel(
+    text: String,
+    color: Color = MaterialTheme.colorScheme.primary
+) {
+    Text(
+        text = text.uppercase(Locale.getDefault()),
+        color = color,
+        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.padding(start = 2.dp, bottom = 8.dp)
+    )
+}
+
+@Composable
+private fun SettingsGroupedCard(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.24f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                            Color.Transparent
+                        ),
+                        radius = 720f
+                    )
+                )
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun SettingsMenuDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 60.dp),
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.16f)
+    )
+}
+
+@Composable
+private fun SettingsMenuRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    iconColor: Color,
+    modifier: Modifier = Modifier,
+    value: String? = null,
+    badge: String? = null,
+    chevronColor: Color = iconColor,
+    onClick: () -> Unit = {}
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(iconColor.copy(alpha = 0.18f))
+                .border(1.dp, iconColor.copy(alpha = 0.25f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(25.dp))
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                subtitle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+                lineHeight = 18.sp
+            )
+        }
+        if (value != null) {
+            Text(value, color = chevronColor, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(10.dp))
+        }
+        if (badge != null) {
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = chevronColor.copy(alpha = 0.16f),
+                border = BorderStroke(1.dp, chevronColor.copy(alpha = 0.18f))
+            ) {
+                Text(
+                    badge,
+                    color = chevronColor,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+        }
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = chevronColor,
+            modifier = Modifier.size(30.dp)
+        )
+    }
+}
+
+@Composable
+private fun SettingsBrandFooter() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.76f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.24f))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_tsuzuku_create_habbit_logo),
+                contentDescription = "Tsuzuku",
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(Modifier.width(16.dp))
+            Box(
+                Modifier
+                    .width(1.dp)
+                    .height(52.dp)
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
+            )
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text("Tsuzuku", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text("続く — Keep going, every day.", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                Text("Made with ❤ by Animesh Gupta", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+}
+
+private fun formatBytes(bytes: Long): String {
+    if (bytes <= 0L) return "0 B"
+    val units = listOf("B", "KB", "MB", "GB")
+    var value = bytes.toDouble()
+    var unitIndex = 0
+    while (value >= 1024 && unitIndex < units.lastIndex) {
+        value /= 1024
+        unitIndex++
+    }
+    return if (unitIndex == 0) "${value.toLong()} ${units[unitIndex]}" else String.format(Locale.US, "%.1f %s", value, units[unitIndex])
+}
+
+private fun fileSizeSafely(file: File): Long = runCatching {
+    if (!file.exists()) 0L else if (file.isFile) file.length() else file.listFiles().orEmpty().sumOf { fileSizeSafely(it) }
+}.getOrDefault(0L)
+
+private fun databaseSizeBytes(context: Context): Long {
+    val db = context.getDatabasePath("streak_marker_db")
+    val parent = db.parentFile
+    return listOf(
+        db,
+        File(parent, "streak_marker_db-wal"),
+        File(parent, "streak_marker_db-shm")
+    ).sumOf { fileSizeSafely(it) }
+}
+
+private fun appStorageBytes(context: Context): Long {
+    return fileSizeSafely(File(context.applicationInfo.dataDir))
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -489,12 +688,19 @@ fun SettingsScreen(
     var importText by remember { mutableStateOf("") }
     
     var showResetDialog by remember { mutableStateOf(false) }
+    var showResetFocusDialog by remember { mutableStateOf(false) }
     var confirmText by remember { mutableStateOf("") }
 
     var showTimePickerDialog by remember { mutableStateOf(false) }
 
     var showPrivacyDialog by remember { mutableStateOf(false) }
     var showTermsDialog by remember { mutableStateOf(false) }
+    var showAppearanceDialog by remember { mutableStateOf(false) }
+    var showNotificationDialog by remember { mutableStateOf(false) }
+    var showPersonalizationDialog by remember { mutableStateOf(false) }
+    var showMotivationDialog by remember { mutableStateOf(false) }
+    var showAppStatsDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
 
     // Local notification parameters loaded/saved dynamically
     var reminderHour by remember { mutableStateOf(sharedPrefs.getInt("reminder_hour", 20)) }
@@ -514,6 +720,7 @@ fun SettingsScreen(
     // Dynamic Database Stats Streams
     val habitsList by viewModel.habits.collectAsState()
     val logsList by viewModel.allLogs.collectAsState()
+    val focusSessionsList by viewModel.focusSessions.collectAsState()
 
     // Calculate real App Statistics
     val totalHabitsCount = habitsList.size
@@ -566,10 +773,39 @@ fun SettingsScreen(
 
     // Backup details persisted & loaded
     var lastBackupDate by remember {
-        mutableStateOf(sharedPrefs.getString("last_backup_date", "June 23, 2026") ?: "June 23, 2026")
+        mutableStateOf(sharedPrefs.getString("last_backup_date", "Never") ?: "Never")
     }
     var lastBackupSize by remember {
-        mutableStateOf(sharedPrefs.getString("last_backup_size", "124 KB") ?: "124 KB")
+        mutableStateOf(sharedPrefs.getString("last_backup_size", "0 B") ?: "0 B")
+    }
+
+    val databaseSizeText = remember(habitsList, logsList, focusSessionsList) {
+        formatBytes(databaseSizeBytes(context))
+    }
+    val storageUsageText = remember(habitsList, logsList, focusSessionsList) {
+        formatBytes(appStorageBytes(context))
+    }
+
+    fun openUrl(url: String, fallbackMessage: String) {
+        runCatching {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        }.onFailure {
+            Toast.makeText(context, fallbackMessage, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun sendMail(subject: String, body: String) {
+        runCatching {
+            context.startActivity(
+                Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:agupta07505@gmail.com")
+                    putExtra(Intent.EXTRA_SUBJECT, subject)
+                    putExtra(Intent.EXTRA_TEXT, body)
+                }
+            )
+        }.onFailure {
+            Toast.makeText(context, "No email app found.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // Sharing Exports Action
@@ -665,8 +901,265 @@ fun SettingsScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.background
+                    ),
+                    center = androidx.compose.ui.geometry.Offset(80f, 120f),
+                    radius = 980f
+                )
+            )
+            .padding(horizontal = 18.dp)
     ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("settings_scroll"),
+            contentPadding = PaddingValues(top = 22.dp, bottom = 116.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Settings",
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Customize your experience and manage your local data.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+
+            item {
+                Column {
+                    SettingsSectionLabel("Preferences")
+                    SettingsGroupedCard {
+                        SettingsMenuRow(
+                            icon = Icons.Default.Edit,
+                            title = "Appearance",
+                            subtitle = "Theme, colors and display options",
+                            iconColor = Color(0xFF4ADE80),
+                            onClick = { showAppearanceDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Notifications,
+                            title = "Notifications",
+                            subtitle = "Reminders, alerts and focus notifications",
+                            iconColor = Color(0xFFFACC15),
+                            onClick = { showNotificationDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Settings,
+                            title = "Personalization",
+                            subtitle = "Home cards, habit order and more",
+                            iconColor = Color(0xFF22C55E),
+                            onClick = { showPersonalizationDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Star,
+                            title = "Motivation",
+                            subtitle = "Quotes, streak celebrations and sounds",
+                            iconColor = Color(0xFF38BDF8),
+                            chevronColor = Color(0xFF22D3EE),
+                            onClick = { showMotivationDialog = true }
+                        )
+                    }
+                }
+            }
+
+            item {
+                Column {
+                    SettingsSectionLabel("Local Data")
+                    SettingsGroupedCard {
+                        SettingsMenuRow(
+                            icon = Icons.Default.Share,
+                            title = "Export Data (.json)",
+                            subtitle = "Export all habits, focus sessions and settings to a JSON file",
+                            iconColor = Color(0xFFC084FC),
+                            chevronColor = Color(0xFFC084FC),
+                            onClick = { exportJsonLauncher.launch("Tsuzuku.json") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Add,
+                            title = "Import Data (.json)",
+                            subtitle = "Restore data from a previously exported JSON file",
+                            iconColor = Color(0xFF38BDF8),
+                            chevronColor = Color(0xFF38BDF8),
+                            onClick = { showImportDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.AutoMirrored.Filled.List,
+                            title = "Database Size",
+                            subtitle = "Total size of your local database",
+                            iconColor = Color(0xFF22D3EE),
+                            value = databaseSizeText,
+                            onClick = {
+                                Toast.makeText(context, "Database size: $databaseSizeText", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Settings,
+                            title = "Storage Usage",
+                            subtitle = "View app storage breakdown",
+                            iconColor = Color(0xFFF59E0B),
+                            chevronColor = Color(0xFFF59E0B),
+                            value = storageUsageText,
+                            onClick = {
+                                runCatching {
+                                    context.startActivity(
+                                        Intent(
+                                            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                            Uri.parse("package:${context.packageName}")
+                                        )
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            item {
+                Column {
+                    SettingsSectionLabel("App")
+                    SettingsGroupedCard {
+                        SettingsMenuRow(
+                            icon = Icons.AutoMirrored.Filled.List,
+                            title = "App Statistics",
+                            subtitle = "Explore your app usage and activity",
+                            iconColor = Color(0xFFC084FC),
+                            chevronColor = Color(0xFFC084FC),
+                            onClick = { showAppStatsDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Info,
+                            title = "About Tsuzuku",
+                            subtitle = "Version, developer and app information",
+                            iconColor = Color(0xFF38BDF8),
+                            chevronColor = Color(0xFF38BDF8),
+                            value = "v${BuildConfig.VERSION_NAME}",
+                            onClick = { showAboutDialog = true }
+                        )
+                    }
+                }
+            }
+
+            item {
+                Column {
+                    SettingsSectionLabel("Community")
+                    SettingsGroupedCard {
+                        SettingsMenuRow(
+                            icon = Icons.Default.Star,
+                            title = "Star on GitHub",
+                            subtitle = "Support the project by starring on GitHub",
+                            iconColor = Color(0xFFE5E7EB),
+                            chevronColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku", "Cannot open GitHub.") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Warning,
+                            title = "Report a Bug",
+                            subtitle = "Found an issue? Let us know",
+                            iconColor = Color(0xFFEF4444),
+                            chevronColor = Color(0xFFEF4444),
+                            onClick = { sendMail("Tsuzuku Bug Report", "Describe the issue:\n\nSteps to reproduce:\n") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Add,
+                            title = "Request a Feature",
+                            subtitle = "Suggest a new feature or improvement",
+                            iconColor = Color(0xFFFACC15),
+                            chevronColor = Color(0xFFFACC15),
+                            onClick = { sendMail("Tsuzuku Feature Request", "Feature idea:\n\nWhy it helps:\n") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Notifications,
+                            title = "Join Community",
+                            subtitle = "Join the discussion and share your journey",
+                            iconColor = Color(0xFFC084FC),
+                            chevronColor = Color(0xFFC084FC),
+                            badge = "Coming Soon",
+                            onClick = { Toast.makeText(context, "Community is coming soon.", Toast.LENGTH_SHORT).show() }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Info,
+                            title = "MIT License",
+                            subtitle = "Open source and free to use",
+                            iconColor = Color(0xFF2DD4BF),
+                            chevronColor = Color(0xFF2DD4BF),
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/blob/main/LICENSE", "Cannot open license.") }
+                        )
+                    }
+                }
+            }
+
+            item {
+                Column {
+                    SettingsSectionLabel("Danger Zone", color = MaterialTheme.colorScheme.error)
+                    SettingsGroupedCard {
+                        SettingsMenuRow(
+                            icon = Icons.AutoMirrored.Filled.List,
+                            title = "Reset Focus Statistics",
+                            subtitle = "Reset all focus sessions and statistics",
+                            iconColor = Color(0xFFEF4444),
+                            chevronColor = Color(0xFFEF4444),
+                            onClick = { showResetFocusDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Delete,
+                            title = "Delete All Habits",
+                            subtitle = "Permanently delete all habits and progress",
+                            iconColor = Color(0xFFEF4444),
+                            chevronColor = Color(0xFFEF4444),
+                            onClick = { showResetDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Share,
+                            title = "Clear Database",
+                            subtitle = "Remove all data from the local database",
+                            iconColor = Color(0xFFEF4444),
+                            chevronColor = Color(0xFFEF4444),
+                            onClick = { showResetDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Warning,
+                            title = "Factory Reset Tsuzuku",
+                            subtitle = "Erase everything and start fresh",
+                            iconColor = Color(0xFFEF4444),
+                            chevronColor = Color(0xFFEF4444),
+                            onClick = { showResetDialog = true }
+                        )
+                    }
+                }
+            }
+
+            item {
+                SettingsBrandFooter()
+            }
+        }
+
+        if (false) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -907,6 +1400,7 @@ fun SettingsScreen(
                     }
                 }
             }
+        }
         }
 
         val showLegacySettings = remember { false }
@@ -1745,6 +2239,239 @@ fun SettingsScreen(
                 }
             }
         }
+        }
+
+        if (showAppearanceDialog) {
+            AlertDialog(
+                onDismissRequest = { showAppearanceDialog = false },
+                title = { Text("Appearance", fontWeight = FontWeight.Bold) },
+                text = {
+                    val themeOptions = listOf(
+                        ThemeOption("system", "System", listOf(Color(0xFFF8FAFC), Color(0xFF0F171F), Color(0xFF94A3B8))),
+                        ThemeOption("light", "Light", listOf(Color(0xFFE2E8F0), Color(0xFFF8FAFC), Color(0xFF2CB5C3))),
+                        ThemeOption("dark", "Dark", listOf(Color(0xFF090E14), Color(0xFF16222F), Color(0xFF2CB5C3))),
+                        ThemeOption("amoled", "AMOLED", listOf(Color(0xFF000000), Color(0xFF090E14), Color(0xFF2CB5C3))),
+                        ThemeOption("green", "Tsuzuku Green", listOf(Color(0xFF050E09), Color(0xFF122C1E), Color(0xFF22C55E))),
+                        ThemeOption("blue", "Tsuzuku Blue", listOf(Color(0xFF030914), Color(0xFF0E223F), Color(0xFF38BDF8)))
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 460.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        themeOptions.forEach { option ->
+                            SettingsThemeRow(
+                                option = option,
+                                selected = themeState == option.key,
+                                onClick = { onThemeChanged(option.key) }
+                            )
+                        }
+                        OutlinedTextField(
+                            value = customAccentColorHex,
+                            onValueChange = onAccentColorChanged,
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            label = { Text("Custom accent hex") },
+                            placeholder = { Text("#22C55E") },
+                            supportingText = { Text("Leave empty to use the selected theme accent.") },
+                            trailingIcon = {
+                                if (customAccentColorHex.isNotBlank()) {
+                                    IconButton(onClick = { onAccentColorChanged("") }) {
+                                        Icon(Icons.Default.Refresh, contentDescription = "Reset accent")
+                                    }
+                                }
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showAppearanceDialog = false }) { Text("Done") }
+                }
+            )
+        }
+
+        if (showNotificationDialog) {
+            AlertDialog(
+                onDismissRequest = { showNotificationDialog = false },
+                title = { Text("Notifications", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SettingsSwitchRow(
+                            title = "Daily Habit Reminders",
+                            subtitle = "Use local notifications to remind you about active habits.",
+                            checked = remindersEnabled,
+                            onCheckedChange = { enabled ->
+                                remindersEnabled = enabled
+                                sharedPrefs.edit().putBoolean("reminders_active", enabled).apply()
+                            }
+                        )
+                        SettingsActionRow(
+                            title = "Reminder Time",
+                            subtitle = formattedReminderTime,
+                            icon = Icons.Default.Notifications,
+                            onClick = { showTimePickerDialog = true },
+                            accent = Color(0xFFEAB308),
+                            trailing = { Text("Change", color = Color(0xFFEAB308), fontWeight = FontWeight.Bold) }
+                        )
+                        SettingsSwitchRow(
+                            title = "Status Bar Motivation",
+                            subtitle = "Show a quiet ongoing motivational notification.",
+                            checked = permanentNotificationEnabled,
+                            onCheckedChange = { enabled ->
+                                permanentNotificationEnabled = enabled
+                                sharedPrefs.edit().putBoolean("permanent_notification_active", enabled).apply()
+                                if (enabled) {
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.updatePermanentNotification(context)
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.scheduleNextHourlyUpdate(context)
+                                } else {
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.cancelPermanentNotification(context)
+                                }
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showNotificationDialog = false }) { Text("Done") }
+                }
+            )
+        }
+
+        if (showPersonalizationDialog) {
+            var confettiEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("confetti_active", true)) }
+            AlertDialog(
+                onDismissRequest = { showPersonalizationDialog = false },
+                title = { Text("Personalization", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SettingsSwitchRow(
+                            title = "Confetti Celebrations",
+                            subtitle = "Celebrate when completing today's habits.",
+                            checked = confettiEnabled,
+                            onCheckedChange = { enabled ->
+                                confettiEnabled = enabled
+                                sharedPrefs.edit().putBoolean("confetti_active", enabled).apply()
+                            }
+                        )
+                        SettingsSwitchRow(
+                            title = "Japanese Motto",
+                            subtitle = "Show the Japanese consistency motto where supported.",
+                            checked = showJapaneseQuotes,
+                            onCheckedChange = { enabled ->
+                                showJapaneseQuotes = enabled
+                                sharedPrefs.edit().putBoolean("show_japanese_quotes", enabled).apply()
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showPersonalizationDialog = false }) { Text("Done") }
+                }
+            )
+        }
+
+        if (showMotivationDialog) {
+            var quoteBannersEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("quotes_active", true)) }
+            var morningEncouragementEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("morning_active", true)) }
+            AlertDialog(
+                onDismissRequest = { showMotivationDialog = false },
+                title = { Text("Motivation", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SettingsSwitchRow(
+                            title = "Daily Quote Banners",
+                            subtitle = "Show motivational quotes around habit surfaces.",
+                            checked = quoteBannersEnabled,
+                            onCheckedChange = { enabled ->
+                                quoteBannersEnabled = enabled
+                                sharedPrefs.edit().putBoolean("quotes_active", enabled).apply()
+                            }
+                        )
+                        SettingsSwitchRow(
+                            title = "Morning Encouragement",
+                            subtitle = "Show stronger encouragement at the start of the day.",
+                            checked = morningEncouragementEnabled,
+                            onCheckedChange = { enabled ->
+                                morningEncouragementEnabled = enabled
+                                sharedPrefs.edit().putBoolean("morning_active", enabled).apply()
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showMotivationDialog = false }) { Text("Done") }
+                }
+            )
+        }
+
+        if (showAppStatsDialog) {
+            AlertDialog(
+                onDismissRequest = { showAppStatsDialog = false },
+                title = { Text("App Statistics", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        SettingsInfoPill("Total Habits", totalHabitsCount.toString(), Modifier.fillMaxWidth())
+                        SettingsInfoPill("Completed Check-ins", totalCheckInsCount.toString(), Modifier.fillMaxWidth())
+                        SettingsInfoPill("Focus Sessions", focusSessionsList.size.toString(), Modifier.fillMaxWidth())
+                        SettingsInfoPill("Best Streak", "$bestStreakCount days", Modifier.fillMaxWidth())
+                        SettingsInfoPill("Days Using Tsuzuku", daysUsingCount.toString(), Modifier.fillMaxWidth())
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showAppStatsDialog = false }) { Text("Done") }
+                }
+            )
+        }
+
+        if (showAboutDialog) {
+            AlertDialog(
+                onDismissRequest = { showAboutDialog = false },
+                title = { Text("About Tsuzuku", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        SettingsBrandFooter()
+                        Text("Version ${BuildConfig.VERSION_NAME}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                            OutlinedButton(onClick = { showPrivacyDialog = true }, modifier = Modifier.weight(1f)) {
+                                Text("Privacy")
+                            }
+                            OutlinedButton(onClick = { showTermsDialog = true }, modifier = Modifier.weight(1f)) {
+                                Text("Terms")
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showAboutDialog = false }) { Text("Done") }
+                }
+            )
+        }
+
+        if (showResetFocusDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetFocusDialog = false },
+                title = { Text("Reset Focus Statistics?") },
+                text = {
+                    Text("This will permanently delete all saved Focus sessions and Focus statistics. Habits will not be deleted.")
+                },
+                confirmButton = {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        onClick = {
+                            viewModel.deleteAllFocusData {
+                                showResetFocusDialog = false
+                                Toast.makeText(context, "Focus statistics reset.", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    ) {
+                        Text("Reset Focus")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetFocusDialog = false }) { Text("Cancel") }
+                }
+            )
         }
         
         // Time Picker Custom selection dialog

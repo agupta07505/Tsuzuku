@@ -220,6 +220,17 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun deleteAllFocusData(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                focusRepository.clearAll()
+                onSuccess()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun importDataJson(jsonString: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
