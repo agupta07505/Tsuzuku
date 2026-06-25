@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
@@ -33,7 +32,6 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Spa
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.outlined.FormatQuote
@@ -53,6 +51,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import com.agupta07505.tsuzuku.data.FocusSession
+import com.agupta07505.tsuzuku.R
 import com.agupta07505.tsuzuku.data.Habit
 import com.agupta07505.tsuzuku.data.HabitLog
 import com.agupta07505.tsuzuku.data.Quotes
@@ -488,14 +488,21 @@ fun ManageLauncherWidgetsScreen(
         modifier = modifier
     ) {
         item {
-            Text("Choose which Tsuzuku app widgets should appear on launcher home.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        item {
-            PremiumCard(contentPadding = PaddingValues(0.dp)) {
-                widgets.forEach { widget ->
-                    LauncherWidgetToggleRow(widget = widget, onToggle = { onToggleWidget(widget.key, it) })
-                    if (widget != widgets.last()) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
-                }
+            PremiumCard(modifier = Modifier.fillMaxWidth()) {
+                Text("Widgets", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Coming soon...",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "Tsuzuku app widgets you add later will be managed here.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
@@ -646,29 +653,29 @@ fun TsuzukuLauncherHomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val quote = remember { Quotes.byIndex((System.currentTimeMillis() / 86_400_000L).toInt()) }
-    val today = remember { DateUtils.getTodayString() }
-    val completedToday = logs.count { it.date == today && it.isCompleted }
-    val activeHabits = habits.filterNot { it.isArchived }
-    val todayFocusMinutes = focusSessions
-        .filter { it.completed && SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(it.startTime)) == today }
-        .sumOf { it.actualDurationMinutes }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier
     ) { padding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(launcherHomeGradient())
                 .padding(padding)
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(top = 10.dp, bottom = 18.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp)
         ) {
-            item {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, bottom = 92.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -676,14 +683,8 @@ fun TsuzukuLauncherHomeScreen(
                     if (previewMode && onBack != null) {
                         IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
                     }
-                    Icon(Icons.Default.Spa, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        "Tsuzuku Launcher",
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.weight(1f)
-                    )
+                    TsuzukuMiniLogo()
+                    Spacer(Modifier.weight(1f))
                     AssistChip(
                         onClick = {},
                         label = { Text(if (uiState.isDefaultLauncher) "Active" else "Preview") },
@@ -699,72 +700,55 @@ fun TsuzukuLauncherHomeScreen(
                         )
                     )
                 }
-            }
 
-            item {
                 LauncherClockWidget()
-            }
 
             if (uiState.widgets.firstOrNull { it.key == "motivational_quote" }?.enabled == true && uiState.focusSettings.showMotivationalQuote) {
-                item {
-                    LauncherQuoteWidget(japanese = quote.japanese, english = quote.english)
-                }
+                LauncherQuoteWidget(japanese = quote.japanese, english = quote.english)
             }
 
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    LauncherAppButton(label = "Phone", icon = null, fallback = Icons.Default.Phone) {
-                        if (!onOpenPhone(context)) scope.launch { snackbarHostState.showSnackbar("Phone app is unavailable.") }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                LauncherAppButton(label = "Phone", icon = null, fallback = Icons.Default.Phone) {
+                    if (!onOpenPhone(context)) scope.launch { snackbarHostState.showSnackbar("Phone app is unavailable.") }
+                }
+                uiState.selectedAllowedApps.take(2).forEach { app ->
+                    LauncherAppButton(label = app.label, icon = app.icon, fallback = Icons.Default.Apps) {
+                        if (!onOpenApp(context, app.packageName)) scope.launch { snackbarHostState.showSnackbar("${app.label} is unavailable.") }
                     }
-                    uiState.selectedAllowedApps.take(2).forEach { app ->
-                        LauncherAppButton(label = app.label, icon = app.icon, fallback = Icons.Default.Apps) {
-                            if (!onOpenApp(context, app.packageName)) scope.launch { snackbarHostState.showSnackbar("${app.label} is unavailable.") }
-                        }
-                    }
-                    repeat((2 - uiState.selectedAllowedApps.size).coerceAtLeast(0)) {
-                        LauncherAppButton(label = "Select App", icon = null, fallback = Icons.Default.Apps) {
-                            scope.launch { snackbarHostState.showSnackbar("Choose apps from Tsuzuku Launcher settings.") }
-                        }
+                }
+                repeat((2 - uiState.selectedAllowedApps.size).coerceAtLeast(0)) {
+                    LauncherAppButton(label = "Select App", icon = null, fallback = Icons.Default.Apps) {
+                        scope.launch { snackbarHostState.showSnackbar("Choose apps from Tsuzuku Launcher settings.") }
                     }
                 }
             }
 
-            if (uiState.widgets.any { it.enabled }) {
-                item {
-                    LauncherWidgetTray(
-                        widgets = uiState.widgets,
-                        completedToday = completedToday,
-                        totalHabits = activeHabits.size,
-                        todayFocusMinutes = todayFocusMinutes
-                    )
+            LauncherWidgetTray()
+
+            Text(
+                "Only your selected apps and Tsuzuku widgets live here",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center
+            )
+        }
+
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { scope.launch { snackbarHostState.showSnackbar("Only selected apps are available in Tsuzuku Launcher.") } }) {
+                    Icon(Icons.Default.GridView, contentDescription = "Apps", tint = MaterialTheme.colorScheme.primary)
                 }
-            }
-
-            item {
-                Text(
-                    "Only your selected apps and Tsuzuku widgets live here",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { scope.launch { snackbarHostState.showSnackbar("Only selected apps are available in Tsuzuku Launcher.") } }) {
-                        Icon(Icons.Default.GridView, contentDescription = "Apps", tint = MaterialTheme.colorScheme.primary)
-                    }
-                    TsuzukuGlowLogo(size = 64.dp)
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
-                    }
+                IconButton(onClick = onOpenSettings) {
+                    Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
                 }
             }
         }
@@ -801,136 +785,22 @@ fun LauncherQuoteWidget(japanese: String, english: String, modifier: Modifier = 
 }
 
 @Composable
-private fun LauncherWidgetTray(
-    widgets: List<LauncherWidgetPreference>,
-    completedToday: Int,
-    totalHabits: Int,
-    todayFocusMinutes: Int,
-    modifier: Modifier = Modifier
-) {
-    val enabledWidgets = widgets.filter { it.enabled }
+private fun LauncherWidgetTray(modifier: Modifier = Modifier) {
     PremiumCard(modifier = modifier.fillMaxWidth(), contentPadding = PaddingValues(14.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Tsuzuku Widgets", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                Text(
-                    "Your enabled Tsuzuku app widgets appear here.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            AssistChip(
-                onClick = {},
-                label = { Text("${enabledWidgets.size} enabled") },
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    labelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
-        Spacer(Modifier.height(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            MiniLauncherWidgetStat(
-                icon = Icons.Default.Check,
-                title = "Habits",
-                value = "$completedToday/$totalHabits",
-                modifier = Modifier.weight(1f)
-            )
-            MiniLauncherWidgetStat(
-                icon = Icons.Default.Timer,
-                title = "Focus",
-                value = "${todayFocusMinutes}m",
-                modifier = Modifier.weight(1f)
-            )
-        }
-        Spacer(Modifier.height(10.dp))
+        Text("Widgets", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(6.dp))
         Text(
-            enabledWidgets.joinToString(" • ") { it.title },
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            "Coming soon...",
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
         )
-    }
-}
-
-@Composable
-private fun MiniLauncherWidgetStat(
-    icon: ImageVector,
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.width(10.dp))
-        Column {
-            Text(title, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-            Text(value, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-@Composable
-fun LauncherFocusTimerWidget(todayFocusMinutes: Int, modifier: Modifier = Modifier) {
-    PremiumCard(modifier = modifier.height(186.dp)) {
-        Text("Focus Timer", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.weight(1f))
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(progress = { 0.72f }, strokeWidth = 8.dp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(92.dp))
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("25:00", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Text("${todayFocusMinutes}m today", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-            }
-        }
-        Spacer(Modifier.weight(1f))
-        Text("Tap Focus tab to start", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-    }
-}
-
-@Composable
-private fun TodayHabitsLauncherWidget(
-    completed: Int,
-    total: Int,
-    habits: List<Habit>,
-    logs: List<HabitLog>,
-    modifier: Modifier = Modifier
-) {
-    val today = DateUtils.getTodayString()
-    PremiumCard(modifier = modifier.height(186.dp)) {
-        Text("Today's Habits", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(10.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(
-                    progress = { if (total == 0) 0f else completed.toFloat() / total.toFloat() },
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 7.dp,
-                    modifier = Modifier.size(74.dp)
-                )
-                Text("$completed/$total", fontWeight = FontWeight.Bold)
-            }
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text("Completed", style = MaterialTheme.typography.bodySmall)
-                habits.take(5).forEach { habit ->
-                    val done = logs.any { it.habitId == habit.id && it.date == today && it.isCompleted }
-                    Text(
-                        "${if (done) "●" else "○"} ${habit.name}",
-                        color = if (done) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "Tsuzuku app widgets you add later will appear here.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
 
@@ -1050,8 +920,27 @@ private fun TsuzukuGlowLogo(modifier: Modifier = Modifier, size: androidx.compos
             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        Icon(Icons.Default.Spa, contentDescription = "Tsuzuku", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(size * 0.58f))
+        Image(
+            painter = painterResource(id = R.drawable.ic_tsuzuku_create_habbit_logo),
+            contentDescription = "Tsuzuku",
+            modifier = Modifier
+                .size(size * 0.82f)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
+        )
     }
+}
+
+@Composable
+private fun TsuzukuMiniLogo(modifier: Modifier = Modifier, size: androidx.compose.ui.unit.Dp = 38.dp) {
+    Image(
+        painter = painterResource(id = R.drawable.ic_tsuzuku_create_habbit_logo),
+        contentDescription = "Tsuzuku",
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape),
+        contentScale = ContentScale.Crop
+    )
 }
 
 @Composable
