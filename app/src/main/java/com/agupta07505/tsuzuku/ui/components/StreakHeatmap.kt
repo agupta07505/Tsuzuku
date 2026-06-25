@@ -150,8 +150,19 @@ fun CurrentMonthHabitHeatmap(
     val calendar = remember { Calendar.getInstance() }
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
-    val monthDates = remember(year, month) { DateUtils.getMonthGridDates(year, month) }
-    val rows = remember(monthDates) { monthDates.chunked(7) }
+    val monthDates = remember(year, month) {
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.YEAR, year)
+            set(Calendar.MONTH, month)
+            set(Calendar.DAY_OF_MONTH, 1)
+        }
+        val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        (1..daysInMonth).map { day ->
+            cal.set(Calendar.DAY_OF_MONTH, day)
+            DateUtils.getFormattedDate(cal)
+        }
+    }
+    val rows = remember(monthDates) { monthDates.chunked(10) }
     val completedDates = remember(logs) {
         logs.filter { it.isCompleted }.map { it.date }.toSet()
     }
@@ -160,28 +171,41 @@ fun CurrentMonthHabitHeatmap(
     } catch (e: Exception) {
         MaterialTheme.colorScheme.primary
     }
-    val emptyColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.88f)
-    val futureColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.32f)
+    val emptyColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.74f)
+    val futureColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
+    val legendColors = listOf(
+        emptyColor,
+        habitColor.copy(alpha = 0.35f),
+        habitColor.copy(alpha = 0.55f),
+        habitColor.copy(alpha = 0.78f),
+        habitColor
+    )
 
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-        Text(
-            text = "This Month Activity",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 10.dp)
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f), RoundedCornerShape(18.dp))
+                .padding(14.dp)
+        ) {
+            Column {
+                Text(
+                    text = "This Month Activity",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
 
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            rows.forEach { week ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    week.forEach { dateStr ->
-                        if (dateStr == null) {
-                            Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
-                        } else {
+                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    rows.forEach { row ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            row.forEach { dateStr ->
                             val isToday = dateStr == todayStr
                             val isCompleted = dateStr in completedDates
                             val isFuture = dateStr > todayStr
@@ -191,16 +215,15 @@ fun CurrentMonthHabitHeatmap(
                                 else -> emptyColor
                             }
                             val border = if (isToday) {
-                                Modifier.border(1.6.dp, habitColor, RoundedCornerShape(7.dp))
+                                Modifier.border(1.2.dp, habitColor, RoundedCornerShape(3.dp))
                             } else {
-                                Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f), RoundedCornerShape(7.dp))
+                                Modifier
                             }
 
                             Box(
                                 modifier = Modifier
-                                    .weight(1f)
-                                    .aspectRatio(1f)
-                                    .clip(RoundedCornerShape(7.dp))
+                                    .size(18.dp)
+                                    .clip(RoundedCornerShape(3.dp))
                                     .background(cellColor)
                                     .then(border)
                                     .clickable(enabled = isToday) {
@@ -209,10 +232,33 @@ fun CurrentMonthHabitHeatmap(
                                     .testTag("month_cell_${dateStr}_${habit.id}")
                             )
                         }
+                            repeat(10 - row.size) {
+                                Spacer(modifier = Modifier.size(18.dp))
+                            }
+                        }
                     }
-                    repeat(7 - week.size) {
-                        Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Less", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    legendColors.forEach { color ->
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(color)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
                     }
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text("More", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
