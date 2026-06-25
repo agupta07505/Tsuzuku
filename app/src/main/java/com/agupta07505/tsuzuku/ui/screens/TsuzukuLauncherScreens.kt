@@ -672,9 +672,9 @@ fun TsuzukuLauncherHomeScreen(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .fillMaxWidth()
-                    .padding(top = 10.dp, bottom = 92.dp),
+                    .padding(top = 0.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -703,52 +703,49 @@ fun TsuzukuLauncherHomeScreen(
 
                 LauncherClockWidget()
 
-            if (uiState.widgets.firstOrNull { it.key == "motivational_quote" }?.enabled == true && uiState.focusSettings.showMotivationalQuote) {
-                LauncherQuoteWidget(japanese = quote.japanese, english = quote.english)
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                LauncherAppButton(label = "Phone", icon = null, fallback = Icons.Default.Phone) {
-                    if (!onOpenPhone(context)) scope.launch { snackbarHostState.showSnackbar("Phone app is unavailable.") }
-                }
-                uiState.selectedAllowedApps.take(2).forEach { app ->
-                    LauncherAppButton(label = app.label, icon = app.icon, fallback = Icons.Default.Apps) {
-                        if (!onOpenApp(context, app.packageName)) scope.launch { snackbarHostState.showSnackbar("${app.label} is unavailable.") }
-                    }
-                }
-                repeat((2 - uiState.selectedAllowedApps.size).coerceAtLeast(0)) {
-                    LauncherAppButton(label = "Select App", icon = null, fallback = Icons.Default.Apps) {
-                        scope.launch { snackbarHostState.showSnackbar("Choose apps from Tsuzuku Launcher settings.") }
-                    }
+                if (uiState.widgets.firstOrNull { it.key == "motivational_quote" }?.enabled == true && uiState.focusSettings.showMotivationalQuote) {
+                    LauncherQuoteWidget(japanese = quote.japanese, english = quote.english)
                 }
             }
 
-            LauncherWidgetTray()
-
-            Text(
-                "Only your selected apps and Tsuzuku widgets live here",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center
-            )
-        }
-
-            Row(
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .padding(bottom = 20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(bottom = 6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                IconButton(onClick = { scope.launch { snackbarHostState.showSnackbar("Only selected apps are available in Tsuzuku Launcher.") } }) {
-                    Icon(Icons.Default.GridView, contentDescription = "Apps", tint = MaterialTheme.colorScheme.primary)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    LauncherAppButton(label = "Phone", icon = null, fallback = Icons.Default.Phone) {
+                        if (!onOpenPhone(context)) scope.launch { snackbarHostState.showSnackbar("Phone app is unavailable.") }
+                    }
+                    uiState.selectedAllowedApps.take(2).forEach { app ->
+                        LauncherAppButton(label = app.label, icon = app.icon, fallback = Icons.Default.Apps) {
+                            if (!onOpenApp(context, app.packageName)) scope.launch { snackbarHostState.showSnackbar("${app.label} is unavailable.") }
+                        }
+                    }
+                    repeat((2 - uiState.selectedAllowedApps.size).coerceAtLeast(0)) {
+                        LauncherAppButton(label = "Select App", icon = null, fallback = Icons.Default.Apps) {
+                            scope.launch { snackbarHostState.showSnackbar("Choose apps from Tsuzuku Launcher settings.") }
+                        }
+                    }
                 }
-                IconButton(onClick = onOpenSettings) {
-                    Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { scope.launch { snackbarHostState.showSnackbar("Only selected apps are available in Tsuzuku Launcher.") } }) {
+                        Icon(Icons.Default.GridView, contentDescription = "Apps", tint = MaterialTheme.colorScheme.primary)
+                    }
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
+                    }
                 }
             }
         }
@@ -771,7 +768,7 @@ fun LauncherClockWidget(modifier: Modifier = Modifier) {
         lineHeight = 78.sp,
         fontWeight = FontWeight.Light,
         color = MaterialTheme.colorScheme.onBackground,
-        modifier = modifier.padding(top = 22.dp)
+        modifier = modifier
     )
 }
 
@@ -781,26 +778,6 @@ fun LauncherQuoteWidget(japanese: String, english: String, modifier: Modifier = 
         Text(japanese, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
         Spacer(Modifier.height(6.dp))
         Text(english, color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
-    }
-}
-
-@Composable
-private fun LauncherWidgetTray(modifier: Modifier = Modifier) {
-    PremiumCard(modifier = modifier.fillMaxWidth(), contentPadding = PaddingValues(14.dp)) {
-        Text("Widgets", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(6.dp))
-        Text(
-            "Coming soon...",
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            "Tsuzuku app widgets you add later will appear here.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall
-        )
     }
 }
 
