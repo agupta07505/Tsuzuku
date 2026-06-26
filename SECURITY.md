@@ -2,40 +2,50 @@
 
 ## Supported Versions
 
-| Version | Supported          |
-|---------|--------------------|
-| 1.3.x   | ✅ Active support  |
-| < 1.3   | ❌ No longer supported |
+| Version | Supported |
+|---------|-----------|
+| 2.x | Active support |
+| < 2.0 | Best effort only |
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in Tsuzuku, **please do not open a public issue**.
+Please do not open a public issue for security problems.
 
-Instead, report it responsibly via one of the following methods:
+Report vulnerabilities by email to **agupta07505@gmail.com** or through GitHub private security advisories:
 
-1. **Email**: Send a detailed report to **agupta07505@gmail.com**
-2. **GitHub Private Advisory**: Use [GitHub Security Advisories](https://github.com/agupta07505/Tsuzuku/security/advisories/new) to privately report the issue
+https://github.com/agupta07505/Tsuzuku/security/advisories/new
 
-### What to Include
+Include as much detail as you can:
 
 - A description of the vulnerability
-- Steps to reproduce the issue
-- The potential impact
-- Any suggested fixes (if applicable)
+- Steps to reproduce
+- Android version and device/emulator details
+- Potential impact
+- Screenshots, logs, or a proof of concept if safe to share
+- Suggested fixes, if you have them
 
-### Response Timeline
+## Response Timeline
 
-- **Acknowledgment**: Within 48 hours
-- **Initial Assessment**: Within 1 week
-- **Fix & Disclosure**: We aim to release a patch within 2 weeks of confirmation
-
-## Security Best Practices for Contributors
-
-- Never commit API keys, passwords, or keystore files to the repository.
-- Use `.env` files for sensitive configuration (see `.env.example`).
-- Keystore credentials should be passed via GitHub Secrets in CI/CD workflows.
-- Always use the latest dependencies to avoid known CVEs.
+- Acknowledgment: within 48 hours
+- Initial assessment: within 7 days
+- Fix target: within 14 days after confirmation, when practical
 
 ## Scope
 
-This policy covers the Tsuzuku Android application source code and its build pipeline. Third-party dependencies are maintained by their respective projects.
+This policy covers:
+
+- Tsuzuku Android app source code
+- Local habit and focus-session storage
+- Backup and restore behavior
+- Notification, focus-service, and launcher permission flows
+- Build and release pipeline configuration
+
+Third-party dependencies are maintained by their respective projects.
+
+## Contributor Security Checklist
+
+- Never commit passwords, API keys, signing credentials, or private keystores.
+- Do not commit `local.properties`, generated APKs, or personal backup JSON files.
+- Keep release signing values in GitHub Secrets or local Gradle properties.
+- Treat exported backup files as user data.
+- Be careful with launcher, notification, foreground service, and DND permission changes.

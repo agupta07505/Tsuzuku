@@ -15,6 +15,9 @@ interface HabitDao {
     fun getAllActiveHabits(): Flow<List<Habit>>
 
     @Query("SELECT * FROM habits ORDER BY id DESC")
+    fun getAllHabits(): Flow<List<Habit>>
+
+    @Query("SELECT * FROM habits ORDER BY id DESC")
     suspend fun getAllHabitsDirect(): List<Habit>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -35,6 +38,9 @@ interface HabitDao {
 
     @Query("SELECT * FROM habit_logs ORDER BY date DESC")
     fun getAllLogs(): Flow<List<HabitLog>>
+
+    @Query("SELECT * FROM habit_logs ORDER BY date DESC")
+    suspend fun getAllLogsDirect(): List<HabitLog>
 
     @Query("SELECT * FROM habit_logs WHERE date = :date")
     suspend fun getLogsForDateDirect(date: String): List<HabitLog>

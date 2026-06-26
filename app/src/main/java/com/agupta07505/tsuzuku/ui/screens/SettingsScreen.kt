@@ -11,6 +11,8 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,12 +23,25 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Refresh
@@ -40,13 +55,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.annotation.DrawableRes
@@ -63,6 +82,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.net.Uri
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import com.agupta07505.tsuzuku.BuildConfig
 
@@ -222,7 +242,7 @@ private fun CollapsibleSettingsCard(
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, bottom = 20.dp)
                 ) {
-                    Divider(
+                    HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -299,7 +319,7 @@ private fun CollapsibleSettingsCardDanger(
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, bottom = 20.dp)
                 ) {
-                    Divider(
+                    HorizontalDivider(
                         color = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -308,6 +328,742 @@ private fun CollapsibleSettingsCardDanger(
             }
         }
     }
+}
+
+@Composable
+private fun SettingsSectionCard(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier,
+    accent: Color = MaterialTheme.colorScheme.primary,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.78f)
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.28f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(accent.copy(alpha = 0.14f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(icon, contentDescription = null, tint = accent)
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.22f))
+            content()
+        }
+    }
+}
+
+@Composable
+private fun SettingsActionRow(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    accent: Color = MaterialTheme.colorScheme.primary,
+    trailing: @Composable (() -> Unit)? = null
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = accent)
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.SemiBold)
+            Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+        }
+        trailing?.invoke()
+    }
+}
+
+@Composable
+private fun SettingsSwitchRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f))
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.SemiBold)
+            Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+        }
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+@Composable
+private fun SettingsThemeRow(
+    option: ThemeOption,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .background(
+                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.24f)
+            )
+            .border(
+                1.dp,
+                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+                else MaterialTheme.colorScheme.outline.copy(alpha = 0.16f),
+                RoundedCornerShape(16.dp)
+            )
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(selected = selected, onClick = onClick)
+        Spacer(Modifier.width(8.dp))
+        Text(option.label, modifier = Modifier.weight(1f), fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
+        ThemePreviewDots(option.colors)
+    }
+}
+
+@Composable
+private fun SettingsInfoPill(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.22f), RoundedCornerShape(18.dp))
+            .padding(14.dp)
+    ) {
+        Text(value, fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleLarge)
+        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+private fun SettingsSectionLabel(
+    text: String,
+    color: Color = MaterialTheme.colorScheme.primary
+) {
+    Text(
+        text = text.uppercase(Locale.getDefault()),
+        color = color,
+        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.padding(start = 2.dp, bottom = 8.dp)
+    )
+}
+
+@Composable
+private fun SettingsGroupedCard(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.24f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                            Color.Transparent
+                        ),
+                        radius = 720f
+                    )
+                )
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun SettingsMenuDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 60.dp),
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.16f)
+    )
+}
+
+@Composable
+private fun SettingsMenuRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    iconColor: Color,
+    modifier: Modifier = Modifier,
+    value: String? = null,
+    badge: String? = null,
+    chevronColor: Color = iconColor,
+    showChevron: Boolean = true,
+    onClick: () -> Unit = {}
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(iconColor.copy(alpha = 0.18f))
+                .border(1.dp, iconColor.copy(alpha = 0.25f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(25.dp))
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                subtitle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+                lineHeight = 18.sp
+            )
+        }
+        if (value != null) {
+            Text(value, color = chevronColor, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(10.dp))
+        }
+        if (badge != null) {
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = chevronColor.copy(alpha = 0.16f),
+                border = BorderStroke(1.dp, chevronColor.copy(alpha = 0.18f))
+            ) {
+                Text(
+                    badge,
+                    color = chevronColor,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+        }
+        if (showChevron) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = chevronColor,
+                modifier = Modifier.size(30.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsBrandFooter() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            "Made with ❤️ by Animesh Gupta",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun MissionMountainIllustration(modifier: Modifier = Modifier) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+
+        // 1. Soft glowing sun/moon in the background
+        drawCircle(
+            color = primaryColor.copy(alpha = 0.12f),
+            radius = w * 0.24f,
+            center = androidx.compose.ui.geometry.Offset(w * 0.70f, h * 0.35f)
+        )
+
+        // 2. Minimal distant background mountain peak
+        val bgHillPath = Path().apply {
+            moveTo(w * 0.05f, h * 0.90f)
+            lineTo(w * 0.40f, h * 0.38f)
+            lineTo(w * 0.75f, h * 0.90f)
+            close()
+        }
+        val bgGradient = Brush.verticalGradient(
+            colors = listOf(
+                secondaryColor.copy(alpha = 0.30f),
+                secondaryColor.copy(alpha = 0.02f)
+            ),
+            startY = h * 0.38f,
+            endY = h * 0.90f
+        )
+        drawPath(bgHillPath, bgGradient)
+
+        // 3. Foreground mountain peak
+        val fgHillPath = Path().apply {
+            moveTo(w * 0.25f, h * 0.90f)
+            lineTo(w * 0.65f, h * 0.25f)
+            lineTo(w * 0.98f, h * 0.90f)
+            close()
+        }
+        val fgGradient = Brush.verticalGradient(
+            colors = listOf(
+                primaryColor.copy(alpha = 0.55f),
+                primaryColor.copy(alpha = 0.04f)
+            ),
+            startY = h * 0.25f,
+            endY = h * 0.90f
+        )
+        drawPath(fgHillPath, fgGradient)
+
+        // 4. Subtle, minimal clean accent peak outline (drawn on the foreground peak)
+        val fgPeakOutline = Path().apply {
+            moveTo(w * 0.55f, h * 0.41f)
+            lineTo(w * 0.65f, h * 0.25f)
+            lineTo(w * 0.75f, h * 0.41f)
+        }
+        drawPath(
+            path = fgPeakOutline,
+            color = primaryColor.copy(alpha = 0.75f),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(
+                width = 2.dp.toPx(),
+                cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                join = androidx.compose.ui.graphics.StrokeJoin.Round
+            )
+        )
+
+        // 5. Minimal clean accent peak outline for bg peak
+        val bgPeakOutline = Path().apply {
+            moveTo(w * 0.32f, h * 0.50f)
+            lineTo(w * 0.40f, h * 0.38f)
+            lineTo(w * 0.48f, h * 0.50f)
+        }
+        drawPath(
+            path = bgPeakOutline,
+            color = secondaryColor.copy(alpha = 0.40f),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(
+                width = 1.5.dp.toPx(),
+                cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                join = androidx.compose.ui.graphics.StrokeJoin.Round
+            )
+        )
+    }
+}
+
+@Composable
+private fun AboutContactButton(
+    title: String,
+    subtitle: String,
+    @DrawableRes iconResId: Int,
+    iconColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .heightIn(min = 78.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.22f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(iconColor.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+            Column(
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AboutTsuzukuScreen(
+    versionName: String,
+    onBack: () -> Unit,
+    onPrivacy: () -> Unit,
+    onTerms: () -> Unit,
+    onOpenSource: () -> Unit,
+    onGitHub: () -> Unit,
+    onInstagram: () -> Unit,
+    onLinkedIn: () -> Unit,
+    onEmail: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
+                        Color.Transparent,
+                        Color.Transparent
+                    ),
+                    center = androidx.compose.ui.geometry.Offset(180f, 180f),
+                    radius = 980f
+                )
+            )
+            .padding(horizontal = 18.dp),
+        contentPadding = PaddingValues(top = 22.dp, bottom = 116.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
+        item {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.offset(x = (-12).dp)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                    Text(
+                        text = "About Tsuzuku",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.offset(x = (-4).dp)
+                    )
+                }
+                Text(
+                    text = "Learn more about the app and its mission.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .padding(start = 44.dp)
+                        .offset(y = (-8).dp)
+                )
+            }
+        }
+
+        item {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_tsuzuku_create_habbit_logo),
+                    contentDescription = "Tsuzuku",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.30f), CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(Modifier.height(12.dp))
+                Text("Tsuzuku", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+                Text("続く — Keep going, every day.", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    "Tsuzuku is a privacy-first habit tracker and focus companion.\nAll your data stays on your device. Always.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
+                    lineHeight = 18.sp
+                )
+            }
+        }
+
+        item {
+            SettingsGroupedCard {
+                SettingsMenuRow(
+                    icon = Icons.Default.Info,
+                    title = "Version",
+                    subtitle = versionName,
+                    iconColor = Color(0xFF4ADE80),
+                    badge = "Latest",
+                    showChevron = false,
+                    onClick = {}
+                )
+                SettingsMenuDivider()
+                SettingsMenuRow(
+                    icon = Icons.Default.CloudOff,
+                    title = "Privacy",
+                    subtitle = "100% Offline. Your data never leaves your device.",
+                    iconColor = Color(0xFF38BDF8),
+                    onClick = onPrivacy
+                )
+                SettingsMenuDivider()
+                SettingsMenuRow(
+                    icon = Icons.Default.Gavel,
+                    title = "Terms of Use",
+                    subtitle = "Read the terms and conditions for using Tsuzuku.",
+                    iconColor = Color(0xFFFACC15),
+                    chevronColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    onClick = onTerms
+                )
+                SettingsMenuDivider()
+                SettingsMenuRow(
+                    icon = Icons.Default.PrivacyTip,
+                    title = "Privacy Policy",
+                    subtitle = "Learn how we protect your privacy.",
+                    iconColor = Color(0xFFC084FC),
+                    chevronColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    onClick = onPrivacy
+                )
+                SettingsMenuDivider()
+                SettingsMenuRow(
+                    icon = Icons.Default.Code,
+                    title = "Open Source",
+                    subtitle = "Tsuzuku is open source and community driven.",
+                    iconColor = Color(0xFF22C55E),
+                    chevronColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    showChevron = false,
+                    onClick = onOpenSource
+                )
+            }
+        }
+
+        item {
+            SettingsGroupedCard {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(12.dp))
+                            Text("Our Mission", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                        }
+                        Spacer(Modifier.height(14.dp))
+                        Text(
+                            "To help you build better habits, stay focused, and live intentionally.\nNo ads. No tracking. Just you and your journey.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyLarge,
+                            lineHeight = 20.sp
+                        )
+                    }
+                    MissionMountainIllustration(
+                        modifier = Modifier
+                            .size(width = 132.dp, height = 108.dp)
+                            .padding(start = 12.dp)
+                    )
+                }
+            }
+        }
+
+        item {
+            SettingsGroupedCard {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFFB7185).copy(alpha = 0.12f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFFB7185), modifier = Modifier.size(16.dp))
+                            }
+                            Spacer(Modifier.width(10.dp))
+                            Text(
+                                "MADE WITH LOVE BY",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelSmall,
+                                letterSpacing = 1.sp,
+                                color = Color(0xFFFB7185)
+                            )
+                        }
+                        Spacer(Modifier.height(10.dp))
+                        Text("Animesh Gupta", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                        Spacer(Modifier.height(4.dp))
+                        Text("Developer • Designer • Lifelong Learner", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
+                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.developer),
+                        contentDescription = "Animesh Gupta",
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, Color.Black, CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+        }
+
+        item {
+            SettingsGroupedCard {
+                Text("Connect with me", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(12.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                        AboutContactButton(
+                            title = "GitHub",
+                            subtitle = "@agupta07505",
+                            iconResId = R.drawable.ic_github,
+                            iconColor = MaterialTheme.colorScheme.onSurface,
+                            onClick = onGitHub,
+                            modifier = Modifier.weight(1f)
+                        )
+                        AboutContactButton(
+                            title = "Instagram",
+                            subtitle = "@agupta07505",
+                            iconResId = R.drawable.ic_instagram,
+                            iconColor = Color(0xFFE1306C),
+                            onClick = onInstagram,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                        AboutContactButton(
+                            title = "LinkedIn",
+                            subtitle = "/in/agupta07505",
+                            iconResId = R.drawable.ic_linkedin,
+                            iconColor = Color(0xFF0A66C2),
+                            onClick = onLinkedIn,
+                            modifier = Modifier.weight(1f)
+                        )
+                        AboutContactButton(
+                            title = "Email",
+                            subtitle = "agupta07505@gmail.com",
+                            iconResId = R.drawable.ic_email,
+                            iconColor = Color(0xFFEA4335),
+                            onClick = onEmail,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            SettingsGroupedCard {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.CloudOff, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(14.dp))
+                    Text(
+                        "Tsuzuku is and always will be ad-free and analytics-free.\nYour trust means everything.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 20.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun formatBytes(bytes: Long): String {
+    if (bytes <= 0L) return "0 B"
+    val units = listOf("B", "KB", "MB", "GB")
+    var value = bytes.toDouble()
+    var unitIndex = 0
+    while (value >= 1024 && unitIndex < units.lastIndex) {
+        value /= 1024
+        unitIndex++
+    }
+    return if (unitIndex == 0) "${value.toLong()} ${units[unitIndex]}" else String.format(Locale.US, "%.1f %s", value, units[unitIndex])
+}
+
+private fun fileSizeSafely(file: File): Long = runCatching {
+    if (!file.exists()) 0L else if (file.isFile) file.length() else file.listFiles().orEmpty().sumOf { fileSizeSafely(it) }
+}.getOrDefault(0L)
+
+private fun databaseSizeBytes(context: Context): Long {
+    val db = context.getDatabasePath("streak_marker_db")
+    val parent = db.parentFile
+    return listOf(
+        db,
+        File(parent, "streak_marker_db-wal"),
+        File(parent, "streak_marker_db-shm")
+    ).sumOf { fileSizeSafely(it) }
+}
+
+private fun appStorageBytes(context: Context): Long {
+    return fileSizeSafely(File(context.applicationInfo.dataDir))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -329,19 +1085,29 @@ fun SettingsScreen(
     var showJapaneseQuotes by remember {
         mutableStateOf(sharedPrefs.getBoolean("show_japanese_quotes", true))
     }
+    var remindersEnabled by remember {
+        mutableStateOf(sharedPrefs.getBoolean("reminders_active", true))
+    }
+    var permanentNotificationEnabled by remember {
+        mutableStateOf(sharedPrefs.getBoolean("permanent_notification_active", false))
+    }
 
 
     // Dialog state
     var showImportDialog by remember { mutableStateOf(false) }
-    var importText by remember { mutableStateOf("") }
     
     var showResetDialog by remember { mutableStateOf(false) }
+    var showResetFocusDialog by remember { mutableStateOf(false) }
     var confirmText by remember { mutableStateOf("") }
 
     var showTimePickerDialog by remember { mutableStateOf(false) }
 
     var showPrivacyDialog by remember { mutableStateOf(false) }
     var showTermsDialog by remember { mutableStateOf(false) }
+    var showAppearanceDialog by remember { mutableStateOf(false) }
+    var showNotificationDialog by remember { mutableStateOf(false) }
+    var showPersonalizationDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
 
     // Local notification parameters loaded/saved dynamically
     var reminderHour by remember { mutableStateOf(sharedPrefs.getInt("reminder_hour", 20)) }
@@ -361,6 +1127,7 @@ fun SettingsScreen(
     // Dynamic Database Stats Streams
     val habitsList by viewModel.habits.collectAsState()
     val logsList by viewModel.allLogs.collectAsState()
+    val focusSessionsList by viewModel.focusSessions.collectAsState()
 
     // Calculate real App Statistics
     val totalHabitsCount = habitsList.size
@@ -413,10 +1180,32 @@ fun SettingsScreen(
 
     // Backup details persisted & loaded
     var lastBackupDate by remember {
-        mutableStateOf(sharedPrefs.getString("last_backup_date", "June 23, 2026") ?: "June 23, 2026")
+        mutableStateOf(sharedPrefs.getString("last_backup_date", "Never") ?: "Never")
     }
     var lastBackupSize by remember {
-        mutableStateOf(sharedPrefs.getString("last_backup_size", "124 KB") ?: "124 KB")
+        mutableStateOf(sharedPrefs.getString("last_backup_size", "0 B") ?: "0 B")
+    }
+
+    fun openUrl(url: String, fallbackMessage: String) {
+        runCatching {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        }.onFailure {
+            Toast.makeText(context, fallbackMessage, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun sendMail(subject: String, body: String) {
+        runCatching {
+            context.startActivity(
+                Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:agupta07505@gmail.com")
+                    putExtra(Intent.EXTRA_SUBJECT, subject)
+                    putExtra(Intent.EXTRA_TEXT, body)
+                }
+            )
+        }.onFailure {
+            Toast.makeText(context, "No email app found.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // Sharing Exports Action
@@ -512,13 +1301,467 @@ fun SettingsScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.background
+                    ),
+                    center = androidx.compose.ui.geometry.Offset(80f, 120f),
+                    radius = 980f
+                )
+            )
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(horizontal = 18.dp)
                 .testTag("settings_scroll"),
-            contentPadding = PaddingValues(top = 22.dp, bottom = 80.dp),
+            contentPadding = PaddingValues(top = 22.dp, bottom = 116.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Settings",
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Customize your experience and manage your local data.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+
+            item {
+                Column {
+                    SettingsSectionLabel("Preferences")
+                    SettingsGroupedCard {
+                        SettingsMenuRow(
+                            icon = Icons.Default.Edit,
+                            title = "Appearance",
+                            subtitle = "Theme, colors and display options",
+                            iconColor = Color(0xFF4ADE80),
+                            onClick = { showAppearanceDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Notifications,
+                            title = "Notifications",
+                            subtitle = "Reminders, alerts and focus notifications",
+                            iconColor = Color(0xFFFACC15),
+                            onClick = { showNotificationDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Settings,
+                            title = "Personalization",
+                            subtitle = "Home cards, quotes, celebrations and more",
+                            iconColor = Color(0xFF22C55E),
+                            onClick = { showPersonalizationDialog = true }
+                        )
+                    }
+                }
+            }
+
+            item {
+                Column {
+                    SettingsSectionLabel("Local Data")
+                    SettingsGroupedCard {
+                        SettingsMenuRow(
+                            icon = Icons.Default.FileUpload,
+                            title = "Export Data (.json)",
+                            subtitle = "Export all habits, focus sessions and settings to a JSON file",
+                            iconColor = Color(0xFFC084FC),
+                            chevronColor = Color(0xFFC084FC),
+                            showChevron = false,
+                            onClick = { exportJsonLauncher.launch("Tsuzuku.json") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.FileDownload,
+                            title = "Import Data (.json)",
+                            subtitle = "Restore data from a previously exported JSON file",
+                            iconColor = Color(0xFF38BDF8),
+                            chevronColor = Color(0xFF38BDF8),
+                            onClick = { showImportDialog = true }
+                        )
+                    }
+                }
+            }
+
+            item {
+                Column {
+                    SettingsSectionLabel("Community")
+                    SettingsGroupedCard {
+                        SettingsMenuRow(
+                            icon = Icons.Default.Star,
+                            title = "Star on GitHub",
+                            subtitle = "Support the project by starring on GitHub",
+                            iconColor = Color(0xFFE5E7EB),
+                            chevronColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            showChevron = false,
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku", "Cannot open GitHub.") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Lightbulb,
+                            title = "Request a Feature",
+                            subtitle = "Suggest a new feature or improvement",
+                            iconColor = Color(0xFFFACC15),
+                            chevronColor = Color(0xFFFACC15),
+                            showChevron = false,
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/issues/new?template=feature_request.md", "Cannot open feature request page.") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.BugReport,
+                            title = "Report Bugs",
+                            subtitle = "Found an issue? Let us know",
+                            iconColor = Color(0xFFEF4444),
+                            chevronColor = Color(0xFFEF4444),
+                            showChevron = false,
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/issues/new?template=bug_report.md", "Cannot open bug report page.") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.RateReview,
+                            title = "App Review",
+                            subtitle = "Share feedback and review Tsuzuku",
+                            iconColor = Color(0xFF4ADE80),
+                            chevronColor = Color(0xFF4ADE80),
+                            showChevron = false,
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/issues/new?template=app_review.md", "Cannot open app review page.") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Groups,
+                            title = "Join Community",
+                            subtitle = "Join the discussion and share your journey",
+                            iconColor = Color(0xFFC084FC),
+                            chevronColor = Color(0xFFC084FC),
+                            badge = "Coming Soon",
+                            showChevron = false,
+                            onClick = { Toast.makeText(context, "Community is coming soon.", Toast.LENGTH_SHORT).show() }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Gavel,
+                            title = "MIT License",
+                            subtitle = "Open source and free to use",
+                            iconColor = Color(0xFF2DD4BF),
+                            chevronColor = Color(0xFF2DD4BF),
+                            showChevron = false,
+                            onClick = { openUrl("https://github.com/agupta07505/Tsuzuku/blob/main/LICENSE", "Cannot open license.") }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Info,
+                            title = "About Tsuzuku",
+                            subtitle = "Version, developer and app information",
+                            iconColor = Color(0xFF38BDF8),
+                            chevronColor = Color(0xFF38BDF8),
+                            value = "v${BuildConfig.VERSION_NAME}",
+                            onClick = { showAboutDialog = true }
+                        )
+                    }
+                }
+            }
+
+            item {
+                Column {
+                    SettingsSectionLabel("Danger Zone", color = MaterialTheme.colorScheme.error)
+                    SettingsGroupedCard {
+                        SettingsMenuRow(
+                            icon = Icons.AutoMirrored.Filled.List,
+                            title = "Reset Focus Statistics",
+                            subtitle = "Reset all focus sessions and statistics",
+                            iconColor = Color(0xFFEF4444),
+                            chevronColor = Color(0xFFEF4444),
+                            onClick = { showResetFocusDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Delete,
+                            title = "Delete All Habits",
+                            subtitle = "Permanently delete all habits and progress",
+                            iconColor = Color(0xFFEF4444),
+                            chevronColor = Color(0xFFEF4444),
+                            onClick = { showResetDialog = true }
+                        )
+                        SettingsMenuDivider()
+                        SettingsMenuRow(
+                            icon = Icons.Default.Warning,
+                            title = "Factory Reset Tsuzuku",
+                            subtitle = "Erase everything and start fresh",
+                            iconColor = Color(0xFFEF4444),
+                            chevronColor = Color(0xFFEF4444),
+                            onClick = { showResetDialog = true }
+                        )
+                    }
+                }
+            }
+
+            item {
+                SettingsBrandFooter()
+            }
+        }
+
+        if (false) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("settings_scroll"),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Settings",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Keep Tsuzuku calm, private, and synced with your workflow.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(26.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.28f))
+                ) {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Local-first setup", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    "Your habits, check-ins, and Focus history stay on this device unless you export them.",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                            SettingsInfoPill("Habits", totalHabitsCount.toString(), Modifier.weight(1f))
+                            SettingsInfoPill("Check-ins", totalCheckInsCount.toString(), Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = "Appearance",
+                    subtitle = "Theme and accent color",
+                    icon = Icons.Default.Edit
+                ) {
+                    val themeOptions = listOf(
+                        ThemeOption("system", "System", listOf(Color(0xFFF8FAFC), Color(0xFF0F171F), Color(0xFF94A3B8))),
+                        ThemeOption("light", "Light", listOf(Color(0xFFE2E8F0), Color(0xFFF8FAFC), Color(0xFF2CB5C3))),
+                        ThemeOption("dark", "Dark", listOf(Color(0xFF090E14), Color(0xFF16222F), Color(0xFF2CB5C3))),
+                        ThemeOption("amoled", "AMOLED", listOf(Color(0xFF000000), Color(0xFF090E14), Color(0xFF2CB5C3))),
+                        ThemeOption("green", "Tsuzuku Green", listOf(Color(0xFF050E09), Color(0xFF122C1E), Color(0xFF22C55E))),
+                        ThemeOption("blue", "Tsuzuku Blue", listOf(Color(0xFF030914), Color(0xFF0E223F), Color(0xFF38BDF8)))
+                    )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        themeOptions.forEach { option ->
+                            SettingsThemeRow(
+                                option = option,
+                                selected = themeState == option.key,
+                                onClick = { onThemeChanged(option.key) }
+                            )
+                        }
+                        OutlinedTextField(
+                            value = customAccentColorHex,
+                            onValueChange = onAccentColorChanged,
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            label = { Text("Custom accent hex") },
+                            placeholder = { Text("#22C55E") },
+                            supportingText = { Text("Leave empty to use the selected theme accent.") },
+                            trailingIcon = {
+                                if (customAccentColorHex.isNotBlank()) {
+                                    IconButton(onClick = { onAccentColorChanged("") }) {
+                                        Icon(Icons.Default.Refresh, contentDescription = "Reset accent")
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = "Notifications",
+                    subtitle = "Habit reminders only",
+                    icon = Icons.Default.Notifications,
+                    accent = Color(0xFFEAB308)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SettingsSwitchRow(
+                            title = "Daily Habit Reminders",
+                            subtitle = "Use local notifications to remind you about active habits.",
+                            checked = remindersEnabled,
+                            onCheckedChange = { enabled ->
+                                remindersEnabled = enabled
+                                sharedPrefs.edit().putBoolean("reminders_active", enabled).apply()
+                            }
+                        )
+                        SettingsActionRow(
+                            title = "Reminder Time",
+                            subtitle = formattedReminderTime,
+                            icon = Icons.Default.Notifications,
+                            onClick = { showTimePickerDialog = true },
+                            accent = Color(0xFFEAB308),
+                            trailing = { Text("Change", color = Color(0xFFEAB308), fontWeight = FontWeight.Bold) }
+                        )
+                        SettingsSwitchRow(
+                            title = "Status Bar Motivation",
+                            subtitle = "Show a quiet ongoing motivational notification.",
+                            checked = permanentNotificationEnabled,
+                            onCheckedChange = { enabled ->
+                                permanentNotificationEnabled = enabled
+                                sharedPrefs.edit().putBoolean("permanent_notification_active", enabled).apply()
+                                if (enabled) {
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.updatePermanentNotification(context)
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.scheduleNextHourlyUpdate(context)
+                                } else {
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.cancelPermanentNotification(context)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = "Data Backup",
+                    subtitle = "Export or restore your local data",
+                    icon = Icons.Default.Share,
+                    accent = Color(0xFF10B981)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            "Includes habits, check-ins, and Focus history.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                            Button(
+                                onClick = { exportJsonLauncher.launch("Tsuzuku.json") },
+                                modifier = Modifier.weight(1f).testTag("btn_save_backup_file"),
+                                shape = RoundedCornerShape(14.dp)
+                            ) {
+                                Text("Save JSON", fontWeight = FontWeight.Bold)
+                            }
+                            OutlinedButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        val jsonContent = viewModel.exportDataJson()
+                                        shareBackup(jsonContent, "Tsuzuku.json")
+                                    }
+                                },
+                                modifier = Modifier.weight(1f).testTag("btn_export_json"),
+                                shape = RoundedCornerShape(14.dp)
+                            ) {
+                                Text("Share")
+                            }
+                        }
+                        Button(
+                            onClick = { showImportDialog = true },
+                            modifier = Modifier.fillMaxWidth().testTag("btn_import_json"),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEAB308), contentColor = Color(0xFF0F171F)),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text("Import / Restore Backup", fontWeight = FontWeight.Bold)
+                        }
+                        Text(
+                            "Last backup: $lastBackupDate • $lastBackupSize",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = "Privacy & App",
+                    subtitle = "Offline-first details",
+                    icon = Icons.Default.Info,
+                    accent = Color(0xFF64748B)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text("Tsuzuku ${BuildConfig.VERSION_NAME}", fontWeight = FontWeight.Bold)
+                        Text(
+                            "No ads. No telemetry. Your tracking data lives in the local Room database.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                            OutlinedButton(onClick = { showPrivacyDialog = true }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
+                                Text("Privacy")
+                            }
+                            OutlinedButton(onClick = { showTermsDialog = true }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
+                                Text("Terms")
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = "Danger Zone",
+                    subtitle = "Permanent local data actions",
+                    icon = Icons.Default.Warning,
+                    accent = MaterialTheme.colorScheme.error
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            "Deletes habits, check-ins, streak logs, and stored app data from this device.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Button(
+                            onClick = { showResetDialog = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
+                            modifier = Modifier.fillMaxWidth().testTag("btn_wipe_all_data"),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Delete All Data", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+        }
+
+        val showLegacySettings = remember { false }
+        if (showLegacySettings) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("settings_scroll"),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Screen Header Info
@@ -526,7 +1769,7 @@ fun SettingsScreen(
                 Column {
                     Text(
                         text = "Settings",
-                        fontSize = 28.sp,
+                        style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -647,7 +1890,7 @@ fun SettingsScreen(
                             )
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -689,7 +1932,7 @@ fun SettingsScreen(
                             )
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         // Added clickable time picker row
                         Row(
@@ -730,7 +1973,7 @@ fun SettingsScreen(
                             }
                         }
                         
-                        Divider(color = Color(0xFF16222F))
+                        HorizontalDivider(color = Color(0xFF16222F))
                         
                         Button(
                             onClick = {
@@ -797,7 +2040,7 @@ fun SettingsScreen(
                             )
                         }
                         
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -881,7 +2124,7 @@ fun SettingsScreen(
                             )
                         }
                         
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -914,7 +2157,7 @@ fun SettingsScreen(
                             )
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         // Sleek Interactive Quote Showcase box
                         val mantraPairList = remember {
@@ -1053,7 +2296,7 @@ fun SettingsScreen(
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(
-                            text = "Preserve and restore your local backup databases securely",
+                            text = "Preserve and restore habits, check-ins, and Focus sessions securely",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             modifier = Modifier.padding(bottom = 6.dp)
@@ -1103,7 +2346,7 @@ fun SettingsScreen(
                                 }
                             }
                             Text(
-                                text = "Choose Save File to store on your device, or Share Text to copy/send.",
+                            text = "Includes habits, check-ins, and Focus history. Save locally or share as text.",
                                 fontSize = 10.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                 modifier = Modifier.padding(start = 4.dp)
@@ -1134,7 +2377,7 @@ fun SettingsScreen(
             item {
                 CollapsibleSettingsCard(
                     title = "App Statistics",
-                    icon = Icons.Default.List,
+                    icon = Icons.AutoMirrored.Filled.List,
                     isExpanded = expandedSection == "stats",
                     onToggle = { expandedSection = if (expandedSection == "stats") null else "stats" },
                     primaryColor = Color(0xFF8B5CF6)
@@ -1156,7 +2399,7 @@ fun SettingsScreen(
                             Text("$totalHabitsCount", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1167,7 +2410,7 @@ fun SettingsScreen(
                             Text("$totalCheckInsCount", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1178,7 +2421,7 @@ fun SettingsScreen(
                             Text("$daysUsingCount", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
 
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1273,7 +2516,7 @@ fun SettingsScreen(
                         }
                         
                         Spacer(modifier = Modifier.height(10.dp))
-                        Divider(color = Color(0xFF16222F))
+                        HorizontalDivider(color = Color(0xFF16222F))
                         Spacer(modifier = Modifier.height(14.dp))
                         
                         // Developer footer note
@@ -1347,6 +2590,204 @@ fun SettingsScreen(
                     }
                 }
             }
+        }
+        }
+
+        if (showAppearanceDialog) {
+            AlertDialog(
+                onDismissRequest = { showAppearanceDialog = false },
+                title = { Text("Appearance", fontWeight = FontWeight.Bold) },
+                text = {
+                    val themeOptions = listOf(
+                        ThemeOption("system", "System", listOf(Color(0xFFF8FAFC), Color(0xFF0F171F), Color(0xFF94A3B8))),
+                        ThemeOption("light", "Light", listOf(Color(0xFFE2E8F0), Color(0xFFF8FAFC), Color(0xFF2CB5C3))),
+                        ThemeOption("dark", "Dark", listOf(Color(0xFF090E14), Color(0xFF16222F), Color(0xFF2CB5C3))),
+                        ThemeOption("amoled", "AMOLED", listOf(Color(0xFF000000), Color(0xFF090E14), Color(0xFF2CB5C3))),
+                        ThemeOption("green", "Tsuzuku Green", listOf(Color(0xFF050E09), Color(0xFF122C1E), Color(0xFF22C55E))),
+                        ThemeOption("blue", "Tsuzuku Blue", listOf(Color(0xFF030914), Color(0xFF0E223F), Color(0xFF38BDF8)))
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 460.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        themeOptions.forEach { option ->
+                            SettingsThemeRow(
+                                option = option,
+                                selected = themeState == option.key,
+                                onClick = { onThemeChanged(option.key) }
+                            )
+                        }
+                        OutlinedTextField(
+                            value = customAccentColorHex,
+                            onValueChange = onAccentColorChanged,
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            label = { Text("Custom accent hex") },
+                            placeholder = { Text("#22C55E") },
+                            supportingText = { Text("Leave empty to use the selected theme accent.") },
+                            trailingIcon = {
+                                if (customAccentColorHex.isNotBlank()) {
+                                    IconButton(onClick = { onAccentColorChanged("") }) {
+                                        Icon(Icons.Default.Refresh, contentDescription = "Reset accent")
+                                    }
+                                }
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showAppearanceDialog = false }) { Text("Done") }
+                }
+            )
+        }
+
+        if (showNotificationDialog) {
+            AlertDialog(
+                onDismissRequest = { showNotificationDialog = false },
+                title = { Text("Notifications", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SettingsSwitchRow(
+                            title = "Daily Habit Reminders",
+                            subtitle = "Use local notifications to remind you about active habits.",
+                            checked = remindersEnabled,
+                            onCheckedChange = { enabled ->
+                                remindersEnabled = enabled
+                                sharedPrefs.edit().putBoolean("reminders_active", enabled).apply()
+                            }
+                        )
+                        SettingsActionRow(
+                            title = "Reminder Time",
+                            subtitle = formattedReminderTime,
+                            icon = Icons.Default.Notifications,
+                            onClick = { showTimePickerDialog = true },
+                            accent = Color(0xFFEAB308),
+                            trailing = { Text("Change", color = Color(0xFFEAB308), fontWeight = FontWeight.Bold) }
+                        )
+                        SettingsSwitchRow(
+                            title = "Status Bar Motivation",
+                            subtitle = "Show a quiet ongoing motivational notification.",
+                            checked = permanentNotificationEnabled,
+                            onCheckedChange = { enabled ->
+                                permanentNotificationEnabled = enabled
+                                sharedPrefs.edit().putBoolean("permanent_notification_active", enabled).apply()
+                                if (enabled) {
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.updatePermanentNotification(context)
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.scheduleNextHourlyUpdate(context)
+                                } else {
+                                    com.agupta07505.tsuzuku.notification.HabitNotificationHelper.cancelPermanentNotification(context)
+                                }
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showNotificationDialog = false }) { Text("Done") }
+                }
+            )
+        }
+
+        if (showPersonalizationDialog) {
+            var confettiEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("confetti_active", true)) }
+            var quoteBannersEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("quotes_active", true)) }
+            var morningEncouragementEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("morning_active", true)) }
+            AlertDialog(
+                onDismissRequest = { showPersonalizationDialog = false },
+                title = { Text("Personalization", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 420.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        SettingsSwitchRow(
+                            title = "Confetti Celebrations",
+                            subtitle = "Celebrate when completing today's habits.",
+                            checked = confettiEnabled,
+                            onCheckedChange = { enabled ->
+                                confettiEnabled = enabled
+                                sharedPrefs.edit().putBoolean("confetti_active", enabled).apply()
+                            }
+                        )
+                        SettingsSwitchRow(
+                            title = "Japanese Motto",
+                            subtitle = "Show the Japanese consistency motto where supported.",
+                            checked = showJapaneseQuotes,
+                            onCheckedChange = { enabled ->
+                                showJapaneseQuotes = enabled
+                                sharedPrefs.edit().putBoolean("show_japanese_quotes", enabled).apply()
+                            }
+                        )
+                        SettingsSwitchRow(
+                            title = "Daily Quote Banners",
+                            subtitle = "Show motivational quotes around habit surfaces.",
+                            checked = quoteBannersEnabled,
+                            onCheckedChange = { enabled ->
+                                quoteBannersEnabled = enabled
+                                sharedPrefs.edit().putBoolean("quotes_active", enabled).apply()
+                            }
+                        )
+                        SettingsSwitchRow(
+                            title = "Morning Encouragement",
+                            subtitle = "Show stronger encouragement at the start of the day.",
+                            checked = morningEncouragementEnabled,
+                            onCheckedChange = { enabled ->
+                                morningEncouragementEnabled = enabled
+                                sharedPrefs.edit().putBoolean("morning_active", enabled).apply()
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showPersonalizationDialog = false }) { Text("Done") }
+                }
+            )
+        }
+
+        if (showAboutDialog) {
+            AboutTsuzukuScreen(
+                versionName = BuildConfig.VERSION_NAME,
+                onBack = { showAboutDialog = false },
+                onPrivacy = { showPrivacyDialog = true },
+                onTerms = { showTermsDialog = true },
+                onOpenSource = { openUrl("https://github.com/agupta07505/Tsuzuku", "Cannot open GitHub.") },
+                onGitHub = { openUrl("https://github.com/agupta07505", "Cannot open GitHub.") },
+                onInstagram = { openUrl("https://instagram.com/agupta07505", "Cannot open Instagram.") },
+                onLinkedIn = { openUrl("https://www.linkedin.com/in/agupta07505", "Cannot open LinkedIn.") },
+                onEmail = { sendMail("Tsuzuku", "") },
+                modifier = Modifier.matchParentSize()
+            )
+        }
+
+        if (showResetFocusDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetFocusDialog = false },
+                title = { Text("Reset Focus Statistics?") },
+                text = {
+                    Text("This will permanently delete all saved Focus sessions and Focus statistics. Habits will not be deleted.")
+                },
+                confirmButton = {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        onClick = {
+                            viewModel.deleteAllFocusData {
+                                showResetFocusDialog = false
+                                Toast.makeText(context, "Focus statistics reset.", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    ) {
+                        Text("Reset Focus")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetFocusDialog = false }) { Text("Cancel") }
+                }
+            )
         }
         
         // Time Picker Custom selection dialog
@@ -1458,7 +2899,7 @@ fun SettingsScreen(
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
-                            text = "Locate and upload a previously saved streak_marker_backup.json backup file from your local storage:",
+                            text = "Select a Tsuzuku JSON backup containing habits, check-ins, and Focus sessions.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1478,56 +2919,20 @@ fun SettingsScreen(
                         ) {
                             Text("Select Backup File (.json)", fontWeight = FontWeight.Bold)
                         }
-                        
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(vertical = 4.dp))
-                        
                         Text(
-                            text = "Or, paste the raw text content of your backup schema manually below:",
+                            text = "Import will replace the current local data after the file is read successfully.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        OutlinedTextField(
-                            value = importText,
-                            onValueChange = { importText = it },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(130.dp)
-                                .testTag("import_text_field"),
-                            placeholder = { Text("{ \"habits\": [...], \"logs\": [...] }") },
-                            textStyle = LocalTextStyle.current.copy(fontSize = 11.sp, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                         )
                     }
                 },
                 confirmButton = {
-                    Button(
-                        onClick = {
-                            if (importText.trim().isNotEmpty()) {
-                                viewModel.importDataJson(
-                                    importText,
-                                    onSuccess = {
-                                        showImportDialog = false
-                                        importText = ""
-                                        Toast.makeText(context, "Backup successfully loaded!", Toast.LENGTH_LONG).show()
-                                    },
-                                    onError = { err ->
-                                        Toast.makeText(context, "Error: $err", Toast.LENGTH_LONG).show()
-                                    }
-                                )
-                            }
-                        },
-                        enabled = importText.trim().isNotEmpty(),
-                        modifier = Modifier.testTag("import_confirm_button"),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF10B981)
-                        )
-                    ) {
-                        Text("Verify & Overwrite Data")
+                    TextButton(onClick = { showImportDialog = false }) {
+                        Text("Close")
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showImportDialog = false }) {
-                        Text("Nevermind")
-                    }
+                    TextButton(onClick = { importJsonFileLauncher.launch("*/*") }) { Text("Choose File") }
                 }
             )
         }

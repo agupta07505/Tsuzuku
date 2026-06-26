@@ -54,7 +54,7 @@ object HabitNotificationHelper {
         val mantra = Quotes.byIndex(currentHour)
 
         val showJapanese = sharedPrefs.getBoolean("show_japanese_quotes", true)
-        val titleText = "Tsuzuku Permanent Motivation"
+        val titleText = "Tsuzuku Motivation"
         val contentText = if (showJapanese) {
             "${mantra.english}\n${mantra.japanese}"
         } else {

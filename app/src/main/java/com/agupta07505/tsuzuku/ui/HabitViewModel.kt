@@ -20,16 +20,24 @@ import org.json.JSONObject
 
 class HabitViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: HabitRepository
+    private val focusRepository: FocusRepository
 
     init {
         val database = AppDatabase.getDatabase(application)
         repository = HabitRepository(database.habitDao())
+        focusRepository = FocusRepository(database.focusSessionDao())
     }
 
     val habits: StateFlow<List<Habit>> = repository.allActiveHabits
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val managedHabits: StateFlow<List<Habit>> = repository.allHabits
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val allLogs: StateFlow<List<HabitLog>> = repository.allLogs
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val focusSessions: StateFlow<List<FocusSession>> = focusRepository.sessions
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // State of selected date for checklist checking (Default is today)
@@ -89,6 +97,18 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun setHabitArchived(habit: Habit, archived: Boolean) {
+        viewModelScope.launch {
+            val updated = habit.copy(isArchived = archived)
+            repository.updateHabit(updated)
+            val context = getApplication<Application>().applicationContext
+            HabitNotificationHelper.cancelReminder(context, habit.id)
+            if (!archived && updated.reminderHour != null && updated.reminderMinute != null) {
+                HabitNotificationHelper.scheduleDailyReminder(context, updated)
+            }
+        }
+    }
+
     fun toggleHabitLog(habitId: Int, date: String, isCompleted: Boolean) {
         viewModelScope.launch {
             repository.toggleLog(habitId, date, isCompleted)
@@ -103,9 +123,10 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
     // Export Portability Methods
     suspend fun exportDataJson(): String {
         val allHabits = repository.getAllHabitsDirectDecrypted()
-        val allLogsList = allLogs.value
+        val allLogsList = repository.getAllLogsDirect()
+        val allFocusSessions = focusRepository.getAllDirect()
         
-        val root = JSONObject()
+        val root = JSONObject().put("backupVersion", 2)
         val habitsArray = JSONArray()
         for (h in allHabits) {
             val hObj = JSONObject().apply {
@@ -134,13 +155,30 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         
         root.put("habits", habitsArray)
         root.put("logs", logsArray)
+        root.put("focusSessions", JSONArray().apply {
+            allFocusSessions.forEach { session ->
+                put(JSONObject().apply {
+                    put("id", session.id)
+                    put("sessionName", session.sessionName)
+                    put("plannedDurationMinutes", session.plannedDurationMinutes)
+                    put("actualDurationMinutes", session.actualDurationMinutes)
+                    put("allowedMistakes", session.allowedMistakes)
+                    put("mistakesUsed", session.mistakesUsed)
+                    put("completed", session.completed)
+                    put("failedReason", session.failedReason ?: JSONObject.NULL)
+                    put("startTime", session.startTime)
+                    put("endTime", session.endTime)
+                })
+            }
+        })
         
         return root.toString(2)
     }
 
     suspend fun exportDataCsv(): String {
         val allHabits = repository.getAllHabitsDirectDecrypted()
-        val allLogsList = allLogs.value
+        val allLogsList = repository.getAllLogsDirect()
+        val allFocusSessions = focusRepository.getAllDirect()
         
         val sb = StringBuilder()
         sb.append("--- HABITS TABLE ---\n")
@@ -156,6 +194,12 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         for (l in allLogsList) {
             sb.append("${l.habitId},${l.date},${l.isCompleted}\n")
         }
+
+        sb.append("\n--- FOCUS SESSIONS TABLE ---\n")
+        sb.append("ID,SessionName,PlannedMinutes,ActualMinutes,AllowedMistakes,MistakesUsed,Completed,FailedReason,StartTime,EndTime\n")
+        for (session in allFocusSessions) {
+            sb.append("${session.id},\"${escapeCsvField(session.sessionName)}\",${session.plannedDurationMinutes},${session.actualDurationMinutes},${session.allowedMistakes},${session.mistakesUsed},${session.completed},\"${escapeCsvField(session.failedReason.orEmpty())}\",${session.startTime},${session.endTime}\n")
+        }
         
         return sb.toString()
     }
@@ -168,6 +212,18 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 repository.clearAllData()
+                focusRepository.clearAll()
+                onSuccess()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun deleteAllFocusData(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                focusRepository.clearAll()
                 onSuccess()
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -181,12 +237,14 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
                 val root = JSONObject(jsonString)
                 val habitsArray = root.getJSONArray("habits")
                 val logsArray = root.getJSONArray("logs")
+                val focusSessionsArray = root.optJSONArray("focusSessions")
                 
                 val context = getApplication<Application>().applicationContext
                 val db = AppDatabase.getDatabase(context)
                 
                 // Clear existing using explicit DAO truncation
                 repository.clearAllData()
+                focusRepository.clearAll()
                 
                 for (i in 0 until habitsArray.length()) {
                     val ho = habitsArray.getJSONObject(i)
@@ -218,6 +276,26 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
                         isCompleted = lo.getBoolean("isCompleted")
                     )
                     db.habitDao().insertLog(log)
+                }
+
+                if (focusSessionsArray != null) {
+                    for (i in 0 until focusSessionsArray.length()) {
+                        val item = focusSessionsArray.getJSONObject(i)
+                        focusRepository.save(
+                            FocusSession(
+                                id = item.optLong("id", 0L),
+                                sessionName = item.getString("sessionName"),
+                                plannedDurationMinutes = item.getInt("plannedDurationMinutes"),
+                                actualDurationMinutes = item.getInt("actualDurationMinutes"),
+                                allowedMistakes = item.getInt("allowedMistakes"),
+                                mistakesUsed = item.getInt("mistakesUsed"),
+                                completed = item.getBoolean("completed"),
+                                failedReason = if (item.isNull("failedReason")) null else item.getString("failedReason"),
+                                startTime = item.getLong("startTime"),
+                                endTime = item.getLong("endTime")
+                            )
+                        )
+                    }
                 }
                 
                 onSuccess()

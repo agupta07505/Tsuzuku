@@ -23,11 +23,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -47,7 +55,6 @@ import androidx.compose.ui.window.Dialog
 import com.agupta07505.tsuzuku.data.Habit
 import com.agupta07505.tsuzuku.data.Quotes
 import com.agupta07505.tsuzuku.ui.HabitViewModel
-import com.agupta07505.tsuzuku.ui.components.StreakHeatmap
 import com.agupta07505.tsuzuku.util.DateUtils
 import com.agupta07505.tsuzuku.util.StreakCalculator
 import java.text.SimpleDateFormat
@@ -58,6 +65,8 @@ import kotlin.math.roundToInt
 @Composable
 fun TrackerScreen(
     viewModel: HabitViewModel,
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToFocus: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val habits by viewModel.habits.collectAsState()
@@ -130,71 +139,131 @@ fun TrackerScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Spacer(modifier = Modifier.height(20.dp))
-            
-            // Premium Brand Header Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    // Custom brand ring icon loaded dynamically from Vector Drawable
-                    Image(
-                        painter = painterResource(id = com.agupta07505.tsuzuku.R.drawable.ic_tsuzuku_logo),
-                        contentDescription = "Tsuzuku Logo",
-                        modifier = Modifier
-                            .size(54.dp)
-                            .clip(CircleShape)
-                    )
-                    
-                    Column {
-                        Text(
-                            text = "Tsuzuku",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("habits_checklist"),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Column {
                             Text(
-                                text = "続く ",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                text = "Tsuzuku",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
-                            Text(
-                                text = "Keep going, every day.",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "続く ",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Keep going, every day.",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        Row {
+                            IconButton(onClick = {}) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Notifications",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            IconButton(onClick = onNavigateToSettings) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Settings",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
-                }
-                
-                // Add button as solid aquamarine circle FAB
-                IconButton(
-                    onClick = { showAddDialog = true },
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF2CB5C3))
-                        .testTag("fab_add_habit")
+
+                    Spacer(modifier = Modifier.height(16.dp))
+            
+            // Motivational Hero Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Habit",
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    androidx.compose.foundation.Canvas(modifier = Modifier.matchParentSize()) {
+                        val canvasWidth = size.width
+                        val canvasHeight = size.height
+                        
+                        drawCircle(
+                            color = Color(0xFF81C784).copy(alpha = 0.5f),
+                            radius = 40.dp.toPx(),
+                            center = androidx.compose.ui.geometry.Offset(x = canvasWidth - 60.dp.toPx(), y = 50.dp.toPx())
+                        )
+                        
+                        val path1 = androidx.compose.ui.graphics.Path().apply {
+                            moveTo(canvasWidth * 0.3f, canvasHeight)
+                            lineTo(canvasWidth * 0.7f, canvasHeight * 0.3f)
+                            lineTo(canvasWidth * 1.1f, canvasHeight)
+                            close()
+                        }
+                        drawPath(path = path1, color = Color(0xFF1E3A23).copy(alpha = 0.6f))
+                        
+                        val path2 = androidx.compose.ui.graphics.Path().apply {
+                            moveTo(canvasWidth * 0.1f, canvasHeight)
+                            lineTo(canvasWidth * 0.5f, canvasHeight * 0.5f)
+                            lineTo(canvasWidth * 0.9f, canvasHeight)
+                            close()
+                        }
+                        drawPath(path = path2, color = Color(0xFF162B1A).copy(alpha = 0.8f))
+                    }
+                    
+                    Column(
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+                    ) {
+                        Text(
+                            text = selectedMantra.second, // Japanese
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            lineHeight = 28.sp,
+                            modifier = Modifier.fillMaxWidth(0.75f)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = selectedMantra.first, // English
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                            lineHeight = 20.sp,
+                            modifier = Modifier.fillMaxWidth(0.75f)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "- 継続の力 (The Power of Consistency)",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        )
+                    }
                 }
             }
             
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             // Overall streak banner card with Canvas-drawn bamboo stalk illustration
             Card(
@@ -304,12 +373,23 @@ fun TrackerScreen(
             Spacer(modifier = Modifier.height(18.dp))
             
             // Tracking Date Slider
-            Text(
-                text = "Tracking Date",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Tracking Date",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = "Calendar",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             
             Spacer(modifier = Modifier.height(8.dp))
             
@@ -389,239 +469,214 @@ fun TrackerScreen(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Habits list
-            if (habits.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(32.dp)
-                    ) {
-                        Text(
-                            text = "🌱",
-                            fontSize = 60.sp,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-                        Text(
-                            text = "No Habits Configured Yet",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Click the '+' button to declare your first habit and lock in your daily streaks securely.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
+            // Today's Habits Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Today's Habits",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                TextButton(onClick = { showAddDialog = true }) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add", modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Add Habit", fontWeight = FontWeight.Bold)
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+
                     }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .testTag("habits_checklist"),
-                    contentPadding = PaddingValues(bottom = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(habits) { habit ->
-                        val habitLogs = logs.filter { it.habitId == habit.id }
-                        val stats = remember(habitLogs) {
-                            StreakCalculator.calculate(habitLogs, habit.createdAt)
-                        }
-                        
-                        val isCompleted = logs.any { it.habitId == habit.id && it.date == selectedDate && it.isCompleted }
-                        
-                        val habitColor = remember(habit.colorHex) {
-                            try {
-                                Color(android.graphics.Color.parseColor(habit.colorHex))
-                            } catch (e: Exception) {
-                                Color(0xFF2CB5C3)
+
+                if (habits.isEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 24.dp, horizontal = 16.dp)
+                            ) {
+                                Text(
+                                    text = "🌱",
+                                    fontSize = 60.sp,
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                )
+                                Text(
+                                    text = "No Habits Configured Yet",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Click the '+ Add Habit' button to declare your first habit\nand lock in your daily streaks securely.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         }
+                    }
+                } else {
+                    items(habits) { habit ->
+                        val habitLogs = logs.filter { it.habitId == habit.id }
+                        val stats = remember(habitLogs) { StreakCalculator.calculate(habitLogs, habit.createdAt) }
+                        val isCompleted = logs.any { it.habitId == habit.id && it.date == selectedDate && it.isCompleted }
+                        val habitColor = remember(habit.colorHex) { try { Color(android.graphics.Color.parseColor(habit.colorHex)) } catch (e: Exception) { Color(0xFF2CB5C3) } }
 
                         Card(
                             onClick = { viewingStreakHabit = habit },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("habit_card_${habit.id}"),
+                            modifier = Modifier.fillMaxWidth().testTag("habit_card_${habit.id}"),
                             shape = RoundedCornerShape(18.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                            ),
-                            border = BorderStroke(
-                                width = if (isCompleted) 1.5.dp else 1.dp,
-                                color = if (isCompleted) habitColor else MaterialTheme.colorScheme.outlineVariant
-                            )
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
+                            border = BorderStroke(width = if (isCompleted) 1.5.dp else 1.dp, color = if (isCompleted) habitColor else MaterialTheme.colorScheme.outlineVariant)
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Left Emoji Icon Circle with tinted background matching image
-                                Box(
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .clip(CircleShape)
-                                        .background(habitColor.copy(alpha = 0.12f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
+                            Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(habitColor.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
                                     val iconParts = habit.iconName.split(" ")
-                                    val emoji = if (iconParts.isNotEmpty()) iconParts[0] else "⭐"
-                                    Text(
-                                        text = emoji,
-                                        fontSize = 22.sp
-                                    )
+                                    Text(text = if (iconParts.isNotEmpty()) iconParts[0] else "⭐", fontSize = 22.sp)
                                 }
-                                
                                 Spacer(modifier = Modifier.width(14.dp))
-                                
-                                // Habit Name & Details Text
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = habit.name,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    
+                                    Text(text = habit.name, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     Spacer(modifier = Modifier.height(2.dp))
-                                    
-                                    // Streak Info with flame icon matching screenshot
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "🔥 ${stats.currentStreak} day streak",
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                        
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Text(text = "🔥 ${stats.currentStreak} day streak", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
                                         if (habit.reminderHour != null && habit.reminderMinute != null) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Notifications,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(10.dp),
-                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                                                )
+                                                Icon(imageVector = Icons.Default.Notifications, contentDescription = null, modifier = Modifier.size(10.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                                                 Spacer(modifier = Modifier.width(2.dp))
-                                                val formattedTime = String.format(
-                                                    "%02d:%02d",
-                                                    habit.reminderHour,
-                                                    habit.reminderMinute
-                                                )
-                                                Text(
-                                                    text = formattedTime,
-                                                    fontSize = 11.sp,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                                                )
+                                                Text(text = String.format("%02d:%02d", habit.reminderHour, habit.reminderMinute), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                                             }
                                         }
                                     }
                                 }
-                                
                                 Spacer(modifier = Modifier.width(12.dp))
-                                
-                                // Beautiful circular checklist button (active/checked state matches image)
                                 val isSelectedToday = selectedDate == DateUtils.getTodayString()
                                 Box(
-                                    modifier = Modifier
-                                        .size(42.dp)
-                                        .clip(CircleShape)
-                                        .background(
-                                            if (isCompleted) {
-                                                if (isSelectedToday) habitColor else habitColor.copy(alpha = 0.5f)
-                                            } else Color.Transparent
-                                        )
-                                        .border(
-                                            width = 1.5.dp,
-                                            color = if (isCompleted) {
-                                                Color.Transparent
-                                            } else {
-                                                if (isSelectedToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                                            },
-                                            shape = CircleShape
-                                        )
-                                        .clickable(enabled = isSelectedToday) {
-                                            viewModel.toggleHabitLog(
-                                                habit.id,
-                                                selectedDate,
-                                                !isCompleted
-                                            )
-                                        }
-                                        .testTag("habit_checkbox_${habit.id}"),
+                                    modifier = Modifier.size(42.dp).clip(CircleShape).background(if (isCompleted) { if (isSelectedToday) habitColor else habitColor.copy(alpha = 0.5f) } else Color.Transparent).border(width = 1.5.dp, color = if (isCompleted) Color.Transparent else { if (isSelectedToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant }, shape = CircleShape).clickable(enabled = isSelectedToday) { viewModel.toggleHabitLog(habit.id, selectedDate, !isCompleted) }.testTag("habit_checkbox_${habit.id}"),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (isCompleted) {
-                                        Icon(
-                                            imageVector = Icons.Default.Check,
-                                            contentDescription = "Completed",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(22.dp)
-                                        )
+                                        Icon(imageVector = Icons.Default.Check, contentDescription = "Completed", tint = Color.White, modifier = Modifier.size(22.dp))
                                     } else if (!isSelectedToday) {
-                                        Text("🔒", fontSize = 11.sp)
+                                        Icon(imageVector = Icons.Default.Lock, contentDescription = "Locked date", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                                     }
                                 }
                             }
                         }
                     }
-
-                    // Japanese Slogan / Quote block centered beautifully at bottom of the list
-                    item {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 4.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            ),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                }
+                
+                // --- Focus AND STATS CARDS ---
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Tsuzuku Focus Card
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(20.dp)
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(20.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(
-                                    text = "“",
-                                    fontSize = 42.sp,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Black,
-                                    modifier = Modifier.height(30.dp)
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = selectedMantra.second,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = selectedMantra.first,
-                                    fontSize = 12.sp,
-                                    textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                                )
+                                Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
+                                    Icon(imageVector = Icons.Default.School, contentDescription = "Study", tint = MaterialTheme.colorScheme.primary)
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(text = "Tsuzuku Focus", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                    Text(text = "Eliminate distractions. Stay focused.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(text = "Last session: 0 min • 0 distractions", fontSize = 11.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Button(
+                                    onClick = onNavigateToFocus,
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    shape = RoundedCornerShape(24.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                                ) {
+                                    Text("Start Session", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                }
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(20.dp))
+                    
+                    // Statistics Dashboard Grid
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Card(modifier = Modifier.weight(1f).heightIn(min = 100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
+                            Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(imageVector = Icons.Default.Schedule, contentDescription = "Focus", tint = Color(0xFFA78BFA), modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Focus Time", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("0m", fontSize = 24.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface)
+                                Text("Today", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                            }
+                        }
+                        Card(modifier = Modifier.weight(1f).heightIn(min = 100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
+                            Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(imageVector = Icons.Default.RadioButtonChecked, contentDescription = "Completed", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Completed", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                val completedToday = logs.count { it.date == selectedDate && it.isCompleted }
+                                Text("$completedToday", fontSize = 24.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface)
+                                Text("Habits", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Card(modifier = Modifier.weight(1f).heightIn(min = 100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
+                            Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("🔥", fontSize = 12.sp)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Current Streak", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("$globalStreak days", fontSize = 20.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface)
+                                Text("Best: $globalStreak days", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                            }
+                        }
+                        Card(modifier = Modifier.weight(1f).heightIn(min = 100.dp), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))) {
+                            Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(imageVector = Icons.AutoMirrored.Filled.TrendingUp, contentDescription = "Success", tint = Color(0xFF60A5FA), modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Success Rate", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                val completedToday = logs.count { it.date == selectedDate && it.isCompleted }
+                                val successRate = if (habits.isNotEmpty()) (completedToday.toFloat() / habits.size * 100).toInt() else 0
+                                Text("$successRate%", fontSize = 24.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface)
+                                Text("This Week", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
                             }
                         }
                     }
@@ -663,11 +718,39 @@ fun TrackerScreen(
             )
         }
 
-        // Display Complete Streak Details Dialog on tap of Habit card!
         viewingStreakHabit?.let { habit ->
             val habitLogs = logs.filter { it.habitId == habit.id }
-            val stats = remember(habitLogs) {
-                StreakCalculator.calculate(habitLogs, habit.createdAt)
+            HabitStreakDetailsDialog(
+                habit = habit,
+                logs = habitLogs,
+                onCellToggle = { dateStr, state ->
+                    viewModel.toggleHabitLog(habit.id, dateStr, state)
+                },
+                onEdit = {
+                    editingHabit = habit
+                    viewingStreakHabit = null
+                },
+                onDismiss = { viewingStreakHabit = null }
+            )
+        }
+
+        /*
+            val habitLogs = logs.filter { it.habitId == habit.id }
+            val currentMonthPrefix = remember { SimpleDateFormat("yyyy-MM", Locale.US).format(Date()) }
+            val monthStart = remember {
+                Calendar.getInstance().apply {
+                    set(Calendar.DAY_OF_MONTH, 1)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+            }
+            val monthLogs = remember(habitLogs, currentMonthPrefix) {
+                habitLogs.filter { it.date.startsWith(currentMonthPrefix) }
+            }
+            val stats = remember(monthLogs, monthStart, habit.createdAt) {
+                StreakCalculator.calculate(monthLogs, maxOf(habit.createdAt, monthStart))
             }
             val habitColor = remember(habit.colorHex) {
                 try {
@@ -792,7 +875,9 @@ fun TrackerScreen(
                             logs = habitLogs,
                             onCellToggle = { dateStr, state ->
                                 viewModel.toggleHabitLog(habit.id, dateStr, state)
-                            }
+                            },
+                            weeksCount = 5,
+                            title = "Last 30 Days Activity"
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -834,8 +919,8 @@ fun TrackerScreen(
                 }
             }
         }
+        */
     }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

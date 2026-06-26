@@ -1,87 +1,113 @@
-# Contributing to Tsuzuku 🌿
+# Contributing to Tsuzuku
 
-Thank you for your interest in contributing to Tsuzuku! Every contribution helps make this habit tracker better for everyone.
+Thank you for helping improve Tsuzuku. This project is a Kotlin/Jetpack Compose Android app focused on private habit tracking, focus sessions, and a minimal launcher experience.
 
-## 🏁 Getting Started
+## Getting Started
 
-1. **Fork** the repository and clone your fork locally.
-2. Create a new branch from `main` for your work:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-3. Follow the [build instructions](README.md#-how-to-compile--run) to set up the project.
+1. Fork the repository and clone your fork.
+2. Create a focused branch from `main` or `dev`.
+3. Build the project locally before making changes.
 
-## 🔧 Development Setup
+```bash
+git checkout -b feature/your-feature-name
+./gradlew assembleDebug
+```
 
-- **JDK**: Version 17 (Zulu recommended)
-- **IDE**: Android Studio Ladybug or later
-- **Min SDK**: 24 (Android 7.0)
-- **Compose**: 100% Jetpack Compose UI — no XML layouts
+On Windows:
 
-## 📋 Contribution Guidelines
+```powershell
+.\gradlew.bat assembleDebug
+```
 
-### Code Style
-- Follow standard [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html).
-- Use meaningful variable and function names.
-- Keep functions focused and concise.
-- Add KDoc comments for public APIs and complex logic.
+## Development Setup
 
-### Commits
-- Write clear, descriptive commit messages.
-- Use [Conventional Commits](https://www.conventionalcommits.org/) format when possible:
-  ```
-  feat: add weekly streak summary view
-  fix: resolve notification not firing on Android 14+
-  docs: update README with new screenshots
-  ```
+- JDK 17
+- Android Studio Ladybug or later
+- Min SDK 24
+- Target SDK 36
+- Kotlin and Jetpack Compose
+- Material 3 UI
+- Room, DataStore, coroutines, Robolectric, and Roborazzi
 
-### Pull Requests
-- Keep PRs focused on a single concern.
-- Fill out the PR template completely.
-- Include screenshots or recordings for any UI changes.
-- Ensure the project builds without errors before submitting.
-- Link related issues using `Closes #123` or `Fixes #123`.
+## Areas of the App
 
-## 🐛 Reporting Bugs
+- Habit tracker: habit creation, check-ins, streak calculations, and habit management.
+- Insights: stats cards, weekly activity, top habits, and yearly heatmaps.
+- Focus mode: timed sessions, phone-position discipline, DND integration, and focus statistics.
+- Launcher: optional Android HOME launcher, allowed apps, widgets, quotes, and focus environment settings.
+- Settings: themes, custom accent colors, reminders, backup/restore, privacy/about, and destructive reset flows.
 
-Use the [Bug Report](https://github.com/agupta07505/Tsuzuku/issues/new?template=bug_report.md) issue template. Include:
+## Code Style
+
+- Follow standard Kotlin conventions.
+- Prefer the existing Compose, ViewModel, repository, and Room patterns.
+- Keep UI state predictable and testable.
+- Keep features offline-first unless the change explicitly requires connectivity.
+- Avoid committing generated build outputs, secrets, keystores, or personal device data.
+- Add short comments only when they explain non-obvious behavior.
+
+## Testing
+
+Run the relevant tests before opening a pull request:
+
+```bash
+./gradlew testDebugUnitTest
+```
+
+For UI or screenshot-related changes, update or run the Roborazzi/Robolectric tests when applicable.
+
+For launcher and focus changes, manually verify the affected Android permissions or system settings:
+
+- Default launcher selection
+- Notification permission on Android 13+
+- Do Not Disturb policy access
+- Foreground focus-session behavior
+- Backup and restore using a local JSON file
+
+## Commit Messages
+
+Clear commit messages are preferred. Conventional Commits are welcome:
+
+```text
+feat: add launcher widget toggle
+fix: preserve focus session after app backgrounding
+docs: update setup instructions
+test: add streak calculator coverage
+```
+
+## Pull Requests
+
+- Keep the PR focused on one feature, fix, or documentation update.
+- Fill out the PR template.
+- Include screenshots or recordings for UI changes.
+- Mention tested Android versions/devices when behavior depends on system APIs.
+- Link related issues with `Closes #123` or `Fixes #123`.
+- Update README, assets documentation, or templates when behavior changes.
+
+## Reporting Bugs
+
+Use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md). Include:
+
 - Device model and Android version
+- App version or commit SHA
+- Screen or feature affected
 - Steps to reproduce
-- Expected vs. actual behavior
-- Screenshots or screen recordings if applicable
+- Expected and actual behavior
+- Logs, crash output, screenshots, or recordings when available
 
-## 💡 Suggesting Features
+## Suggesting Features
 
-Use the [Feature Request](https://github.com/agupta07505/Tsuzuku/issues/new?template=feature_request.md) issue template. Describe:
-- The problem your feature would solve
-- Your proposed solution
-- Any alternatives you've considered
+Use the [feature request template](.github/ISSUE_TEMPLATE/feature_request.md). Describe:
 
-## ⭐ Reviewing the App / Leaving Feedback
+- The user problem
+- The proposed solution
+- Which area of the app it affects
+- Any privacy, permission, or backup/restore implications
 
-Use the [App Review / Feedback](https://github.com/agupta07505/Tsuzuku/issues/new?template=app_review.md) issue template. You can share:
-- An overall rating of your experience (out of 5 stars)
-- Detailed thoughts and reviews of the app
-- What features you found most helpful
-- Suggestions for general user experience improvements
+## Security
 
-## 🧪 Testing
+Do not open public issues for vulnerabilities. Follow [SECURITY.md](SECURITY.md) instead.
 
-- Run existing tests before submitting:
-  ```bash
-  ./gradlew testDebugUnitTest
-  ```
-- Add tests for new features when possible.
-- Visual regression tests use [Roborazzi](https://github.com/takahirom/roborazzi).
+## License
 
-## 🔒 Security
-
-If you discover a security vulnerability, **do not** open a public issue. Instead, follow the instructions in [SECURITY.md](SECURITY.md).
-
-## 📜 License
-
-By contributing to Tsuzuku, you agree that your contributions will be licensed under the [MIT License](LICENSE).
-
----
-
-Thank you for helping make Tsuzuku better! 🎋
+By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE).

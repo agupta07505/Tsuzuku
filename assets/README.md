@@ -1,62 +1,48 @@
 # Assets
 
-This directory holds all static assets for the Tsuzuku project.
+This directory contains static project assets used by the README, GitHub previews, release notes, and store/listing material.
 
-## Directory Structure
+## Structure
 
-```
+```text
 assets/
-├── screenshots/       ← App preview images for README & store listings
-├── banners/           ← Feature graphics, promotional banners
-└── icons/             ← Additional icons & branding assets
+|-- icons/         # Logo and branding assets
+`-- screenshots/   # App preview screenshots
 ```
 
----
+## Screenshots
 
-## 📸 Screenshots
+Screenshots in `assets/screenshots/` are referenced by the root README.
 
-Place app preview images in `screenshots/`. These are referenced by the README's Preview section.
+| Filename | Content |
+|----------|---------|
+| `01_home.jpg` | Home dashboard |
+| `02_Habits.jpg` | Habits screen |
+| `03_Launcher.jpg` | Tsuzuku launcher preview |
+| `04_Activate_Laucnher.jpg` | Launcher activation flow |
+| `05_Launcher_Allowed_Apps.jpg` | Launcher allowed-app selection |
+| `06_Launcher_Focus_Settings.jpg` | Launcher focus settings |
+| `07_Focus.jpg` | Focus mode |
+| `08_Insights_1.jpg` | Insights overview |
+| `09_Insights_2.jpg` | Insights heatmap and details |
+| `10_Settings_1.jpg` | Settings overview |
+| `11_Settings_2.jpg` | Settings customization and controls |
+| `12_Settings_About_1.jpg` | About screen |
+| `13_Settings_About_2.jpg` | About and social links |
 
-### Naming Convention
+## Guidelines
 
-| Filename                  | Content                              |
-|---------------------------|--------------------------------------|
-| `01_home.jpg`             | Home screen (empty state)            |
-| `02_habit_tracker.jpg`    | Tracker with habit & mantra quote    |
-| `03_create_streak.jpg`    | Create Streak dialog                 |
-| `04_insights.png`         | Insights — heatmap & weekly activity |
-| `05_settings.png`         | Settings overview                    |
-| `06_motivation.png`       | Motivation section with mantras      |
-| `07_backup.png`           | Backup & Sync (import/export)        |
-| `08_notification.png`     | Lock screen notification with mantra |
-| `09_about.png`            | About screen with social links       |
+- Use demo data only. Do not include personal habits, contacts, logs, or device identifiers.
+- Prefer PNG or JPG for README screenshots.
+- Use consistent device dimensions and crop style when adding a new screenshot set.
+- Keep screenshots current when major UI surfaces change, especially Tracker, Focus, Launcher, Insights, and Settings.
+- Optimize large images before committing when possible.
 
-### Guidelines
-
-- **Format**: PNG or WebP
-- **Resolution**: 1080px wide recommended
-- **Content**: Use sample/demo data — avoid personal information
-- **Themes**: Showcase the app's signature dark themes
-
----
-
-## 🖼️ Banners
-
-Place feature graphics and promotional images in `banners/`.
-
-| Filename                  | Content                         |
-|---------------------------|---------------------------------|
-| `feature_graphic.png`     | 1024×500 Play Store graphic     |
-| `github_social.png`       | 1280×640 GitHub social preview  |
-
----
-
-## How to Reference in README
+## Referencing Assets
 
 ```markdown
 <p align="center">
-  <img src="assets/screenshots/01_home.jpg" width="180" alt="Home Screen" />
-  <img src="assets/screenshots/02_habit_tracker.jpg" width="180" alt="Habit Tracker" />
-  <img src="assets/screenshots/03_create_streak.jpg" width="180" alt="Create Streak" />
+  <img src="assets/screenshots/01_home.jpg" width="220" alt="Home dashboard" />
+  <img src="assets/screenshots/08_Insights_1.jpg" width="220" alt="Insights overview" />
 </p>
 ```

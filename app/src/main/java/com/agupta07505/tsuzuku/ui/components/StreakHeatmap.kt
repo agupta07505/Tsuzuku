@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,23 +39,30 @@ fun StreakHeatmap(
     logs: List<HabitLog>,
     onCellToggle: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    weeksCount: Int = 18
+    weeksCount: Int = 18,
+    selectedYear: Int? = null,
+    title: String? = null,
+    allowPastToggle: Boolean = false
 ) {
     val todayStr = remember { DateUtils.getTodayString() }
+    val effectiveWeeksCount = if (selectedYear == null) weeksCount else 53
     
     // Retrieve a structured sequence of dates for the grid
-    val dates = remember(weeksCount) {
+    val dates = remember(weeksCount, selectedYear) {
          val tempDates = mutableListOf<String>()
          val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
          val cal = Calendar.getInstance()
-         
+
+         if (selectedYear != null) {
+             cal.clear()
+             cal.set(selectedYear, Calendar.JANUARY, 1)
+         }
          val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
          val daysToMonday = if (dayOfWeek == Calendar.SUNDAY) 6 else dayOfWeek - 2
-         
          cal.add(Calendar.DAY_OF_YEAR, -daysToMonday)
-         cal.add(Calendar.WEEK_OF_YEAR, -(weeksCount - 1))
+         if (selectedYear == null) cal.add(Calendar.WEEK_OF_YEAR, -(weeksCount - 1))
          
-         for (i in 0 until (weeksCount * 7)) {
+         for (i in 0 until (effectiveWeeksCount * 7)) {
              tempDates.add(sdf.format(cal.time))
              cal.add(Calendar.DAY_OF_YEAR, 1)
          }
@@ -74,22 +82,11 @@ fun StreakHeatmap(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Last $weeksCount Weeks Activity",
+                text = title ?: selectedYear?.let { "$it Activity" } ?: "Last $weeksCount Weeks Activity",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f, fill = false)
-            )
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            Text(
-                text = "Only Today can be marked",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.End,
-                modifier = Modifier.wrapContentWidth(Alignment.End)
             )
         }
 
@@ -100,73 +97,177 @@ fun StreakHeatmap(
                 .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Days of the week row headers column
-            Column(
-                modifier = Modifier.padding(end = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                val weekLabels = listOf("Mon", "", "Wed", "", "Fri", "", "Sun")
-                weekLabels.forEach { label ->
-                    Box(
-                        modifier = Modifier.height(18.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Text(
-                            text = label,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.61f)
-                        )
-                    }
-                }
-            }
-
             // GitHub 7-rows × 18-weeks block columns
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                for (c in 0 until weeksCount) {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                for (c in 0 until effectiveWeeksCount) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         for (r in 0 until 7) {
                             val idx = c * 7 + r
                             val dateStr = dates.getOrNull(idx) ?: ""
                             val isToday = dateStr == todayStr
                             val isCompleted = logs.any { it.date == dateStr && it.isCompleted }
                             val isFuture = dateStr > todayStr
-                            
+                            val isOutsideYear = selectedYear != null && !dateStr.startsWith(selectedYear.toString())
+                            val canToggle = !isFuture && !isOutsideYear && (allowPastToggle || isToday)
                             val cellColor = when {
-                                isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                                isOutsideYear || isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
                                 isCompleted -> habitColor
-                                isToday -> habitColor.copy(alpha = 0.35f)
-                                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                isToday -> habitColor.copy(alpha = 0.22f)
+                                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.82f)
                             }
                             
                             val cellBorder = if (isToday) {
-                                Modifier.border(1.2.dp, habitColor, RoundedCornerShape(3.dp))
+                                Modifier.border(1.4.dp, habitColor, RoundedCornerShape(5.dp))
                             } else Modifier
+
+                            Box(
+                                modifier = Modifier
+                                    .size(22.dp)
+                                    .clip(RoundedCornerShape(5.dp))
+                                    .background(cellColor)
+                                    .then(cellBorder)
+                                    .clickable(enabled = canToggle) {
+                                        onCellToggle(dateStr, !isCompleted)
+                                    }
+                                    .testTag("github_cell_${dateStr}_${habit.id}"),
+                                contentAlignment = Alignment.Center
+                            ) {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CurrentMonthHabitHeatmap(
+    habit: Habit,
+    logs: List<HabitLog>,
+    onTodayToggle: (String, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val todayStr = remember { DateUtils.getTodayString() }
+    val calendar = remember { Calendar.getInstance() }
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val monthDates = remember(year, month) {
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.YEAR, year)
+            set(Calendar.MONTH, month)
+            set(Calendar.DAY_OF_MONTH, 1)
+        }
+        val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        (1..daysInMonth).map { day ->
+            cal.set(Calendar.DAY_OF_MONTH, day)
+            DateUtils.getFormattedDate(cal)
+        }
+    }
+    val rows = remember(monthDates) { monthDates.chunked(10) }
+    val completedDates = remember(logs) {
+        logs.filter { it.isCompleted }.map { it.date }.toSet()
+    }
+    val habitColor = try {
+        Color(android.graphics.Color.parseColor(habit.colorHex))
+    } catch (e: Exception) {
+        MaterialTheme.colorScheme.primary
+    }
+    val emptyColor = lerp(
+        MaterialTheme.colorScheme.surfaceVariant,
+        MaterialTheme.colorScheme.onSurface,
+        0.12f
+    ).copy(alpha = 0.95f)
+    val futureColor = lerp(
+        MaterialTheme.colorScheme.surfaceVariant,
+        MaterialTheme.colorScheme.onSurface,
+        0.06f
+    ).copy(alpha = 0.62f)
+    val legendColors = listOf(
+        emptyColor,
+        habitColor.copy(alpha = 0.35f),
+        habitColor.copy(alpha = 0.55f),
+        habitColor.copy(alpha = 0.78f),
+        habitColor
+    )
+
+    Column(modifier = modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant, 0.38f))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f), RoundedCornerShape(18.dp))
+                .padding(14.dp)
+        ) {
+            Column {
+                Text(
+                    text = "This Month Activity",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    rows.forEach { row ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            row.forEach { dateStr ->
+                            val isToday = dateStr == todayStr
+                            val isCompleted = dateStr in completedDates
+                            val isFuture = dateStr > todayStr
+                            val cellColor = when {
+                                isCompleted -> habitColor
+                                isFuture -> futureColor
+                                else -> emptyColor
+                            }
+                            val border = if (isToday) {
+                                Modifier.border(1.2.dp, habitColor, RoundedCornerShape(3.dp))
+                            } else {
+                                Modifier
+                            }
 
                             Box(
                                 modifier = Modifier
                                     .size(18.dp)
                                     .clip(RoundedCornerShape(3.dp))
                                     .background(cellColor)
-                                    .then(cellBorder)
+                                    .then(border)
                                     .clickable(enabled = isToday) {
-                                        onCellToggle(dateStr, !isCompleted)
+                                        onTodayToggle(dateStr, !isCompleted)
                                     }
-                                    .testTag("github_cell_${dateStr}_${habit.id}"),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                // Subtle today dot indicator or text
-                                if (isToday) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(5.dp)
-                                            .clip(RoundedCornerShape(2.dp))
-                                            .background(Color.White)
-                                    )
-                                }
+                                    .testTag("month_cell_${dateStr}_${habit.id}")
+                            )
+                        }
+                            repeat(10 - row.size) {
+                                Spacer(modifier = Modifier.size(18.dp))
                             }
                         }
                     }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Less", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    legendColors.forEach { color ->
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(color)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                    }
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text("More", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -178,23 +279,29 @@ fun GithubCombinedHeatmap(
     logs: List<HabitLog>,
     onCellToggle: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    weeksCount: Int = 18
+    weeksCount: Int = 18,
+    selectedYear: Int? = null
 ) {
     val todayStr = remember { DateUtils.getTodayString() }
+    val effectiveWeeksCount = if (selectedYear == null) weeksCount else 53
     
     // Retrieve grid dates
-    val dates = remember(weeksCount) {
+    val dates = remember(weeksCount, selectedYear) {
          val tempDates = mutableListOf<String>()
          val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
          val cal = Calendar.getInstance()
-         
+
+         if (selectedYear != null) {
+             cal.clear()
+             cal.set(selectedYear, Calendar.JANUARY, 1)
+         }
          val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
          val daysToMonday = if (dayOfWeek == Calendar.SUNDAY) 6 else dayOfWeek - 2
          
          cal.add(Calendar.DAY_OF_YEAR, -daysToMonday)
-         cal.add(Calendar.WEEK_OF_YEAR, -(weeksCount - 1))
+         if (selectedYear == null) cal.add(Calendar.WEEK_OF_YEAR, -(weeksCount - 1))
          
-         for (i in 0 until (weeksCount * 7)) {
+         for (i in 0 until (effectiveWeeksCount * 7)) {
              tempDates.add(sdf.format(cal.time))
              cal.add(Calendar.DAY_OF_YEAR, 1)
          }
@@ -208,7 +315,7 @@ fun GithubCombinedHeatmap(
 
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 12.dp)) {
         Text(
-            text = "Total Combined Contributions",
+            text = selectedYear?.let { "$it Combined Contributions" } ?: "Total Combined Contributions",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -250,7 +357,7 @@ fun GithubCombinedHeatmap(
 
             // GitHub Combined Color Shading (Green theme!)
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                for (c in 0 until weeksCount) {
+                for (c in 0 until effectiveWeeksCount) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         for (r in 0 until 7) {
                             val idx = c * 7 + r
@@ -258,6 +365,7 @@ fun GithubCombinedHeatmap(
                             val isToday = dateStr == todayStr
                             val count = dateCompletionCounts[dateStr] ?: 0
                             val isFuture = dateStr > todayStr
+                            val isOutsideYear = selectedYear != null && !dateStr.startsWith(selectedYear.toString())
                             
                             // GitHub's standard green shades:
                             // 0: Light gray
@@ -266,7 +374,7 @@ fun GithubCombinedHeatmap(
                             // 3: Dark Green (#239A3B)    -> Color(0xFF37B24D)
                             // 4+: Deep Forest Green (#196127) -> Color(0xFF2B8A3E)
                             val cellColor = when {
-                                isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                                isOutsideYear || isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
                                 count >= 4 -> Color(0xFF2B8A3E)
                                 count == 3 -> Color(0xFF37B24D)
                                 count == 2 -> Color(0xFF8CE99A)
