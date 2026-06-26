@@ -271,7 +271,7 @@ private fun HabitsHeader(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("Your Habits", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text("Tsuzuku Habits", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                 Text(
                     "Build consistent habits. Become 1% better every day.",
                     style = MaterialTheme.typography.bodySmall,

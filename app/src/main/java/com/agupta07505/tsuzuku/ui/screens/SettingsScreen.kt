@@ -751,7 +751,7 @@ private fun AboutTsuzukuScreen(
                     text = "Learn more about the app and its mission.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(start = 32.dp, top = 2.dp)
+                    modifier = Modifier.padding(start = 44.dp, top = 2.dp)
                 )
             }
         }
