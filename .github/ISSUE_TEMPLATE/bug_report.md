@@ -1,43 +1,56 @@
 ---
-name: 🐛 Bug Report
-about: Report a bug to help us improve Tsuzuku
+name: Bug Report
+about: Report a bug to help improve Tsuzuku
 title: "[Bug] "
 labels: bug
 assignees: ''
 ---
 
-## 📝 Describe the Bug
+## Describe the Bug
 
-A clear and concise description of what the bug is.
+<!-- What happened? -->
 
-## 📱 Device Information
+## Affected Area
 
-| Field             | Value                  |
-|-------------------|------------------------|
-| **Device**        | e.g. Pixel 8 Pro       |
-| **Android Version** | e.g. Android 15      |
-| **App Version**   | e.g. 1.3               |
-| **Theme**         | e.g. Tsuzuku Green / Blue |
+- [ ] Home/tracker
+- [ ] Habits management
+- [ ] Insights/stats/heatmaps
+- [ ] Focus mode
+- [ ] Launcher
+- [ ] Settings/themes
+- [ ] Reminders/notifications
+- [ ] Backup/restore
+- [ ] Build/release
+- [ ] Other:
 
-## 🔄 Steps to Reproduce
+## Device Information
 
-1. Go to '...'
-2. Tap on '...'
-3. Scroll down to '...'
-4. See error
+| Field | Value |
+|-------|-------|
+| Device | e.g. Pixel 8 Pro |
+| Android version | e.g. Android 15 |
+| App version | e.g. 2.0 |
+| Install type | Release APK / debug APK / local build |
+| Theme | e.g. Green / custom accent |
 
-## ✅ Expected Behavior
+## Steps to Reproduce
 
-A clear and concise description of what you expected to happen.
+1.
+2.
+3.
 
-## ❌ Actual Behavior
+## Expected Behavior
 
-A clear and concise description of what actually happened.
+<!-- What did you expect to happen? -->
 
-## 📸 Screenshots / Screen Recordings
+## Actual Behavior
 
-If applicable, add screenshots or screen recordings to help explain the problem.
+<!-- What actually happened? -->
 
-## 📋 Additional Context
+## Screenshots, Recordings, or Logs
 
-Add any other context about the problem here (e.g. crash logs, stack traces, whether the issue is intermittent).
+<!-- Add screenshots, recordings, crash logs, or stack traces when useful. -->
+
+## Additional Context
+
+<!-- Is it intermittent? Did it start after an update? Does it involve permissions such as Launcher, Notifications, or DND? -->

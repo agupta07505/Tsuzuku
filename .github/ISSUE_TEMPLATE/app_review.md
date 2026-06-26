@@ -1,39 +1,48 @@
 ---
-name: ⭐ App Review / Feedback
+name: App Review / Feedback
 about: Share your experience, rating, and feedback on using Tsuzuku
 title: "[Review] "
 labels: feedback
 assignees: ''
 ---
 
-## 🌟 Overall Rating
+## Overall Rating
 
-Choose one of the following:
-- [ ] ⭐⭐⭐⭐⭐ (Excellent - I love it!)
-- [ ] ⭐⭐⭐⭐ (Very Good - Great app with minor room for improvement)
-- [ ] ⭐⭐⭐ (Good - Functional but needs some features/polishing)
-- [ ] ⭐⭐ (Fair - Needs work to be useful for me)
-- [ ] ⭐ (Poor - Needs significant changes/fixes)
+- [ ] 5 stars - Excellent
+- [ ] 4 stars - Very good
+- [ ] 3 stars - Good, but needs work
+- [ ] 2 stars - Needs significant improvement
+- [ ] 1 star - Not useful for me yet
 
-## 📝 Your Review
+## Your Review
 
-Please share your overall experience with Tsuzuku. What makes it stand out for you? How does it help you with your daily habits?
+<!-- How has Tsuzuku worked for your habits, focus sessions, or launcher setup? -->
 
-## 🌿 Favorite Features
+## Favorite Features
 
-What parts of Tsuzuku do you find most helpful? (Check all that apply)
-- [ ] 🎯 **Streak Tracker** (habit tracking & completion check-ins)
-- [ ] 📊 **Insights & Stats** (heatmaps, streak length, completion rates)
-- [ ] 🎨 **Material 3 Themes** (Emerald Green, Deep Aqua Blue, etc.)
-- [ ] 🔔 **Smart Reminders** (local notification alarms)
-- [ ] ✨ **Japanese Mantras** (bilingual quotes)
-- [ ] 📦 **Data Portability** (JSON import/export)
-- [ ] 🔒 **Privacy/Offline focus** (no tracking/analytics)
+- [ ] Habit tracking and streaks
+- [ ] Habit management
+- [ ] Insights, stats, and heatmaps
+- [ ] Focus mode
+- [ ] Minimal launcher
+- [ ] Local reminders
+- [ ] Motivation quotes/mantras
+- [ ] Themes and custom accent color
+- [ ] Backup and restore
+- [ ] Privacy/offline-first approach
 
-## 🛠️ Areas for Improvement
+## Areas for Improvement
 
-Are there any aspects of the app that could be made smoother, more intuitive, or more engaging?
+<!-- What felt confusing, slow, incomplete, or less polished? -->
 
-## 📋 Additional Feedback
+## Device Context
 
-Any other thoughts, comments, or kind words you'd like to share with the developers?
+| Field | Value |
+|-------|-------|
+| Device |  |
+| Android version |  |
+| App version |  |
+
+## Additional Feedback
+
+<!-- Anything else you want to share. -->

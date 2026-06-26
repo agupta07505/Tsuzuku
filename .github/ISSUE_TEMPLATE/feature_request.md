@@ -1,39 +1,45 @@
 ---
-name: 💡 Feature Request
+name: Feature Request
 about: Suggest a new feature or improvement for Tsuzuku
 title: "[Feature] "
 labels: enhancement
 assignees: ''
 ---
 
-## 🎯 Problem Statement
+## Problem
 
-A clear and concise description of the problem this feature would solve.
-e.g. *"I'm always frustrated when..."*
+<!-- What user problem should this solve? -->
 
-## 💡 Proposed Solution
+## Proposed Solution
 
-Describe your ideal solution. Be as specific as possible about the expected behavior.
+<!-- Describe the behavior you want. -->
 
-## 🎨 UI / UX Mockups (Optional)
+## Affected Area
 
-If your feature involves UI changes, include sketches, wireframes, or screenshots of similar features from other apps.
+- [ ] Home/tracker
+- [ ] Habits management
+- [ ] Insights/stats/heatmaps
+- [ ] Focus mode
+- [ ] Launcher
+- [ ] Settings/themes
+- [ ] Reminders/notifications
+- [ ] Backup/restore/data
+- [ ] Privacy/security
+- [ ] Build/release
+- [ ] Other:
 
-## 🔄 Alternatives Considered
+## UI or UX Notes
 
-Describe any alternative solutions or workarounds you've considered.
+<!-- Include sketches, screenshots, examples, or interaction notes if this changes the interface. -->
 
-## 📱 Scope
+## Privacy, Permission, or Data Impact
 
-Which part of Tsuzuku does this affect?
+<!-- Mention if this needs internet, new permissions, exported data, notifications, launcher access, or DND access. -->
 
-- [ ] Tracker Screen (habit list & check-ins)
-- [ ] Stats Screen (analytics & heatmaps)
-- [ ] Settings Screen (themes, export/import, reminders)
-- [ ] Notifications & Reminders
-- [ ] Data & Storage
-- [ ] Other: ___
+## Alternatives Considered
 
-## 📋 Additional Context
+<!-- What other approaches or workarounds did you consider? -->
 
-Add any other context, references, or screenshots about the feature request here.
+## Additional Context
+
+<!-- Anything else that would help evaluate the request. -->

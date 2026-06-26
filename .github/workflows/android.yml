@@ -60,7 +60,7 @@ jobs:
             base64 -d debug.keystore.base64 > debug.keystore || base64 --decode debug.keystore.base64 > debug.keystore
           fi
           if [ ! -f debug.keystore ]; then
-            echo "No debug keystore found! Generating a fresh debug.keystore..."
+            echo "No debug keystore found. Generating a fresh debug.keystore..."
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           else
             echo "Debug keystore restored successfully."
@@ -73,23 +73,17 @@ jobs:
           STORE_PASS: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
           KEY_PASS: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "Decoding production/release keystore from secrets..."
-            # Decode base64 release keystore cleanly, removing blank spaces/newlines
-            echo "$KEYSTORE_BASE64" | tr -d '\r\n[:space:]' | base64 --decode > tsuzuku.jks
-            echo "STORE_PASSWORD=$STORE_PASS" >> $GITHUB_ENV
-            
-            # Use KEY_PASS if provided, otherwise default to STORE_PASS
-            FINAL_KEY_PASS="${KEY_PASS:-$STORE_PASS}"
-            echo "KEY_PASSWORD=$FINAL_KEY_PASS" >> $GITHUB_ENV
-            echo "KEYSTORE_PATH=$GITHUB_WORKSPACE/tsuzuku.jks" >> $GITHUB_ENV
-          else
-            echo "Using fallback production/release signing credentials..."
-            keytool -genkey -v -keystore tsuzuku.jks -storepass fallbackpassword -alias upload -keypass fallbackpassword -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Tsuzuku Production Fallback,O=Tsuzuku,C=US"
-            echo "STORE_PASSWORD=fallbackpassword" >> $GITHUB_ENV
-            echo "KEY_PASSWORD=fallbackpassword" >> $GITHUB_ENV
-            echo "KEYSTORE_PATH=$GITHUB_WORKSPACE/tsuzuku.jks" >> $GITHUB_ENV
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$STORE_PASS" ]; then
+            echo "Release signing secrets are missing. Set RELEASE_KEYSTORE_BASE64 and RELEASE_KEYSTORE_PASSWORD."
+            exit 1
           fi
+          echo "Decoding production/release keystore from secrets..."
+          echo "$KEYSTORE_BASE64" | tr -d '\r\n[:space:]' | base64 --decode > tsuzuku.jks
+          echo "STORE_PASSWORD=$STORE_PASS" >> $GITHUB_ENV
+
+          FINAL_KEY_PASS="${KEY_PASS:-$STORE_PASS}"
+          echo "KEY_PASSWORD=$FINAL_KEY_PASS" >> $GITHUB_ENV
+          echo "KEYSTORE_PATH=$GITHUB_WORKSPACE/tsuzuku.jks" >> $GITHUB_ENV
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -120,6 +114,11 @@ jobs:
         run: |
           cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/tsuzuku-release.apk
 
+      - name: Verify Release APK Signature
+        if: github.ref != 'refs/heads/dev' && github.base_ref != 'dev'
+        run: |
+          "$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/tsuzuku-release.apk
+
       - name: Upload Debug APK Artifact
         if: github.ref == 'refs/heads/dev' || github.base_ref == 'dev'
         uses: actions/upload-artifact@v4
@@ -136,7 +135,7 @@ jobs:
           path: app/build/outputs/apk/release/tsuzuku-release.apk
           if-no-files-found: error
 
-      - name: Delete existing release (clean slate)
+      - name: Delete Existing Release
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         run: |
           TAG="${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || env.VERSION_NAME }}"
@@ -155,11 +154,11 @@ jobs:
           draft: false
           prerelease: false
           body: |
-            ## Tsuzuku Open-Source Release 🌿
+            ## Tsuzuku Open-Source Release
 
-            Welcome to the new release of Tsuzuku habit tracker!
+            This release includes the latest Tsuzuku habit tracking, focus mode, launcher, insights, reminder, and backup improvements.
 
-            ### 📦 Download Assets
+            ### Download Assets
             - **Production Release APK (signed)**: tsuzuku-release.apk
 
             _Built and packaged automatically by GitHub Actions._
