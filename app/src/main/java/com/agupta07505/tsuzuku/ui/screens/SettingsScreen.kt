@@ -627,39 +627,84 @@ private fun SettingsBrandFooter() {
 
 @Composable
 private fun MissionMountainIllustration(modifier: Modifier = Modifier) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val mountain = Path().apply {
-            moveTo(w * 0.12f, h * 0.86f)
-            lineTo(w * 0.48f, h * 0.18f)
-            lineTo(w * 0.82f, h * 0.86f)
+
+        // 1. Soft glowing sun/moon in the background
+        drawCircle(
+            color = primaryColor.copy(alpha = 0.12f),
+            radius = w * 0.24f,
+            center = androidx.compose.ui.geometry.Offset(w * 0.70f, h * 0.35f)
+        )
+
+        // 2. Minimal distant background mountain peak
+        val bgHillPath = Path().apply {
+            moveTo(w * 0.05f, h * 0.90f)
+            lineTo(w * 0.40f, h * 0.38f)
+            lineTo(w * 0.75f, h * 0.90f)
             close()
         }
-        val side = Path().apply {
-            moveTo(w * 0.48f, h * 0.18f)
-            lineTo(w * 0.82f, h * 0.86f)
-            lineTo(w * 0.55f, h * 0.86f)
+        val bgGradient = Brush.verticalGradient(
+            colors = listOf(
+                secondaryColor.copy(alpha = 0.30f),
+                secondaryColor.copy(alpha = 0.02f)
+            ),
+            startY = h * 0.38f,
+            endY = h * 0.90f
+        )
+        drawPath(bgHillPath, bgGradient)
+
+        // 3. Foreground mountain peak
+        val fgHillPath = Path().apply {
+            moveTo(w * 0.25f, h * 0.90f)
+            lineTo(w * 0.65f, h * 0.25f)
+            lineTo(w * 0.98f, h * 0.90f)
             close()
         }
-        val path = Path().apply {
-            moveTo(w * 0.42f, h * 0.86f)
-            cubicTo(w * 0.60f, h * 0.72f, w * 0.34f, h * 0.66f, w * 0.52f, h * 0.54f)
-            cubicTo(w * 0.68f, h * 0.44f, w * 0.56f, h * 0.36f, w * 0.64f, h * 0.28f)
+        val fgGradient = Brush.verticalGradient(
+            colors = listOf(
+                primaryColor.copy(alpha = 0.55f),
+                primaryColor.copy(alpha = 0.04f)
+            ),
+            startY = h * 0.25f,
+            endY = h * 0.90f
+        )
+        drawPath(fgHillPath, fgGradient)
+
+        // 4. Subtle, minimal clean accent peak outline (drawn on the foreground peak)
+        val fgPeakOutline = Path().apply {
+            moveTo(w * 0.55f, h * 0.41f)
+            lineTo(w * 0.65f, h * 0.25f)
+            lineTo(w * 0.75f, h * 0.41f)
         }
-        drawPath(mountain, Color(0xFF1C7C39).copy(alpha = 0.82f))
-        drawPath(side, Color(0xFF0E4F28).copy(alpha = 0.88f))
-        drawPath(path, Color(0xFF63E66E).copy(alpha = 0.38f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 5.dp.toPx()))
-        drawCircle(Color(0xFF34D399).copy(alpha = 0.62f), radius = 8.dp.toPx(), center = androidx.compose.ui.geometry.Offset(w * 0.82f, h * 0.22f))
-        drawCircle(Color(0xFF34D399).copy(alpha = 0.36f), radius = 6.dp.toPx(), center = androidx.compose.ui.geometry.Offset(w * 0.18f, h * 0.36f))
-        drawRect(Color(0xFF86EFAC), topLeft = androidx.compose.ui.geometry.Offset(w * 0.50f, h * 0.06f), size = androidx.compose.ui.geometry.Size(3.dp.toPx(), 26.dp.toPx()))
-        val flag = Path().apply {
-            moveTo(w * 0.52f, h * 0.07f)
-            lineTo(w * 0.68f, h * 0.12f)
-            lineTo(w * 0.52f, h * 0.18f)
-            close()
+        drawPath(
+            path = fgPeakOutline,
+            color = primaryColor.copy(alpha = 0.75f),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(
+                width = 2.dp.toPx(),
+                cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                join = androidx.compose.ui.graphics.StrokeJoin.Round
+            )
+        )
+
+        // 5. Minimal clean accent peak outline for bg peak
+        val bgPeakOutline = Path().apply {
+            moveTo(w * 0.32f, h * 0.50f)
+            lineTo(w * 0.40f, h * 0.38f)
+            lineTo(w * 0.48f, h * 0.50f)
         }
-        drawPath(flag, Color(0xFF86EFAC))
+        drawPath(
+            path = bgPeakOutline,
+            color = secondaryColor.copy(alpha = 0.40f),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(
+                width = 1.5.dp.toPx(),
+                cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                join = androidx.compose.ui.graphics.StrokeJoin.Round
+            )
+        )
     }
 }
 
