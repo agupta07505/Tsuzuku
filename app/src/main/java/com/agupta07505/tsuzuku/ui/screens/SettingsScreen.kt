@@ -792,7 +792,7 @@ private fun AboutTsuzukuScreen(
                     painter = painterResource(id = R.drawable.ic_tsuzuku_create_habbit_logo),
                     contentDescription = "Tsuzuku",
                     modifier = Modifier
-                        .size(126.dp)
+                        .size(100.dp)
                         .clip(CircleShape)
                         .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.30f), CircleShape),
                     contentScale = ContentScale.Crop
@@ -800,13 +800,13 @@ private fun AboutTsuzukuScreen(
                 Spacer(Modifier.height(12.dp))
                 Text("Tsuzuku", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
                 Text("続く — Keep going, every day.", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(14.dp))
                 Text(
                     "Tsuzuku is a privacy-first habit tracker and focus companion.\nAll your data stays on your device. Always.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyLarge,
-                    lineHeight = 24.sp
+                    lineHeight = 18.sp
                 )
             }
         }
@@ -875,7 +875,7 @@ private fun AboutTsuzukuScreen(
                             "To help you build better habits, stay focused, and live intentionally.\nNo ads. No tracking. Just you and your journey.",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyLarge,
-                            lineHeight = 25.sp
+                            lineHeight = 20.sp
                         )
                     }
                     MissionMountainIllustration(
@@ -981,7 +981,7 @@ private fun AboutTsuzukuScreen(
                     Text(
                         "Tsuzuku is and always will be ad-free and analytics-free.\nYour trust means everything.",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 23.sp
+                        lineHeight = 20.sp
                     )
                 }
             }
