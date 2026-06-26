@@ -178,7 +178,7 @@ private fun FocusDashboard(state: FocusUiState, onStart: () -> Unit) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Tsuzuku Focus", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                    Text("Tsuzuku Focus", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
                     Text("Stay focused. Keep going.", color = FocusGreen, style = MaterialTheme.typography.bodyMedium)
                 }
                 Surface(shape = CircleShape, color = FocusGreen.copy(alpha = .12f)) {

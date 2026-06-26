@@ -65,6 +65,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.annotation.DrawableRes
@@ -666,6 +667,8 @@ private fun MissionMountainIllustration(modifier: Modifier = Modifier) {
 private fun AboutContactButton(
     title: String,
     subtitle: String,
+    @DrawableRes iconResId: Int,
+    iconColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -678,18 +681,43 @@ private fun AboutContactButton(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.22f))
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.Center
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(title, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(Modifier.height(4.dp))
-            Text(
-                subtitle,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1
-            )
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(iconColor.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+            Column(
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
@@ -893,7 +921,7 @@ private fun AboutTsuzukuScreen(
                         modifier = Modifier
                             .size(72.dp)
                             .clip(CircleShape)
-                            .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
+                            .border(2.dp, Color.Black, CircleShape),
                         contentScale = ContentScale.Crop
                     )
                 }
@@ -906,12 +934,40 @@ private fun AboutTsuzukuScreen(
                 Spacer(Modifier.height(12.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                        AboutContactButton("GitHub", "@agupta07505", onGitHub, Modifier.weight(1f))
-                        AboutContactButton("Instagram", "@agupta07505", onInstagram, Modifier.weight(1f))
+                        AboutContactButton(
+                            title = "GitHub",
+                            subtitle = "@agupta07505",
+                            iconResId = R.drawable.ic_github,
+                            iconColor = MaterialTheme.colorScheme.onSurface,
+                            onClick = onGitHub,
+                            modifier = Modifier.weight(1f)
+                        )
+                        AboutContactButton(
+                            title = "Instagram",
+                            subtitle = "@agupta07505",
+                            iconResId = R.drawable.ic_instagram,
+                            iconColor = Color(0xFFE1306C),
+                            onClick = onInstagram,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                        AboutContactButton("LinkedIn", "/in/agupta07505", onLinkedIn, Modifier.weight(1f))
-                        AboutContactButton("Email", "agupta07505@gmail.com", onEmail, Modifier.weight(1f))
+                        AboutContactButton(
+                            title = "LinkedIn",
+                            subtitle = "/in/agupta07505",
+                            iconResId = R.drawable.ic_linkedin,
+                            iconColor = Color(0xFF0A66C2),
+                            onClick = onLinkedIn,
+                            modifier = Modifier.weight(1f)
+                        )
+                        AboutContactButton(
+                            title = "Email",
+                            subtitle = "agupta07505@gmail.com",
+                            iconResId = R.drawable.ic_email,
+                            iconColor = Color(0xFFEA4335),
+                            onClick = onEmail,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
