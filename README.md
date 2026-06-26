@@ -66,7 +66,7 @@ Tsuzuku is growing as a focused productivity ecosystem, not just a habit checkli
 |-----------|--------|-----------|
 | 🌱 Tsuzuku Habits | ✅ Done | Core habit creation, daily check-ins, streak tracking, local reminders, insights, and backup/restore. |
 | 🧘 Tsuzuku Focus | ✅ Done | Timed focus sessions with progress tracking, phone-pickup discipline, focus history, and distraction controls. |
-| 🏠 Tsuzuku Launcher | 🚧 In progress | A minimal Android launcher that keeps essential apps available while reducing distractions. |
+| 🏠 Tsuzuku Launcher | ✅ Done | A minimal Android launcher that keeps essential apps available while reducing distractions. |
 | 🧩 Tsuzuku Widgets | 🗓️ Planned | Lightweight home/launcher widgets for habits, streaks, focus sessions, quotes, and quick check-ins. |
 | 🤖 Tsuzuku AI Integration | 🗓️ Planned | Optional assistance for habit ideas, reflection prompts, summaries, and productivity guidance with privacy-first defaults. |
 | ✨ More soon | 🔜 Upcoming | More refinements based on real use, feedback, accessibility, and long-term habit-building needs. |
