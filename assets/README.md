@@ -16,15 +16,19 @@ Screenshots in `assets/screenshots/` are referenced by the root README.
 
 | Filename | Content |
 |----------|---------|
-| `01_home.jpg` | Home/tracker entry screen |
-| `02_habit_tracker.jpg` | Habit tracker with habit and mantra content |
-| `03_create_streak.jpg` | Create habit/streak flow |
-| `04_insights.png` | Insights, stats, and heatmap view |
-| `05_settings.png` | Settings overview |
-| `06_motivation.png` | Motivation and quote/mantra content |
-| `07_backup.png` | Backup and restore controls |
-| `08_notification.png` | Reminder notification |
-| `09_about.png` | About and social links |
+| `01_home.jpg` | Home dashboard |
+| `02_Habits.jpg` | Habits screen |
+| `03_Launcher.jpg` | Tsuzuku launcher preview |
+| `04_Activate_Laucnher.jpg` | Launcher activation flow |
+| `05_Launcher_Allowed_Apps.jpg` | Launcher allowed-app selection |
+| `06_Launcher_Focus_Settings.jpg` | Launcher focus settings |
+| `07_Focus.jpg` | Focus mode |
+| `08_Insights_1.jpg` | Insights overview |
+| `09_Insights_2.jpg` | Insights heatmap and details |
+| `10_Settings_1.jpg` | Settings overview |
+| `11_Settings_2.jpg` | Settings customization and controls |
+| `12_Settings_About_1.jpg` | About screen |
+| `13_Settings_About_2.jpg` | About and social links |
 
 ## Guidelines
 
@@ -38,7 +42,7 @@ Screenshots in `assets/screenshots/` are referenced by the root README.
 
 ```markdown
 <p align="center">
-  <img src="assets/screenshots/01_home.jpg" width="220" alt="Home screen" />
-  <img src="assets/screenshots/04_insights.png" width="220" alt="Insights screen" />
+  <img src="assets/screenshots/01_home.jpg" width="220" alt="Home dashboard" />
+  <img src="assets/screenshots/08_Insights_1.jpg" width="220" alt="Insights overview" />
 </p>
 ```

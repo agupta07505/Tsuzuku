@@ -24,15 +24,19 @@
 ## 📸 Preview
 
 <p align="center">
-  <img src="assets/screenshots/01_home.jpg" width="220" alt="Home screen" />
-  <img src="assets/screenshots/02_habit_tracker.jpg" width="220" alt="Habit tracker" />
-  <img src="assets/screenshots/03_create_streak.jpg" width="220" alt="Create habit" />
-  <img src="assets/screenshots/04_insights.png" width="220" alt="Insights and heatmap" />
-  <img src="assets/screenshots/05_settings.png" width="220" alt="Settings" />
-  <img src="assets/screenshots/06_motivation.png" width="220" alt="Motivation and quotes" />
-  <img src="assets/screenshots/07_backup.png" width="220" alt="Backup and restore" />
-  <img src="assets/screenshots/08_notification.png" width="220" alt="Reminder notification" />
-  <img src="assets/screenshots/09_about.png" width="220" alt="About screen" />
+  <img src="assets/screenshots/01_home.jpg" width="220" alt="Home dashboard" />
+  <img src="assets/screenshots/02_Habits.jpg" width="220" alt="Habits screen" />
+  <img src="assets/screenshots/03_Launcher.jpg" width="220" alt="Tsuzuku launcher" />
+  <img src="assets/screenshots/04_Activate_Laucnher.jpg" width="220" alt="Launcher activation screen" />
+  <img src="assets/screenshots/05_Launcher_Allowed_Apps.jpg" width="220" alt="Launcher allowed apps" />
+  <img src="assets/screenshots/06_Launcher_Focus_Settings.jpg" width="220" alt="Launcher focus settings" />
+  <img src="assets/screenshots/07_Focus.jpg" width="220" alt="Focus mode" />
+  <img src="assets/screenshots/08_Insights_1.jpg" width="220" alt="Insights overview" />
+  <img src="assets/screenshots/09_Insights_2.jpg" width="220" alt="Insights heatmap" />
+  <img src="assets/screenshots/10_Settings_1.jpg" width="220" alt="Settings screen" />
+  <img src="assets/screenshots/11_Settings_2.jpg" width="220" alt="Settings customization" />
+  <img src="assets/screenshots/12_Settings_About_1.jpg" width="220" alt="About screen" />
+  <img src="assets/screenshots/13_Settings_About_2.jpg" width="220" alt="About and links screen" />
 </p>
 
 ---
