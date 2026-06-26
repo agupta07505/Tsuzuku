@@ -722,7 +722,6 @@ private fun AboutTsuzukuScreen(
                     radius = 980f
                 )
             )
-            .statusBarsPadding()
             .padding(horizontal = 18.dp),
         contentPadding = PaddingValues(top = 22.dp, bottom = 116.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
