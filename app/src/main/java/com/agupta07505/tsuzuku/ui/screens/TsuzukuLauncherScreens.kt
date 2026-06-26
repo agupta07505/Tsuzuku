@@ -127,7 +127,7 @@ fun TsuzukuLauncherSettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Tsuzuku Launcher", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                        Text("Tsuzuku Launcher", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
                         Spacer(Modifier.height(8.dp))
                         Text(
                             "Turn your phone into a minimal focus launcher.",
