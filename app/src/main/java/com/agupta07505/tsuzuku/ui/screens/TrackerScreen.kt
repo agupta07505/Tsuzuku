@@ -69,6 +69,7 @@ fun TrackerScreen(
     onNavigateToFocus: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val habits by viewModel.habits.collectAsState()
     val logs by viewModel.allLogs.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
@@ -78,7 +79,7 @@ fun TrackerScreen(
     var viewingStreakHabit by remember { mutableStateOf<Habit?>(null) }
     
     val selectedMantra = remember {
-        val quote = Quotes.random()
+        val quote = Quotes.next(context)
         Pair(quote.english, quote.japanese)
     }
     

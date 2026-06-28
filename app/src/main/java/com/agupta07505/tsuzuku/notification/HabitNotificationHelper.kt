@@ -50,8 +50,7 @@ object HabitNotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val mantra = Quotes.byIndex(currentHour)
+        val mantra = Quotes.next(context)
 
         val showJapanese = sharedPrefs.getBoolean("show_japanese_quotes", true)
         val titleText = "Tsuzuku Motivation"

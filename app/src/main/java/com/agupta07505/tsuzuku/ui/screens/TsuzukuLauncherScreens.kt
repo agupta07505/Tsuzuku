@@ -808,17 +808,7 @@ fun TsuzukuLauncherHomeScreen(
         val context = LocalContext.current
         val snackbarHostState = remember { SnackbarHostState() }
         val scope = rememberCoroutineScope()
-        var quoteSeed by remember { mutableStateOf(System.currentTimeMillis()) }
-        LaunchedEffect(Unit) {
-            while (true) {
-                quoteSeed = System.currentTimeMillis()
-                kotlinx.coroutines.delay(60_000)
-            }
-        }
-        var quote by remember(quoteSeed) {
-            val minuteBucket = quoteSeed / 60_000L
-            mutableStateOf(Quotes.byIndex((minuteBucket % Quotes.all.size).toInt()))
-        }
+        var quote by remember { mutableStateOf(Quotes.next(context)) }
 
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -872,7 +862,7 @@ fun TsuzukuLauncherHomeScreen(
                     LauncherClockWidget()
 
                     if (uiState.widgets.firstOrNull { it.key == "motivational_quote" }?.enabled == true && uiState.focusSettings.showMotivationalQuote) {
-                        LauncherQuoteWidget(japanese = quote.japanese, english = quote.english, onClick = { quote = Quotes.random() })
+                        LauncherQuoteWidget(japanese = quote.japanese, english = quote.english, onClick = { quote = Quotes.next(context) })
                     }
                 }
 

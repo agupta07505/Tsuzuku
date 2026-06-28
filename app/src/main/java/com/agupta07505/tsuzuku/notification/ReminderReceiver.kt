@@ -66,7 +66,7 @@ class ReminderReceiver : BroadcastReceiver() {
         var contentText = "Don't break your streak! Check in for \"$habitName\" today."
         
         if (showQuotes) {
-            val quote = Quotes.random()
+            val quote = Quotes.next(context)
             contentText = if (showJapanese) {
                 "${quote.english}\n${quote.japanese}"
             } else {

@@ -2160,14 +2160,7 @@ fun SettingsScreen(
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                         // Sleek Interactive Quote Showcase box
-                        val mantraPairList = remember {
-                            Quotes.all.map { q ->
-                                Pair(q.english, Pair(q.japanese, q.romaji))
-                            }
-                        }
-
-                        var currentMantraIdx by remember { mutableStateOf(0) }
-                        val activePair = mantraPairList[currentMantraIdx]
+                        var activeQuote by remember { mutableStateOf(Quotes.next(context)) }
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -2190,30 +2183,22 @@ fun SettingsScreen(
 
                                 if (showJapaneseQuotes) {
                                     Text(
-                                        text = activePair.second.first,
+                                        text = activeQuote.japanese,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White,
                                         textAlign = TextAlign.Center
                                     )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = activePair.second.second,
-                                        fontSize = 11.sp,
-                                        fontStyle = FontStyle.Italic,
-                                        color = Color(0xFF3B82F6),
-                                        textAlign = TextAlign.Center
-                                    )
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
-                                        text = "Translation: \"${activePair.first}\"",
+                                        text = "Translation: \"${activeQuote.english}\"",
                                         fontSize = 11.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                         textAlign = TextAlign.Center
                                     )
                                 } else {
                                     Text(
-                                        text = activePair.first,
+                                        text = activeQuote.english,
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = Color.White,
@@ -2230,7 +2215,7 @@ fun SettingsScreen(
                                 ) {
                                     Button(
                                         onClick = {
-                                            currentMantraIdx = (currentMantraIdx + 1) % mantraPairList.size
+                                            activeQuote = Quotes.next(context)
                                         },
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = Color(0xFF131D27),
