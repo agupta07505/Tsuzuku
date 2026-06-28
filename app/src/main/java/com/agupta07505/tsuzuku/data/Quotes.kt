@@ -6,6 +6,8 @@
 
 package com.agupta07505.tsuzuku.data
 
+import android.content.Context
+
 /**
  * Single source of truth for all motivational quotes used across the app.
  * Each quote has an English translation and Japanese text.
@@ -16,6 +18,9 @@ data class Quote(
 )
 
 object Quotes {
+    private const val PREFS_NAME = "streak_marker_prefs"
+    private const val NEXT_QUOTE_INDEX_KEY = "next_quote_index"
+
     val all: List<Quote> = listOf(
         Quote(
             english = "Genius is one percent inspiration and ninety-nine percent perspiration.",
@@ -4931,9 +4936,18 @@ object Quotes {
         )
     )
 
-    /** Get a random quote. */
-    fun random(): Quote = all.random()
+    /** Get the next quote in order and persist the following index. */
+    @Synchronized
+    fun next(context: Context): Quote {
+        val preferences = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val currentIndex = preferences.getInt(NEXT_QUOTE_INDEX_KEY, 0).floorMod(all.size)
+        val nextIndex = (currentIndex + 1) % all.size
+        preferences.edit().putInt(NEXT_QUOTE_INDEX_KEY, nextIndex).apply()
+        return all[currentIndex]
+    }
 
     /** Get a quote by cycling through the list based on an index (e.g. hour of day). */
-    fun byIndex(index: Int): Quote = all[index % all.size]
+    fun byIndex(index: Int): Quote = all[index.floorMod(all.size)]
+
+    private fun Int.floorMod(size: Int): Int = ((this % size) + size) % size
 }

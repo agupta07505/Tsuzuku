@@ -98,7 +98,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.max
-import kotlin.math.absoluteValue
 
 private val FocusGreen: Color
     @Composable get() = MaterialTheme.colorScheme.primary
@@ -573,12 +572,10 @@ private fun SessionValueCard(label: String, value: String, color: Color, modifie
 
 @Composable
 private fun FocusWarningScreen(runtime: FocusRuntimeState, onEndSession: () -> Unit) {
+    val context = LocalContext.current
     KeepScreenOn()
     val seconds = runtime.warningSeconds ?: 5
-    val quoteIndex = remember(runtime.sessionName, runtime.consecutiveMistakes) {
-        ((runtime.sessionName.hashCode().toLong().absoluteValue + runtime.consecutiveMistakes) % Quotes.all.size).toInt()
-    }
-    val quote = Quotes.byIndex(quoteIndex).english
+    val quote = remember { Quotes.next(context).english }
     val mistakesRemainingLabel = if (runtime.allowedMistakes == FocusSessionManager.UNLIMITED_MISTAKES) {
         "Unlimited"
     } else {
