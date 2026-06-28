@@ -2162,7 +2162,7 @@ fun SettingsScreen(
                         // Sleek Interactive Quote Showcase box
                         val mantraPairList = remember {
                             Quotes.all.map { q ->
-                                Pair(q.english, Pair(q.japanese, q.romaji))
+                                Pair(q.english, q.japanese)
                             }
                         }
 
@@ -2190,18 +2190,10 @@ fun SettingsScreen(
 
                                 if (showJapaneseQuotes) {
                                     Text(
-                                        text = activePair.second.first,
+                                        text = activePair.second,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = activePair.second.second,
-                                        fontSize = 11.sp,
-                                        fontStyle = FontStyle.Italic,
-                                        color = Color(0xFF3B82F6),
                                         textAlign = TextAlign.Center
                                     )
                                     Spacer(modifier = Modifier.height(6.dp))
