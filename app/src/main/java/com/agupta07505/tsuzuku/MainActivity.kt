@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,8 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agupta07505.tsuzuku.ui.HabitViewModel
+import com.agupta07505.tsuzuku.ui.CountdownDateViewModel
 import com.agupta07505.tsuzuku.launcher.LauncherViewModel
 import com.agupta07505.tsuzuku.ui.screens.AllowedLauncherAppsScreen
+import com.agupta07505.tsuzuku.ui.screens.CountdownDatesRoute
 import com.agupta07505.tsuzuku.ui.screens.LauncherActivationInstructionsScreen
 import com.agupta07505.tsuzuku.ui.screens.LauncherFocusSettingsScreen
 import com.agupta07505.tsuzuku.ui.screens.LauncherPreviewScreen
@@ -87,8 +90,18 @@ class MainActivity : ComponentActivity() {
                 customAccentColorHex = customAccentColorHex
             ) {
                 val viewModel: HabitViewModel = viewModel()
+                val countdownViewModel: CountdownDateViewModel = viewModel()
                 val launcherViewModel: LauncherViewModel = viewModel()
-                var currentTab by remember { mutableStateOf(if (intent?.getStringExtra("open_tab") == "launcher") "launcher" else "tracker") }
+                var currentTab by remember {
+                    mutableStateOf(
+                        when (intent?.getStringExtra("open_tab")) {
+                            "launcher" -> "launcher"
+                            "countdown" -> "countdown"
+                            else -> "tracker"
+                        }
+                    )
+                }
+                val initialCountdownId = remember { intent?.getLongExtra("countdown_id", -1L)?.takeIf { it > 0L } }
                 var launcherRoute by remember { mutableStateOf<LauncherRoute>(LauncherRoute.Settings) }
                 var openFocusSetup by remember { mutableStateOf(false) }
                 val focusRuntime by FocusSessionManager.state.collectAsState()
@@ -96,6 +109,7 @@ class MainActivity : ComponentActivity() {
                 val habits by viewModel.managedHabits.collectAsState()
                 val logs by viewModel.allLogs.collectAsState()
                 val focusSessions by viewModel.focusSessions.collectAsState()
+                val countdowns by countdownViewModel.countdowns.collectAsState()
 
                 LaunchedEffect(focusRuntime.active) {
                     if (focusRuntime.active) currentTab = "study_mode"
@@ -156,6 +170,13 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.testTag("tab_study_mode")
                             )
                             NavigationBarItem(
+                                selected = currentTab == "countdown",
+                                onClick = { currentTab = "countdown" },
+                                icon = { Icon(Icons.Default.CalendarMonth, contentDescription = "Dates") },
+                                label = { Text("Dates") },
+                                modifier = Modifier.testTag("tab_countdown")
+                            )
+                            NavigationBarItem(
                                 selected = currentTab == "stats",
                                 onClick = { currentTab = "stats" },
                                 icon = { Icon(Icons.Default.BarChart, contentDescription = "Stats") },
@@ -200,6 +221,7 @@ class MainActivity : ComponentActivity() {
                                 habits = habits,
                                 logs = logs,
                                 focusSessions = focusSessions,
+                                countdowns = countdowns,
                                 onBack = { launcherRoute = LauncherRoute.Settings },
                                 onOpenApp = launcherViewModel::openApp,
                                 onOpenPhone = launcherViewModel::openPhone,
@@ -232,6 +254,10 @@ class MainActivity : ComponentActivity() {
                         )
                         "stats" -> StatsScreen(
                             viewModel = viewModel,
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                        "countdown" -> CountdownDatesRoute(
+                            initialEditId = initialCountdownId,
                             modifier = Modifier.padding(innerPadding)
                         )
                         "settings" -> SettingsScreen(

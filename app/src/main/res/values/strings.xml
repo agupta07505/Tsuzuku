@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Tsuzuku</string>
+    <string name="countdown_widget_description">Track days left for exams, deadlines, or events.</string>
 </resources>

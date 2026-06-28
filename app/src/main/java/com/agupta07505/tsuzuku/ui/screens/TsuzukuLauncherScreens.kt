@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.outlined.VolumeOff
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Phone
@@ -65,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import com.agupta07505.tsuzuku.data.FocusSession
+import com.agupta07505.tsuzuku.data.CountdownDateEntity
 import com.agupta07505.tsuzuku.R
 import com.agupta07505.tsuzuku.data.Habit
 import com.agupta07505.tsuzuku.data.HabitLog
@@ -77,6 +79,8 @@ import com.agupta07505.tsuzuku.launcher.MAX_ALLOWED_LAUNCHER_APPS
 import com.agupta07505.tsuzuku.launcher.defaultLauncherWidgets
 import com.agupta07505.tsuzuku.ui.theme.MyApplicationTheme
 import com.agupta07505.tsuzuku.util.DateUtils
+import com.agupta07505.tsuzuku.util.countdownDayInfo
+import com.agupta07505.tsuzuku.util.formatCountdownDate
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -601,20 +605,13 @@ fun ManageLauncherWidgetsScreen(
         modifier = modifier
     ) {
         item {
-            PremiumCard(modifier = Modifier.fillMaxWidth()) {
-                Text("Widgets", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "Coming soon...",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "Tsuzuku app widgets you add later will be managed here.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
+            Text("Launcher Widgets", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+        }
+        items(widgets, key = { it.key }) { widget ->
+            PremiumCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(0.dp)) {
+                LauncherWidgetToggleRow(
+                    widget = widget,
+                    onToggle = { onToggleWidget(widget.key, it) }
                 )
             }
         }
@@ -771,6 +768,7 @@ fun LauncherPreviewScreen(
     habits: List<Habit>,
     logs: List<HabitLog>,
     focusSessions: List<FocusSession>,
+    countdowns: List<CountdownDateEntity>,
     onBack: () -> Unit,
     onOpenApp: (Context, String) -> Boolean,
     onOpenPhone: (Context) -> Boolean,
@@ -782,6 +780,7 @@ fun LauncherPreviewScreen(
         habits = habits,
         logs = logs,
         focusSessions = focusSessions,
+        countdowns = countdowns,
         previewMode = true,
         onBack = onBack,
         onOpenApp = onOpenApp,
@@ -797,6 +796,7 @@ fun TsuzukuLauncherHomeScreen(
     habits: List<Habit>,
     logs: List<HabitLog>,
     focusSessions: List<FocusSession>,
+    countdowns: List<CountdownDateEntity> = emptyList(),
     previewMode: Boolean,
     onBack: (() -> Unit)? = null,
     onOpenApp: (Context, String) -> Boolean,
@@ -864,6 +864,9 @@ fun TsuzukuLauncherHomeScreen(
                     if (uiState.widgets.firstOrNull { it.key == "motivational_quote" }?.enabled == true && uiState.focusSettings.showMotivationalQuote) {
                         LauncherQuoteWidget(japanese = quote.japanese, english = quote.english, onClick = { quote = Quotes.next(context) })
                     }
+                    if (uiState.widgets.firstOrNull { it.key == "countdown_date" }?.enabled == true) {
+                        LauncherCountdownWidget(countdowns = countdowns)
+                    }
                 }
 
                 Column(
@@ -918,6 +921,47 @@ fun TsuzukuLauncherHomeScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun LauncherCountdownWidget(
+    countdowns: List<CountdownDateEntity>,
+    modifier: Modifier = Modifier
+) {
+    val event = remember(countdowns) {
+        countdowns
+            .filter { !countdownDayInfo(it.targetDateMillis).isPassed }
+            .minByOrNull { it.targetDateMillis }
+            ?: countdowns.minByOrNull { it.targetDateMillis }
+    }
+    if (event == null) {
+        Column(
+            modifier = modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("No countdown added", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            Text("Add important date", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
+        }
+    } else {
+        val info = countdownDayInfo(event.targetDateMillis)
+        val accent = if (info.isPassed) Color(0xFFFF5252) else Color(event.accentColor)
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.42f))
+                .border(1.dp, accent.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
+                .padding(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = accent)
+            Spacer(Modifier.height(4.dp))
+            Text(event.title, color = accent, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(info.headline, color = MaterialTheme.colorScheme.onBackground, fontSize = 34.sp, fontWeight = FontWeight.Black)
+            Text(info.label, color = accent, fontWeight = FontWeight.SemiBold)
+            Text(formatCountdownDate(event.targetDateMillis), color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
         }
     }
 }

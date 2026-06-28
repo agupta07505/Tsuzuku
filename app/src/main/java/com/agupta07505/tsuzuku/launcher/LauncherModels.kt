@@ -48,6 +48,7 @@ data class LauncherUiState(
 fun defaultLauncherWidgets(): List<LauncherWidgetPreference> = listOf(
     LauncherWidgetPreference("center_clock", "Center Clock", "Launcher clock slot", true),
     LauncherWidgetPreference("motivational_quote", "Motivational Quote", "Uses Tsuzuku's quote source", true),
+    LauncherWidgetPreference("countdown_date", "Countdown Date", "Track days left for exams, deadlines, or events.", true),
     LauncherWidgetPreference("today_habits", "Today's Habits", "Uses your Tsuzuku habit data", true),
     LauncherWidgetPreference("focus_timer", "Focus Timer", "Connects to Tsuzuku Focus", true),
     LauncherWidgetPreference("streak_card", "Streak Card", "Reserved for Tsuzuku streak widget", false),

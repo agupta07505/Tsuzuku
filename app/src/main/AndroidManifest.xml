@@ -52,9 +52,33 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".widget.CountdownDateWidgetConfigureActivity"
+            android:exported="true"
+            android:label="Countdown Date Widget"
+            android:theme="@style/Theme.MyApplication">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <receiver
             android:name=".notification.ReminderReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name=".widget.CountdownDateWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/countdown_date_widget_info" />
+        </receiver>
 
         <service
             android:name=".focus.FocusSessionService"
